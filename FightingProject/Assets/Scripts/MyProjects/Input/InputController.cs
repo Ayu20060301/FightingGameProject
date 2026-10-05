@@ -31,6 +31,8 @@ public class InputController : MonoBehaviour
 
         bool isGuard = Input.GetButton("Guard");
 
+        //bool isCrouch = Input.
+
         State.SetInput(
             direction,
             isLightKick,

@@ -3,6 +3,7 @@ using Fusion.Sockets;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Scripting.APIUpdating;
 
@@ -33,6 +34,9 @@ public class NetworkManager : MonoBehaviour, INetworkRunnerCallbacks
 
     //ネットワークシステムの根幹であるランナー
     private NetworkRunner m_Runner;
+
+    [SerializeField]
+    private Transform[] m_SpawnPoints;
 
     //ジャンプを押したかフラグ
     bool m_IsJump = false;
@@ -82,12 +86,19 @@ public class NetworkManager : MonoBehaviour, INetworkRunnerCallbacks
     public void OnPlayerJoined(NetworkRunner runner, PlayerRef player)
     {
         //サーバーがプレイヤーをスポーンさせる
-        if(runner.IsServer)
+        if(!runner.IsServer)
         {
-            Vector3 spawnPos = new Vector3(0.0f, 3.0f, 0.0f);
-            NetworkObject obj = runner.Spawn(m_PlayerPrefab, spawnPos, Quaternion.identity, player);
-            runner.SetPlayerObject(player, obj);
+            return;
         }
+
+        int index = runner.ActivePlayers.Count() - 1;
+
+        Vector3 spawnPos = m_SpawnPoints[index].position;
+        Quaternion spawnRot = m_SpawnPoints[index].rotation;
+
+        NetworkObject obj = runner.Spawn(m_PlayerPrefab, spawnPos, spawnRot, player);
+
+        runner.SetPlayerObject(player, obj);
     }
 
     /// <summary>
@@ -156,16 +167,45 @@ public class NetworkManager : MonoBehaviour, INetworkRunnerCallbacks
         {
             case Direction.Left:
                 data.horizontal = -1.0f;
+                data.vertical = 0.0f;
                 break;
             case Direction.Right:
                 data.horizontal = 1.0f;
+                data.vertical = 0.0f;
                 break;
+            case Direction.Up:
+                data.horizontal = 0.0f;
+                data.vertical = 1.0f;
+                break;
+            case Direction.Down:
+                data.horizontal = 0.0f;
+                data.vertical = -1.0f;
+                break;
+            case Direction.UpLeft:
+                data.horizontal = -1.0f;
+                data.vertical = 1.0f;
+                break;
+
+            case Direction.UpRight:
+                data.horizontal = 1.0f;
+                data.vertical = 1.0f;
+                break;
+
+            case Direction.DownLeft:
+                data.horizontal = -1.0f;
+                data.vertical = -1.0f;
+                break;
+
+            case Direction.DownRight:
+                data.horizontal = 1.0f;
+                data.vertical = -1.0f;
+                break;
+
             default:
                 data.horizontal = 0.0f;
+                data.vertical = 0.0f;
                 break;
         }
-
-        data.vertical = 0.0f;
 
         //ボタン入力
         data.isJump = state.IsJump;

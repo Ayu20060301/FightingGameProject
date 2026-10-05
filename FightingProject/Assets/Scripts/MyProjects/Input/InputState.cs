@@ -69,6 +69,8 @@ public class InputState
     /// </summary>
     public bool IsGuard { get; private set; }
 
+    public bool ISCrouch { get; private set; }
+
     /// <summary>
     /// 入力状態を更新する
     /// </summary>
