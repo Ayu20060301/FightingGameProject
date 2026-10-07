@@ -5,6 +5,8 @@ using UnityEngine;
 /// </summary>
 public class PlayerCrouchState : PlayerState
 {
+    
+
     public PlayerCrouchState(Player player) : base(player)
     {
 
@@ -24,7 +26,6 @@ public class PlayerCrouchState : PlayerState
             m_Player.ChangeState(m_Player.GuardState);
             return;
         }
-
 
         //しゃがみ入力がなくなった
         if(m_Player.Input.Direction != Direction.Down && m_Player.Input.Direction != Direction.DownLeft && m_Player.Input.Direction != Direction.DownRight)

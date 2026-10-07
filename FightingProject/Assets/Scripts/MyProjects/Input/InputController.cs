@@ -7,6 +7,29 @@ public class InputController : MonoBehaviour
     /// </summary>
     public InputState State { get; private set; } = new InputState();
 
+    private InputSystem_Actions m_Input;
+
+    private bool m_IsLightKick;
+    private bool m_IsHeavyKick;
+    private bool m_IsLightPunch;
+    private bool m_IsHeavyPunch;
+
+    private void Awake()
+    {
+        m_Input = new InputSystem_Actions();
+    }
+
+    private void OnEnable()
+    {
+        m_Input.Player.Enable();
+    }
+
+    private void OnDisable()
+    {
+        m_Input.Player.Disable();
+    }
+
+
     private void Update()
     {
         UpdateInput();
@@ -19,26 +42,37 @@ public class InputController : MonoBehaviour
     {
         Direction direction = GetDirection();
 
-        bool isLightKick = Input.GetButtonDown("LightKick");
+   
+        //攻撃入力を保持
+        if(m_Input.Player.LightKick.WasPressedThisFrame())
+        {
+            m_IsLightKick = true;
+        }
 
-        bool isHeavyKick = Input.GetButtonDown("HeavyKick");
+        if(m_Input.Player.HeavyKick.WasPressedThisFrame())
+        {
+            m_IsHeavyKick = true;
+        }
 
-        bool isLightPunch = Input.GetButtonDown("LightPunch");
+        if(m_Input.Player.LightPunch.WasPressedThisFrame())
+        {
+            m_IsLightPunch = true;
+        }
 
-        bool isHeavyPunch = Input.GetButtonDown("HeavyPunch");
+        if(m_Input.Player.HeavyPunch.WasPressedThisFrame())
+        {
+            m_IsHeavyPunch = true;
+        }
 
-        bool isJump = Input.GetButton("Jump");
-
-        bool isGuard = Input.GetButton("Guard");
-
-        //bool isCrouch = Input.
+        bool isJump = m_Input.Player.Jump.IsPressed();
+        bool isGuard = m_Input.Player.Guard.IsPressed();
 
         State.SetInput(
             direction,
-            isLightKick,
-            isHeavyKick,
-            isLightPunch,
-            isHeavyPunch,
+            m_IsLightKick,
+            m_IsHeavyKick,
+            m_IsLightPunch,
+            m_IsHeavyPunch,
             isJump,
             isGuard);
     }
@@ -50,17 +84,13 @@ public class InputController : MonoBehaviour
     /// <returns></returns>
     private Direction GetDirection()
     {
-        bool isUp = Input.GetKey(KeyCode.W) ||
-                    Input.GetAxisRaw("Vertical") > 0.5f;
 
-        bool isDown = Input.GetKey(KeyCode.S) ||
-                      Input.GetAxisRaw("Vertical") < -0.5f;
+        Vector2 input = m_Input.Player.Move.ReadValue<Vector2>();
 
-        bool isLeft = Input.GetKey(KeyCode.A) ||
-                      Input.GetAxisRaw("Horizontal") < -0.5f;
-
-        bool isRight = Input.GetKey(KeyCode.D) ||
-                       Input.GetAxisRaw("Horizontal") > 0.5f;
+        bool isUp = input.y > 0.5f;
+        bool isDown = input.y < -0.5f;
+        bool isLeft = input.x < -0.5f;
+        bool isRight = input.x > 0.5f;
 
         if (isDown && isRight)
         {

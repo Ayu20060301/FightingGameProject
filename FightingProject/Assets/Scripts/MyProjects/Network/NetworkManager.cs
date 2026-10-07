@@ -35,12 +35,6 @@ public class NetworkManager : MonoBehaviour, INetworkRunnerCallbacks
     //ネットワークシステムの根幹であるランナー
     private NetworkRunner m_Runner;
 
-    [SerializeField]
-    private Transform[] m_SpawnPoints;
-
-    //ジャンプを押したかフラグ
-    bool m_IsJump = false;
-
     async void Start()
     {
         //ランナーの設定
@@ -91,14 +85,17 @@ public class NetworkManager : MonoBehaviour, INetworkRunnerCallbacks
             return;
         }
 
-        int index = runner.ActivePlayers.Count() - 1;
+        //固定スポーン位置
+        Vector3 spawnPos = new Vector3(-2.0f, 0.5f, 0.0f);
 
-        Vector3 spawnPos = m_SpawnPoints[index].position;
-        Quaternion spawnRot = m_SpawnPoints[index].rotation;
+        Quaternion spawnRot = Quaternion.Euler(0.0f, 90.0f, 0.0f);
 
-        NetworkObject obj = runner.Spawn(m_PlayerPrefab, spawnPos, spawnRot, player);
+
+        NetworkObject obj = runner.Spawn(m_PlayerPrefab,spawnPos,spawnRot,player);
 
         runner.SetPlayerObject(player, obj);
+
+
     }
 
     /// <summary>
@@ -219,6 +216,8 @@ public class NetworkManager : MonoBehaviour, INetworkRunnerCallbacks
 
         //Fusionへ入力を渡す
         input.Set(data);
+
+        state.ConsumeAttackInput();
     }
 
     public void OnInputMissing(NetworkRunner runner, PlayerRef player, NetworkInput input)

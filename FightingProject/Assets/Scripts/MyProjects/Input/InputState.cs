@@ -91,4 +91,13 @@ public class InputState
         IsJump = isJump;
         IsGuard = isGuard;
     }
+
+    public void ConsumeAttackInput()
+    {
+        IsLightKick = false;
+        IsHeavyKick = false;
+        IsLightPunch = false;
+        IsHeavyPunch = false;
+    }
+
 }

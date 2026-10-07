@@ -1,5 +1,6 @@
 using Fusion;
 using NUnit.Framework.Constraints;
+using System.Runtime.CompilerServices;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.XR;
@@ -12,7 +13,16 @@ public class Player : NetworkBehaviour
         Idle,
         Walk, //歩行
         Guard, //ガード
-        Crouch //しゃがみ
+        Crouch, //しゃがみ
+        Jump, //ジャンプ
+
+        //攻撃
+
+        lightPunch,  //弱パンチ
+        heavyPunch,  //強パンチ
+        lightKick,  //弱キック
+        heavyKick,  //強キック
+
     }
 
     [Header("移動")]
@@ -41,6 +51,11 @@ public class Player : NetworkBehaviour
     //入力状態
     private InputState m_Input;
 
+    /// <summary>
+    /// 着地しているか
+    /// </summary>
+    public bool IsGrounded => m_Controller.isGrounded;
+
 
     //StateMachine
     public PlayerStateMachine m_StateMachine;
@@ -49,6 +64,13 @@ public class Player : NetworkBehaviour
     public PlayerWalkState WalkState { get; private set; }
     public PlayerGuardState GuardState { get; private set; }
     public PlayerCrouchState CrouchState { get; private set; }
+
+    public PlayerJumpState JumpState { get; private set; }
+
+    public PlayerLightPunchState LightPunchState { get; private set; }
+    public PlayerHeavyPunchState HeavyPunchState { get; private set; }
+    public PlayerLightKickState LightKickState { get; private set; }
+    public PlayerHeavyKickState HeavyKickState { get; private set; }
 
     /// <summary>
     /// 現在の入力
@@ -75,7 +97,11 @@ public class Player : NetworkBehaviour
         WalkState = new PlayerWalkState(this);
         GuardState = new PlayerGuardState(this);
         CrouchState = new PlayerCrouchState(this);
-
+        JumpState = new PlayerJumpState(this);
+        LightPunchState = new PlayerLightPunchState(this);
+        HeavyPunchState = new PlayerHeavyPunchState(this);
+        LightKickState = new PlayerLightKickState(this);
+        HeavyKickState = new PlayerHeavyKickState(this);
     }
 
 
@@ -183,14 +209,45 @@ public class Player : NetworkBehaviour
     /// <param name="data">入力データ</param>
     private void UpdateMoveMent(NetworkManager.PlayerInputData data)
     {
-        //左右移動
-        m_Move.x = data.horizontal * m_Speed;
+
+        //接地中は落下速度をリセット
+        if(m_Controller.isGrounded && m_Move.y < 0.0f)
+        {
+            m_Move.y = -2.0f;
+        }
+
+
+        if (CurrentState == GuardState ||
+          CurrentState == CrouchState ||
+          CurrentState == LightPunchState ||
+          CurrentState == HeavyPunchState ||
+          CurrentState == LightKickState ||
+          CurrentState == HeavyKickState)
+        {
+            m_Move.x = 0.0f;
+        }
+        else
+        {
+            //左右移動
+            m_Move.x = data.horizontal * m_Speed;
+        }
 
         //重力
         m_Move.y += m_Gravity * Runner.DeltaTime;
 
         //移動
         m_Controller.Move(m_Move * Runner.DeltaTime);
+    }
+
+    /// <summary>
+    /// ジャンプ
+    /// </summary>
+    public void Jump()
+    {
+        if (!m_Controller.isGrounded) return;
+
+        m_Move.y = Mathf.Sqrt(m_JumpPower * -2.0f * m_Gravity);
+
     }
 
     /// <summary>
@@ -208,31 +265,128 @@ public class Player : NetworkBehaviour
     /// <param name="state"></param>
     public void SetAnimationState(AnimationState state)
     {
+
+
+        //アニメーションの基本状態をリセット
+        ResetAnimationState();
+
         switch(state)
         {
             case AnimationState.Idle:
-                m_Anim.SetFloat("Speed", 0.0f);
-                m_Anim.SetBool("IsGuard", false);
-                m_Anim.SetBool("IsCrouch", false);
                 break;
-
             case AnimationState.Walk:
-                m_Anim.SetFloat("Speed",1.0f);
-                m_Anim.SetBool("IsGuard", false);
-                m_Anim.SetBool("IsCrouch", false);
+                m_Anim.SetFloat("Speed", 1.0f);
                 break;
-
             case AnimationState.Guard:
-                m_Anim.SetFloat("Speed",0.0f);
                 m_Anim.SetBool("IsGuard", true);
-                m_Anim.SetBool("IsCrouch", false);
                 break;
             case AnimationState.Crouch:
-                m_Anim.SetFloat("Speed", 0.0f);
                 m_Anim.SetBool("IsCrouch", true);
-                m_Anim.SetBool("IsGuard", false);
+                break;
+            case AnimationState.Jump:
+                m_Anim.SetTrigger("JumpTrigger");
+                break;
+            case AnimationState.lightPunch:
+                m_Anim.SetTrigger("LightPunchTrigger");
+                break;
+            case AnimationState.heavyPunch:
+                m_Anim.SetTrigger("HeavyPunchTrigger");
+                break;
+            case AnimationState.lightKick:
+                m_Anim.SetTrigger("LightKickTrigger");
+                break;
+            case AnimationState.heavyKick:
+                m_Anim.SetTrigger("HeavyKickTrigger");
                 break;
         }
     }
 
+    /// <summary>
+    /// アニメーションの基本状態をリセット
+    /// </summary>
+    private void ResetAnimationState()
+    {
+        m_Anim.SetFloat("Speed", 0.0f);
+        m_Anim.SetBool("IsGuard", false);
+        m_Anim.SetBool("IsCrouch", false);
+    }
+
+    public bool IsJumpFinished()
+    {
+        AnimatorStateInfo stateInfo = m_Anim.GetCurrentAnimatorStateInfo(0);
+
+        if(!stateInfo.IsName("Jump"))
+        {
+            return false;
+        }
+
+        return stateInfo.normalizedTime >= 1.0f;
+
+    }
+
+    /// <summary>
+    /// 弱パンチのアニメーションが終了したか
+    /// </summary>
+    /// <returns></returns>
+    public bool IsLightPunchFinished()
+    {
+        AnimatorStateInfo stateInfo = m_Anim.GetCurrentAnimatorStateInfo(0);
+
+        if (!stateInfo.IsName("LightPunch"))
+        {
+            return false;
+        }
+
+        return stateInfo.normalizedTime >= 1.0f;
+    }
+
+
+    /// <summary>
+    /// 強パンチのアニメーションが終了したか
+    /// </summary>
+    /// <returns></returns>
+    public bool IsHeavyPunchFinished()
+    {
+        AnimatorStateInfo stateInfo = m_Anim.GetCurrentAnimatorStateInfo(0);
+
+        if(!stateInfo.IsName("HeavyPunch"))
+        {
+            return false;
+        }
+
+        return stateInfo.normalizedTime >= 1.0f;
+    }
+
+    /// <summary>
+    /// 弱キックのアニメーションが終了したか
+    /// </summary>
+    /// <returns></returns>
+    public bool IsLightKickFinished()
+    {
+        AnimatorStateInfo stateInfo = m_Anim.GetCurrentAnimatorStateInfo(0);
+
+        if(!stateInfo.IsName("LightKick"))
+        {
+            return false;
+        }
+
+        return stateInfo.normalizedTime >= 1.0f;
+
+    }
+
+    /// <summary>
+    /// 強キックのアニメーションが終了したか
+    /// </summary>
+    /// <returns></returns>
+    public bool IsHeavyKickFinished()
+    {
+        AnimatorStateInfo stateInfo = m_Anim.GetCurrentAnimatorStateInfo(0);
+
+        if(!stateInfo.IsName("HeavyKick"))
+        {
+            return false;
+        }
+
+        return stateInfo.normalizedTime >= 1.0f;
+    }
 }

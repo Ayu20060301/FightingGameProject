@@ -1,5 +1,3 @@
-using UnityEngine;
-
 
 /// <summary>
 /// プレイヤーのステート基底クラス
@@ -8,6 +6,11 @@ public abstract class PlayerState
 {
     //このStateを所有しているPlayer
     protected Player m_Player;
+
+    /// <summary>
+    /// ステートの種類
+    /// </summary>
+    //public abstract PlayerStateType StateType { get; }
 
     /// <summary>
     /// コンストラクタ
