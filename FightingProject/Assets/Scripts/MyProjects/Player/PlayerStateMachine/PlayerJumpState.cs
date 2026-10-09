@@ -15,19 +15,12 @@ public class PlayerJumpState : PlayerState
         m_Player.Jump();
 
         //ジャンプアニメーション
-        m_Player.SetAnimationState(Player.AnimationState.Jump);
+        m_Player.RPC__PlayAnimation(Player.AnimationState.Jump);
     }
 
     public override void Update()
     {
-        /*
         //着地したらIdleへ
-        if(m_Player.IsGrounded)
-        {
-            m_Player.ChangeState(m_Player.IdleState);
-        }
-        */
-
         if(m_Player.IsJumpFinished())
         {
             m_Player.ChangeState(m_Player.IdleState);

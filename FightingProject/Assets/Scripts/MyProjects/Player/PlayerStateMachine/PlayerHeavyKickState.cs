@@ -14,7 +14,7 @@ public class PlayerHeavyKickState : PlayerState
     public override void Enter()
     {
         //強キックアニメーション
-        m_Player.SetAnimationState(Player.AnimationState.heavyKick);
+        m_Player.RPC__PlayAnimation(Player.AnimationState.heavyKick);
     }
 
     public override void Update()

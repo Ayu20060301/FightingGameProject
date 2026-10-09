@@ -114,6 +114,11 @@ public class Player : NetworkBehaviour
 
     public override void FixedUpdateNetwork()
     {
+
+        //移動処理はサーバーのみ行う
+        //Authorityはサーバーのみ持つのでそれで判定する
+        if (!Object.HasStateAuthority) return;
+
         //入力取得
         if (!GetInput(out NetworkManager.PlayerInputData data)) return;
 
@@ -218,11 +223,11 @@ public class Player : NetworkBehaviour
 
 
         if (CurrentState == GuardState ||
-          CurrentState == CrouchState ||
-          CurrentState == LightPunchState ||
-          CurrentState == HeavyPunchState ||
-          CurrentState == LightKickState ||
-          CurrentState == HeavyKickState)
+            CurrentState == CrouchState ||
+            CurrentState == LightPunchState ||
+            CurrentState == HeavyPunchState ||
+            CurrentState == LightKickState ||
+            CurrentState == HeavyKickState)
         {
             m_Move.x = 0.0f;
         }
@@ -246,57 +251,78 @@ public class Player : NetworkBehaviour
     {
         if (!m_Controller.isGrounded) return;
 
+        //ジャンプ速度を設定
         m_Move.y = Mathf.Sqrt(m_JumpPower * -2.0f * m_Gravity);
-
     }
 
     /// <summary>
     /// Stateの変更
     /// </summary>
-    /// <param name="state">過ぎに遷移するState</param>
+    /// <param name="state">次に遷移するState</param>
     public void ChangeState(PlayerState state)
     {
         m_StateMachine.ChangeState(state);
     }
 
     /// <summary>
-    /// アニメーションの変更
+    /// アニメーション開始イベントをRPCで通知
     /// </summary>
     /// <param name="state"></param>
-    public void SetAnimationState(AnimationState state)
+    [Rpc(RpcSources.StateAuthority,RpcTargets.All)]
+    public void RPC__PlayAnimation(AnimationState state)
     {
+        PlayAnimationLocal(state);
+    }
 
 
+    /// <summary>
+    /// 各クライアントでアニメーションを再生
+    /// </summary>
+    /// <param name="state"></param>
+    private void PlayAnimationLocal(AnimationState state)
+    {
         //アニメーションの基本状態をリセット
         ResetAnimationState();
 
-        switch(state)
+        switch (state)
         {
             case AnimationState.Idle:
+                m_Anim.CrossFade("Idle", 0.05f);
                 break;
+
             case AnimationState.Walk:
                 m_Anim.SetFloat("Speed", 1.0f);
+                m_Anim.CrossFade("Walk", 0.05f);
                 break;
+
             case AnimationState.Guard:
                 m_Anim.SetBool("IsGuard", true);
+                m_Anim.CrossFade("Guard", 0.05f);
                 break;
+
             case AnimationState.Crouch:
                 m_Anim.SetBool("IsCrouch", true);
+                m_Anim.CrossFade("Crouch", 0.05f);
                 break;
+
             case AnimationState.Jump:
-                m_Anim.SetTrigger("JumpTrigger");
+                m_Anim.CrossFade("Jump", 0.05f);
                 break;
+
             case AnimationState.lightPunch:
-                m_Anim.SetTrigger("LightPunchTrigger");
+                m_Anim.CrossFade("LightPunch", 0.05f);
                 break;
+
             case AnimationState.heavyPunch:
-                m_Anim.SetTrigger("HeavyPunchTrigger");
+                m_Anim.CrossFade("HeavyPunch", 0.05f);
                 break;
+
             case AnimationState.lightKick:
-                m_Anim.SetTrigger("LightKickTrigger");
+                m_Anim.CrossFade("LightKick", 0.05f);
                 break;
+
             case AnimationState.heavyKick:
-                m_Anim.SetTrigger("HeavyKickTrigger");
+                m_Anim.CrossFade("HeavyKick", 0.05f);
                 break;
         }
     }
@@ -311,17 +337,49 @@ public class Player : NetworkBehaviour
         m_Anim.SetBool("IsCrouch", false);
     }
 
-    public bool IsJumpFinished()
-    {
-        AnimatorStateInfo stateInfo = m_Anim.GetCurrentAnimatorStateInfo(0);
 
-        if(!stateInfo.IsName("Jump"))
+    private bool IsAnimationFinished(string stateName)
+    {
+
+        //Animatorが遷移中なら終了判定しない
+        if(m_Anim.IsInTransition(0))
         {
+            Debug.Log($"[Animation] {stateName} : 遷移中");
             return false;
         }
 
-        return stateInfo.normalizedTime >= 1.0f;
+        AnimatorStateInfo stateInfo = m_Anim.GetCurrentAnimatorStateInfo(0);
 
+        if(!stateInfo.IsName(stateName))
+        {
+            Debug.LogWarning($"[Animation]ステート名不一致: " + $"期待={stateName},現在は{stateInfo.fullPathHash}");
+            return false;
+        }
+
+        if (stateInfo.loop)
+        {
+            Debug.LogWarning($"[Animation] {stateName}: Loop設定がON");
+            return false;
+        }
+
+        bool isFinished = stateInfo.normalizedTime >= 1.0f;
+
+        if(isFinished)
+        {
+            Debug.Log($"[Animation] {stateName}: 再生終了" + $"normalizedTime = {stateInfo.normalizedTime:F2}");
+        }
+
+        return isFinished;
+    }
+
+    /// <summary>
+    /// ジャンプが終了したか
+    /// </summary>
+    /// <returns></returns>
+    public bool IsJumpFinished()
+    {
+        //地面に着地し、落下が終わったらジャンプ終了
+        return m_Controller.isGrounded && m_Move.y <= 0.0f;
     }
 
     /// <summary>
@@ -330,14 +388,7 @@ public class Player : NetworkBehaviour
     /// <returns></returns>
     public bool IsLightPunchFinished()
     {
-        AnimatorStateInfo stateInfo = m_Anim.GetCurrentAnimatorStateInfo(0);
-
-        if (!stateInfo.IsName("LightPunch"))
-        {
-            return false;
-        }
-
-        return stateInfo.normalizedTime >= 1.0f;
+        return IsAnimationFinished("LightPunch");
     }
 
 
@@ -347,14 +398,7 @@ public class Player : NetworkBehaviour
     /// <returns></returns>
     public bool IsHeavyPunchFinished()
     {
-        AnimatorStateInfo stateInfo = m_Anim.GetCurrentAnimatorStateInfo(0);
-
-        if(!stateInfo.IsName("HeavyPunch"))
-        {
-            return false;
-        }
-
-        return stateInfo.normalizedTime >= 1.0f;
+        return IsAnimationFinished("HeavyPunch");
     }
 
     /// <summary>
@@ -363,15 +407,7 @@ public class Player : NetworkBehaviour
     /// <returns></returns>
     public bool IsLightKickFinished()
     {
-        AnimatorStateInfo stateInfo = m_Anim.GetCurrentAnimatorStateInfo(0);
-
-        if(!stateInfo.IsName("LightKick"))
-        {
-            return false;
-        }
-
-        return stateInfo.normalizedTime >= 1.0f;
-
+        return IsAnimationFinished("LightKick");
     }
 
     /// <summary>
@@ -380,13 +416,6 @@ public class Player : NetworkBehaviour
     /// <returns></returns>
     public bool IsHeavyKickFinished()
     {
-        AnimatorStateInfo stateInfo = m_Anim.GetCurrentAnimatorStateInfo(0);
-
-        if(!stateInfo.IsName("HeavyKick"))
-        {
-            return false;
-        }
-
-        return stateInfo.normalizedTime >= 1.0f;
+        return IsAnimationFinished("HeavyKick");
     }
 }

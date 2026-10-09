@@ -14,6 +14,8 @@ public class InputController : MonoBehaviour
     private bool m_IsLightPunch;
     private bool m_IsHeavyPunch;
 
+    private bool m_IsJump;
+
     private void Awake()
     {
         m_Input = new InputSystem_Actions();
@@ -64,7 +66,11 @@ public class InputController : MonoBehaviour
             m_IsHeavyPunch = true;
         }
 
-        bool isJump = m_Input.Player.Jump.IsPressed();
+        if(m_Input.Player.Jump.WasPressedThisFrame())
+        {
+            m_IsJump = true;
+        }
+
         bool isGuard = m_Input.Player.Guard.IsPressed();
 
         State.SetInput(
@@ -73,10 +79,36 @@ public class InputController : MonoBehaviour
             m_IsHeavyKick,
             m_IsLightPunch,
             m_IsHeavyPunch,
-            isJump,
+            m_IsJump,
             isGuard);
     }
 
+
+    /// <summary>
+    /// ボタン入力を消費する
+    /// </summary>
+    public void ConsumeButtonInput()
+    {
+        //InputController側の保持フラグをリセット
+        m_IsLightKick = false;
+        m_IsHeavyKick = false;
+        m_IsLightPunch = false;
+        m_IsHeavyPunch = false;
+        m_IsJump = false;
+
+        //InputState側もリセット
+        State.ConsumeAttackInput();
+        State.ConsumeJumpInput();
+    }
+
+    /// <summary>
+    /// Fusionへ渡したジャンプ入力を消費する
+    /// </summary>
+    public void ConsumeJumpInput()
+    {
+        m_IsJump = false;
+        State.ConsumeJumpInput();
+    }
 
     /// <summary>
     /// 方向入力を取得する

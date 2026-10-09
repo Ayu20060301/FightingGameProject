@@ -12,7 +12,7 @@ public class PlayerGuardState : PlayerState
 
     public override void Enter()
     {
-        m_Player.SetAnimationState(Player.AnimationState.Guard);
+        m_Player.RPC__PlayAnimation(Player.AnimationState.Guard);
     }
 
     public override void Update()

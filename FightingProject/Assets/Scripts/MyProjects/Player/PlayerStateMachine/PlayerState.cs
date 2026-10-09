@@ -8,11 +8,6 @@ public abstract class PlayerState
     protected Player m_Player;
 
     /// <summary>
-    /// ステートの種類
-    /// </summary>
-    //public abstract PlayerStateType StateType { get; }
-
-    /// <summary>
     /// コンストラクタ
     /// </summary>
     /// <param name="player">プレイヤー</param>

@@ -12,7 +12,7 @@ public class PlayerIdleState : PlayerState
 
     public override void Enter()
     {
-        m_Player.SetAnimationState(Player.AnimationState.Idle);
+        m_Player.RPC__PlayAnimation(Player.AnimationState.Idle);
     }
 
     public override void Update()
@@ -22,7 +22,7 @@ public class PlayerIdleState : PlayerState
            m_Player.Input.Direction == Direction.Right)
         {
             m_Player.ChangeState(m_Player.WalkState);
-            return; ;
+            return;
         }
 
 

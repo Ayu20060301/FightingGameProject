@@ -9,6 +9,9 @@ using UnityEngine.Scripting.APIUpdating;
 
 public class NetworkManager : MonoBehaviour, INetworkRunnerCallbacks
 {
+
+
+
      //入力データ
      public struct PlayerInputData : INetworkInput
     {
@@ -25,13 +28,17 @@ public class NetworkManager : MonoBehaviour, INetworkRunnerCallbacks
         public NetworkBool isHeavyPunch;
     }
 
+    [Header("入力")]
     [SerializeField]
     private InputController m_Input;
 
-    //プレイヤーが操作するプレハブ
+    [Header("プレイヤーが操作するプレハブ")]
     [SerializeField]
     private NetworkPrefabRef m_PlayerPrefab;
 
+    [Header("ネットワーク設定")]
+    [SerializeField, Min(1)]
+    private int m_MaxPlayers = 2;
     //ネットワークシステムの根幹であるランナー
     private NetworkRunner m_Runner;
 
@@ -58,6 +65,10 @@ public class NetworkManager : MonoBehaviour, INetworkRunnerCallbacks
         {
             GameMode = gameMode, //サーバーかクライアントか
             SessionName = "FightingProject", //セッション名
+
+            //最大Player人数
+            PlayerCount = m_MaxPlayers,
+
             SceneManager = gameObject.AddComponent<NetworkSceneManagerDefault>() //ネットワーク用のシーン
         });
     }
@@ -85,17 +96,30 @@ public class NetworkManager : MonoBehaviour, INetworkRunnerCallbacks
             return;
         }
 
-        //固定スポーン位置
-        Vector3 spawnPos = new Vector3(-2.0f, 0.5f, 0.0f);
 
-        Quaternion spawnRot = Quaternion.Euler(0.0f, 90.0f, 0.0f);
+        Vector3 spawnPos;
+        Quaternion spawnRot;
 
+      
+        //参加したプレイヤーごとに位置を設定
+        if(player == PlayerRef.FromIndex(0))
+        {
+            //1P : 左側
+            spawnPos = new Vector3(-2.0f, 0.5f, 0.0f);
+            spawnRot = Quaternion.Euler(0.0f, -90.0f, 0.0f);
+        }
+        else
+        {
+            //2P:右側
+            spawnPos = new Vector3(2.0f, 0.5f, 0.0f);
+            spawnRot = Quaternion.Euler(0.0f, 90.0f, 0.0f);
+        }
 
-        NetworkObject obj = runner.Spawn(m_PlayerPrefab,spawnPos,spawnRot,player);
+        //プレイヤーをスポーン
+        NetworkObject obj = runner.Spawn(m_PlayerPrefab, spawnPos, spawnRot,player);
 
+        //プレイヤーオブジェクトを登録
         runner.SetPlayerObject(player, obj);
-
-
     }
 
     /// <summary>
@@ -217,7 +241,8 @@ public class NetworkManager : MonoBehaviour, INetworkRunnerCallbacks
         //Fusionへ入力を渡す
         input.Set(data);
 
-        state.ConsumeAttackInput();
+        //ボタン入力を消費
+        m_Input.ConsumeButtonInput();
     }
 
     public void OnInputMissing(NetworkRunner runner, PlayerRef player, NetworkInput input)

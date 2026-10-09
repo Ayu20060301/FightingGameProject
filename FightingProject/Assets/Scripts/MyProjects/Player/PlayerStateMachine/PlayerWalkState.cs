@@ -12,15 +12,21 @@ public class PlayerWalkState : PlayerState
 
     public override void Enter()
     {
-        m_Player.SetAnimationState(Player.AnimationState.Walk);
+        m_Player.RPC__PlayAnimation(Player.AnimationState.Walk);
     }
 
 
     public override void Update()
     {
-    
+        //左右入力がなくなったらIdle
+        if (m_Player.Input.Direction != Direction.Left && m_Player.Input.Direction != Direction.Right)
+        {
+            m_Player.ChangeState(m_Player.IdleState);
+            return;
+        }
+
         //ガード
-        if(m_Player.Input.IsGuard)
+        if (m_Player.Input.IsGuard)
         {
             m_Player.ChangeState(m_Player.GuardState);
             return;
@@ -51,13 +57,6 @@ public class PlayerWalkState : PlayerState
         if (m_Player.Input.IsHeavyKick)
         {
             m_Player.ChangeState(m_Player.HeavyKickState);
-            return;
-        }
-
-        //移動停止
-        if (m_Player.Input.Direction != Direction.Left && m_Player.Input.Direction != Direction.Right)
-        {
-            m_Player.ChangeState(m_Player.IdleState);
             return;
         }
     }

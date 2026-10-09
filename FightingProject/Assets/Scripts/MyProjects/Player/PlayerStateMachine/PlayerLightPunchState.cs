@@ -13,7 +13,7 @@ public class PlayerLightPunchState : PlayerState
     public override void Enter()
     {
         //弱パンチアニメーション
-        m_Player.SetAnimationState(Player.AnimationState.lightPunch);
+        m_Player.RPC__PlayAnimation(Player.AnimationState.lightPunch);
     }
 
     public override void Update()

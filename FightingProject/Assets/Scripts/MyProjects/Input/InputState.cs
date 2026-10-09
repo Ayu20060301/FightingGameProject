@@ -100,4 +100,11 @@ public class InputState
         IsHeavyPunch = false;
     }
 
+    /// <summary>
+    /// ジャンプ入力を消費する
+    /// </summary>
+    public void ConsumeJumpInput()
+    {
+        IsJump = false;
+    }
 }

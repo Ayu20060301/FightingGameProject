@@ -14,7 +14,7 @@ public class PlayerHeavyPunchState : PlayerState
     public override void Enter()
     {
         //強パンチアニメーション
-        m_Player.SetAnimationState(Player.AnimationState.heavyPunch);
+        m_Player.RPC__PlayAnimation(Player.AnimationState.heavyPunch);
     }
 
     public override void Update()
