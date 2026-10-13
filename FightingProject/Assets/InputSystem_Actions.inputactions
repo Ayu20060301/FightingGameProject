@@ -225,11 +225,33 @@
                 },
                 {
                     "name": "",
+                    "id": "4ca4849b-9471-4534-b514-5b256eb52ffa",
+                    "path": "<Keyboard>/#(K)",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": ";Keyboard&Mouse",
+                    "action": "LightKick",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
                     "id": "b698b737-a974-4b68-847c-5b600067162a",
                     "path": "<Gamepad>/buttonEast",
                     "interactions": "",
                     "processors": "",
                     "groups": ";Gamepad",
+                    "action": "HeavyKick",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "92d974aa-79c2-4715-8425-7190f5ae91d7",
+                    "path": "<Keyboard>/#(L)",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": ";Keyboard&Mouse",
                     "action": "HeavyKick",
                     "isComposite": false,
                     "isPartOfComposite": false
@@ -247,6 +269,17 @@
                 },
                 {
                     "name": "",
+                    "id": "124ccfbb-a5fb-40ac-b44a-d2949910e3ff",
+                    "path": "<Keyboard>/#(J)",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": ";Keyboard&Mouse",
+                    "action": "LightPunch",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
                     "id": "4f820ec7-3c8c-43fd-ae21-b3a0f00288a3",
                     "path": "<Gamepad>/buttonNorth",
                     "interactions": "",
@@ -258,11 +291,33 @@
                 },
                 {
                     "name": "",
+                    "id": "a34cfc00-4dfd-41c0-81d6-21e76658170e",
+                    "path": "<Keyboard>/#(I)",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": ";Keyboard&Mouse",
+                    "action": "HeavyPunch",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
                     "id": "9bddebe0-a6d5-41b8-ba7c-905ae170571a",
-                    "path": "<Gamepad>/rightShoulder",
+                    "path": "<Gamepad>/leftTrigger",
                     "interactions": "",
                     "processors": "",
                     "groups": ";Gamepad",
+                    "action": "Guard",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "e6096157-8995-425b-b14c-a9c40d9de491",
+                    "path": "<Keyboard>/#(H)",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": ";Keyboard&Mouse",
                     "action": "Guard",
                     "isComposite": false,
                     "isPartOfComposite": false
@@ -280,11 +335,33 @@
                 },
                 {
                     "name": "",
+                    "id": "e14aab87-818f-4970-9f6f-17d8048057e0",
+                    "path": "<Keyboard>/#(W)",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": ";Keyboard&Mouse",
+                    "action": "Jump",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
                     "id": "428b9578-cee2-4d14-a77f-b6d8cc48a5c5",
                     "path": "<Gamepad>/leftStick/down",
                     "interactions": "",
                     "processors": "",
                     "groups": ";Gamepad",
+                    "action": "Crouch",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "9d2027eb-dda1-487b-bbcd-93b72d79467b",
+                    "path": "<Keyboard>/#(S)",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": ";Keyboard&Mouse",
                     "action": "Crouch",
                     "isComposite": false,
                     "isPartOfComposite": false

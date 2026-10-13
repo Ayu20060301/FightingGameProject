@@ -142,7 +142,8 @@ MonoBehaviour:
   m_Input: {fileID: 3695065380092889564}
   m_PlayerPrefab:
     RawGuidValue: aa576aa4aee6dbd4c8457ddd32895204
-  m_SpawnPoints: []
+  m_MaxPlayers: 2
+  m_TwoPlayerCamera: {fileID: 0}
 --- !u!1 &6203660473763426768
 GameObject:
   m_ObjectHideFlags: 0

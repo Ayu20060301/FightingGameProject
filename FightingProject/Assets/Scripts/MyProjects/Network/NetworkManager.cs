@@ -9,9 +9,6 @@ using UnityEngine.Scripting.APIUpdating;
 
 public class NetworkManager : MonoBehaviour, INetworkRunnerCallbacks
 {
-
-
-
      //入力データ
      public struct PlayerInputData : INetworkInput
     {
@@ -39,8 +36,12 @@ public class NetworkManager : MonoBehaviour, INetworkRunnerCallbacks
     [Header("ネットワーク設定")]
     [SerializeField, Min(1)]
     private int m_MaxPlayers = 2;
+
     //ネットワークシステムの根幹であるランナー
     private NetworkRunner m_Runner;
+
+
+    public NetworkRunner Runner => m_Runner;
 
     async void Start()
     {
@@ -120,6 +121,29 @@ public class NetworkManager : MonoBehaviour, INetworkRunnerCallbacks
 
         //プレイヤーオブジェクトを登録
         runner.SetPlayerObject(player, obj);
+
+
+        //スポーンしたプレイヤーを取得
+        Player newPlayer = obj.GetComponent<Player>();
+
+        //参加中のプレイヤーから対戦相手を探す
+        foreach(PlayerRef otherRef in runner.ActivePlayers)
+        {
+            //自分自身は除外
+            if (otherRef == player) continue;
+
+            NetworkObject otherObj = runner.GetPlayerObject(otherRef);
+
+            if (otherObj == null) continue;
+
+            Player otherPlayer = otherObj.GetComponent<Player>();
+
+            if (otherPlayer == null) continue;
+
+            //お互いに対戦相手を登録
+            newPlayer.SetOpponent(otherPlayer);
+            otherPlayer.SetOpponent(newPlayer);
+        }
     }
 
     /// <summary>
