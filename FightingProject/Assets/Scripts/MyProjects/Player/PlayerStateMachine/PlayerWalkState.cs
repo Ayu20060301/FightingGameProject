@@ -18,45 +18,18 @@ public class PlayerWalkState : PlayerState
 
     public override void Update()
     {
-        //左右入力がなくなったらIdle
-        if (m_Player.Input.Direction != Direction.Left && m_Player.Input.Direction != Direction.Right)
-        {
-            m_Player.ChangeState(m_Player.IdleState);
-            return;
-        }
+        InputState input = m_Player.Input;
 
-        //ガード
-        if (m_Player.Input.IsGuard)
+        //上にあるほど優先度が高い
+        if (IsTryChangeState(!input.Direction.IsHorizontal(), m_Player.IdleState) ||  //左右入力がなくなったらIdle
+            IsTryChangeState(input.IsGuard, m_Player.GuardState) ||
+            IsTryChangeState(input.IsLightPunch, m_Player.LightPunchState) ||
+            IsTryChangeState(input.IsHeavyPunch, m_Player.HeavyPunchState) ||
+            IsTryChangeState(input.IsLightKick, m_Player.LightKickState) ||
+            IsTryChangeState(input.IsMidKick, m_Player.MidKickState) ||
+            IsTryChangeState(input.IsMidPunch, m_Player.MidPunchState) ||
+            IsTryChangeState(input.IsHeavyKick, m_Player.HeavyKickState))
         {
-            m_Player.ChangeState(m_Player.GuardState);
-            return;
-        }
-
-        // 弱パンチ
-        if (m_Player.Input.IsLightPunch)
-        {
-            m_Player.ChangeState(m_Player.LightPunchState);
-            return;
-        }
-
-        // 強パンチ
-        if (m_Player.Input.IsHeavyPunch)
-        {
-            m_Player.ChangeState(m_Player.HeavyPunchState);
-            return;
-        }
-
-        // 弱キック
-        if (m_Player.Input.IsLightKick)
-        {
-            m_Player.ChangeState(m_Player.LightKickState);
-            return;
-        }
-
-        // 強キック
-        if (m_Player.Input.IsHeavyKick)
-        {
-            m_Player.ChangeState(m_Player.HeavyKickState);
             return;
         }
     }

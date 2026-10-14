@@ -163,6 +163,24 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""MidPunch"",
+                    ""type"": ""Button"",
+                    ""id"": ""caa4140b-bfed-42eb-b5de-3375551382c6"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""MidKick"",
+                    ""type"": ""Button"",
+                    ""id"": ""f128c0ca-265e-4026-9ef2-76469a514081"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
                 }
             ],
             ""bindings"": [
@@ -323,7 +341,7 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
                 {
                     ""name"": """",
                     ""id"": ""b698b737-a974-4b68-847c-5b600067162a"",
-                    ""path"": ""<Gamepad>/buttonEast"",
+                    ""path"": ""<Gamepad>/rightTrigger"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": "";Gamepad"",
@@ -367,7 +385,7 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
                 {
                     ""name"": """",
                     ""id"": ""4f820ec7-3c8c-43fd-ae21-b3a0f00288a3"",
-                    ""path"": ""<Gamepad>/buttonNorth"",
+                    ""path"": ""<Gamepad>/rightShoulder"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": "";Gamepad"",
@@ -449,6 +467,28 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""groups"": "";Keyboard&Mouse"",
                     ""action"": ""Crouch"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""f098e0b8-9451-4f9f-8c01-4963b904b9de"",
+                    ""path"": ""<Gamepad>/buttonNorth"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": "";Gamepad"",
+                    ""action"": ""MidPunch"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""19418a72-f9d8-477e-b95c-e2fd0c5e0b59"",
+                    ""path"": ""<Gamepad>/buttonEast"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": "";Gamepad"",
+                    ""action"": ""MidKick"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 }
@@ -1044,6 +1084,8 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
         m_Player_Guard = m_Player.FindAction("Guard", throwIfNotFound: true);
         m_Player_Jump = m_Player.FindAction("Jump", throwIfNotFound: true);
         m_Player_Crouch = m_Player.FindAction("Crouch", throwIfNotFound: true);
+        m_Player_MidPunch = m_Player.FindAction("MidPunch", throwIfNotFound: true);
+        m_Player_MidKick = m_Player.FindAction("MidKick", throwIfNotFound: true);
         // UI
         m_UI = asset.FindActionMap("UI", throwIfNotFound: true);
         m_UI_Navigate = m_UI.FindAction("Navigate", throwIfNotFound: true);
@@ -1145,6 +1187,8 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
     private readonly InputAction m_Player_Guard;
     private readonly InputAction m_Player_Jump;
     private readonly InputAction m_Player_Crouch;
+    private readonly InputAction m_Player_MidPunch;
+    private readonly InputAction m_Player_MidKick;
     /// <summary>
     /// Provides access to input actions defined in input action map "Player".
     /// </summary>
@@ -1188,6 +1232,14 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
         /// Provides access to the underlying input action "Player/Crouch".
         /// </summary>
         public InputAction @Crouch => m_Wrapper.m_Player_Crouch;
+        /// <summary>
+        /// Provides access to the underlying input action "Player/MidPunch".
+        /// </summary>
+        public InputAction @MidPunch => m_Wrapper.m_Player_MidPunch;
+        /// <summary>
+        /// Provides access to the underlying input action "Player/MidKick".
+        /// </summary>
+        public InputAction @MidKick => m_Wrapper.m_Player_MidKick;
         /// <summary>
         /// Provides access to the underlying input action map instance.
         /// </summary>
@@ -1238,6 +1290,12 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
             @Crouch.started += instance.OnCrouch;
             @Crouch.performed += instance.OnCrouch;
             @Crouch.canceled += instance.OnCrouch;
+            @MidPunch.started += instance.OnMidPunch;
+            @MidPunch.performed += instance.OnMidPunch;
+            @MidPunch.canceled += instance.OnMidPunch;
+            @MidKick.started += instance.OnMidKick;
+            @MidKick.performed += instance.OnMidKick;
+            @MidKick.canceled += instance.OnMidKick;
         }
 
         /// <summary>
@@ -1273,6 +1331,12 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
             @Crouch.started -= instance.OnCrouch;
             @Crouch.performed -= instance.OnCrouch;
             @Crouch.canceled -= instance.OnCrouch;
+            @MidPunch.started -= instance.OnMidPunch;
+            @MidPunch.performed -= instance.OnMidPunch;
+            @MidPunch.canceled -= instance.OnMidPunch;
+            @MidKick.started -= instance.OnMidKick;
+            @MidKick.performed -= instance.OnMidKick;
+            @MidKick.canceled -= instance.OnMidKick;
         }
 
         /// <summary>
@@ -1629,6 +1693,20 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
         /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
         /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
         void OnCrouch(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "MidPunch" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnMidPunch(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "MidKick" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnMidKick(InputAction.CallbackContext context);
     }
     /// <summary>
     /// Interface to implement callback methods for all input action callbacks associated with input actions defined by "UI" which allows adding and removing callbacks.

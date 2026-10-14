@@ -7,6 +7,17 @@ using UnityEngine;
 /// </summary>
 public class CommandController : MonoBehaviour
 {
+    //コマンド定義
+    private static readonly Direction[] HadoukenCommand =
+        { Direction.Down,Direction.DownRight,Direction.Right};
+
+    private static readonly Direction[] ShoryukenCommand =
+        { Direction.Right,Direction.Down,Direction.DownRight};
+
+    private static readonly Direction[] TatsumakiCommand =
+        { Direction.Down,Direction.DownLeft,Direction.Left};
+
+
     [SerializeField]
     private InputBuffer m_InputBuffer;
 
@@ -14,94 +25,54 @@ public class CommandController : MonoBehaviour
     private InputController m_InputController;
 
 
-    /// <summary>
-    /// コマンド入力を受け付ける最大フレーム数
-    /// </summary>
+   //コマンド入力を受け付ける最大フレーム数
     [SerializeField]
     private int m_CommandFrame = 15;
 
-    /// <summary>
-    /// 波動拳のコマンド 
-    /// ↓ ↘ → + 弱パンチ
-    /// </summary>
-    /// <returns></returns>
-    public bool IsHadouken()
+
+    public bool IsHadouken() => IsCommandInput(AttackButton.LightPunch, HadoukenCommand);
+    public bool IsShoryuken() => IsCommandInput(AttackButton.MidPunch, ShoryukenCommand);
+    public bool IsTatsumaki() => IsCommandInput(AttackButton.LightKick, TatsumakiCommand);
+
+
+    private bool IsCommandInput(AttackButton button,IReadOnlyList<Direction> command)
     {
-        return IsCheckCommand(AttackButton.LightPunch,Direction.Down, Direction.DownRight, Direction.Right);
-    }
-
-    /// <summary>
-    /// 昇竜拳のコマンド
-    /// → ↓ ↘ + 強パンチ
-    /// </summary>
-    /// <returns></returns>
-    public bool IsShoryuken()
-    {
-        return IsCheckCommand(AttackButton.HeavyPunch,Direction.Right, Direction.Down, Direction.DownRight);
-    }
-
-
-    /// <summary>
-    /// 竜巻旋風脚のコマンド
-    /// ↓ ↙ ← + 弱キック
-    /// </summary>
-    /// <returns></returns>
-    public bool IsTatsumaki()
-    {
-        return IsCheckCommand(AttackButton.LightKick,Direction.Down, Direction.DownLeft, Direction.Left);
-    }
-
-    /// <summary>
-    /// 上段足刀蹴りのコマンド
-    /// ↓ ↘ → + 強キック
-    /// </summary>
-    /// <returns></returns>
-    public bool IsSokutogeri()
-    {
-        return IsCheckCommand(AttackButton.HeavyKick,Direction.Down, Direction.DownRight, Direction.Right);
-    }
-
-
-    /// <summary>
-    /// コマンドを判定する
-    /// </summary>
-    /// <param name="command"></param>
-    /// <returns></returns>
-    private bool IsCheckCommand(AttackButton button,params Direction[] command)
-    {
-
         //指定された攻撃ボタンが押されていない
         if(!IsAttackButtonDown(button))
         {
             return false;
         }
 
+
         IReadOnlyList<Direction> buffer = m_InputBuffer.GetBuffer();
 
+
         //入力履歴が足りない
-        if(buffer.Count < command.Length)
+        if(buffer.Count < command.Count)
         {
             return false;
         }
 
-        int commandIndex = command.Length - 1;
+        //直近 m_CommandFrameフレーム分の履歴だけを新しい順に確認する
+        int oldestIndex = Mathf.Max(0, buffer.Count - m_CommandFrame);
+        int commandIndex = command.Count - 1;
 
-
-        //直近の入力だけを確認する
-        int startIndex = Mathf.Max(0, buffer.Count - m_CommandFrame);
-
-        for(int i = buffer.Count - 1; i >= startIndex; i--)
+        for(int i = buffer.Count - 1; i >= oldestIndex; i--)
         {
-            if (buffer[i] == command[commandIndex])
-            {
-                commandIndex--;
+            if (buffer[i] != command[commandIndex]) continue;
 
-                if (commandIndex < 0) return true;
+            commandIndex--;
+
+            if(commandIndex < 0)
+            {
+                return true;
             }
         }
 
+
         return false;
     }
+
 
     /// <summary>
     /// 指定された攻撃ボタンが押されたか
@@ -110,19 +81,16 @@ public class CommandController : MonoBehaviour
     /// <returns></returns>
     private bool IsAttackButtonDown(AttackButton button)
     {
+
+        InputState state = m_InputController.State;
+
         switch(button)
         {
-            case AttackButton.LightKick:
-                return m_InputController.State.IsLightKick;
-            case AttackButton.HeavyKick:
-                return m_InputController.State.IsHeavyKick;
-            case AttackButton.LightPunch:
-                return m_InputController.State.IsLightPunch;
-            case AttackButton.HeavyPunch:
-                return m_InputController.State.IsHeavyPunch;
+            case AttackButton.LightKick:   return state.IsLightKick;
+            case AttackButton.MidKick:     return state.IsMidKick;
+            case AttackButton.LightPunch:  return state.IsLightPunch;
+            case AttackButton.MidPunch:    return state.IsMidPunch;
+            default:                       return false;
         }
-
-        return false;
     }
-
 }

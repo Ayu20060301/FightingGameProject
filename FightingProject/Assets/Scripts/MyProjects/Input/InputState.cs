@@ -2,6 +2,9 @@ using UnityEngine;
 
 /// <summary>
 /// 方向入力
+/// 7 8 9
+/// 4 5 6
+/// 1 2 3
 /// </summary>
 public enum Direction
 {
@@ -26,7 +29,9 @@ public enum AttackButton
     LightKick,
     HeavyKick,
     LightPunch,
-    HeavyPunch
+    HeavyPunch,
+    MidPunch,
+    MidKick,
 }
 
 /// <summary>
@@ -60,6 +65,16 @@ public class InputState
     public bool IsHeavyPunch { get; private set; }
 
     /// <summary>
+    /// 中パンチ
+    /// </summary>
+    public bool IsMidPunch { get; private set; }
+
+    /// <summary>
+    /// 中キック
+    /// </summary>
+    public bool IsMidKick { get; private set; }
+
+    /// <summary>
     /// ジャンプ入力
     /// </summary>
     public bool IsJump { get; private set; }
@@ -80,6 +95,8 @@ public class InputState
         bool isHeavyKick,
         bool isLightPunch,
         bool isHeavyPunch,
+        bool isMidPunch,
+        bool isMidKick,
         bool isJump,
         bool isGuard)
     {
@@ -88,16 +105,23 @@ public class InputState
         IsHeavyKick = isHeavyKick;
         IsLightPunch = isLightPunch;
         IsHeavyPunch = isHeavyPunch;
+        IsMidPunch = isMidPunch;
+        IsMidKick = isMidKick;
         IsJump = isJump;
         IsGuard = isGuard;
     }
 
+    /// <summary>
+    /// 攻撃入力を消費する
+    /// </summary>
     public void ConsumeAttackInput()
     {
         IsLightKick = false;
         IsHeavyKick = false;
         IsLightPunch = false;
         IsHeavyPunch = false;
+        IsMidPunch = false;
+        IsMidKick = false;
     }
 
     /// <summary>

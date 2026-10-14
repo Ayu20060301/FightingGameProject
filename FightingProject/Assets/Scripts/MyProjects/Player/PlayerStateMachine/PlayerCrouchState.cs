@@ -1,8 +1,6 @@
-using UnityEngine;
 
-/// <summary>
-/// しゃがみステート
-/// </summary>
+
+//しゃがみ
 public class PlayerCrouchState : PlayerState
 {
     
@@ -20,17 +18,12 @@ public class PlayerCrouchState : PlayerState
 
     public override void Update()
     {
-        //ガード
-        if(m_Player.Input.IsGuard)
-        {
-            m_Player.ChangeState(m_Player.GuardState);
-            return;
-        }
+        InputState input = m_Player.Input;
 
-        //しゃがみ入力がなくなった
-        if(m_Player.Input.Direction != Direction.Down && m_Player.Input.Direction != Direction.DownLeft && m_Player.Input.Direction != Direction.DownRight)
+        if (IsTryChangeState(input.IsGuard, m_Player.GuardState) ||  //ガード
+            IsTryChangeState(!input.Direction.IsDown(), m_Player.IdleState))     //しゃがみ入力がなくなった
         {
-            m_Player.ChangeState(m_Player.IdleState);
+            return;
         }
     }
 

@@ -1,5 +1,5 @@
-using UnityEngine;
 
+//ガード
 public class PlayerGuardState : PlayerState
 {
 
@@ -18,10 +18,6 @@ public class PlayerGuardState : PlayerState
     public override void Update()
     {
         //ガード解除
-        if(!m_Player.Input.IsGuard)
-        {
-            m_Player.ChangeState(m_Player.IdleState);
-            return;
-        }
+        IsTryChangeState(!m_Player.Input.IsGuard, m_Player.IdleState);
     }
 }

@@ -1,7 +1,5 @@
 
-/// <summary>
-/// プレイヤーのステート基底クラス
-/// </summary>
+//プレイヤーのステート基底クラス
 public abstract class PlayerState
 {
     //このStateを所有しているPlayer
@@ -35,6 +33,17 @@ public abstract class PlayerState
     /// </summary>
     public virtual void Exit()
     {
+    }
+
+  
+    //条件を満たしていれば遷移する
+    protected bool IsTryChangeState(bool condition, PlayerState next)
+    {
+        if (!condition) return false;
+
+        m_Player.ChangeState(next);
+        return true;
+
     }
 
 }

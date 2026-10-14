@@ -1,5 +1,6 @@
 using UnityEngine;
 
+//ジャンプ
 public class PlayerJumpState : PlayerState
 {
 
@@ -21,11 +22,6 @@ public class PlayerJumpState : PlayerState
     public override void Update()
     {
         //着地したらIdleへ
-        if(m_Player.IsJumpFinished())
-        {
-            m_Player.ChangeState(m_Player.IdleState);
-        }
-
+        IsTryChangeState(m_Player.IsJumpFinished(), m_Player.IdleState);
     }
-
 }

@@ -77,6 +77,24 @@
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": false
+                },
+                {
+                    "name": "MidPunch",
+                    "type": "Button",
+                    "id": "caa4140b-bfed-42eb-b5de-3375551382c6",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "MidKick",
+                    "type": "Button",
+                    "id": "f128c0ca-265e-4026-9ef2-76469a514081",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
                 }
             ],
             "bindings": [
@@ -237,7 +255,7 @@
                 {
                     "name": "",
                     "id": "b698b737-a974-4b68-847c-5b600067162a",
-                    "path": "<Gamepad>/buttonEast",
+                    "path": "<Gamepad>/rightTrigger",
                     "interactions": "",
                     "processors": "",
                     "groups": ";Gamepad",
@@ -281,7 +299,7 @@
                 {
                     "name": "",
                     "id": "4f820ec7-3c8c-43fd-ae21-b3a0f00288a3",
-                    "path": "<Gamepad>/buttonNorth",
+                    "path": "<Gamepad>/rightShoulder",
                     "interactions": "",
                     "processors": "",
                     "groups": ";Gamepad",
@@ -363,6 +381,28 @@
                     "processors": "",
                     "groups": ";Keyboard&Mouse",
                     "action": "Crouch",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "f098e0b8-9451-4f9f-8c01-4963b904b9de",
+                    "path": "<Gamepad>/buttonNorth",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": ";Gamepad",
+                    "action": "MidPunch",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "19418a72-f9d8-477e-b95c-e2fd0c5e0b59",
+                    "path": "<Gamepad>/buttonEast",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": ";Gamepad",
+                    "action": "MidKick",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

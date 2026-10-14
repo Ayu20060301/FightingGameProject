@@ -23,6 +23,9 @@ public class NetworkManager : MonoBehaviour, INetworkRunnerCallbacks
 
         public NetworkBool isLightPunch;
         public NetworkBool isHeavyPunch;
+
+        public NetworkBool isMidPunch;
+        public NetworkBool isMidKick;
     }
 
     [Header("入力")]
@@ -261,6 +264,9 @@ public class NetworkManager : MonoBehaviour, INetworkRunnerCallbacks
 
         data.isLightPunch = state.IsLightPunch;
         data.isHeavyPunch = state.IsHeavyPunch;
+
+        data.isMidKick = state.IsMidKick;
+        data.isMidPunch = state.IsMidPunch;
 
         //Fusionへ入力を渡す
         input.Set(data);

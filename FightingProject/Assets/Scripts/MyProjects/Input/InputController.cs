@@ -2,6 +2,11 @@ using UnityEngine;
 
 public class InputController : MonoBehaviour
 {
+
+
+    //方向入力とみなすスティックの値
+    private const float DirectionThreshold = 0.5f;
+
     /// <summary>
     /// 現在の入力状態
     /// </summary>
@@ -9,11 +14,13 @@ public class InputController : MonoBehaviour
 
     private InputSystem_Actions m_Input;
 
+    //押下を保持するフラグ
     private bool m_IsLightKick;
     private bool m_IsHeavyKick;
     private bool m_IsLightPunch;
     private bool m_IsHeavyPunch;
-
+    private bool m_IsMidPunch;
+    private bool m_IsMidKick;
     private bool m_IsJump;
 
     private void Awake()
@@ -42,43 +49,29 @@ public class InputController : MonoBehaviour
     /// </summary>
     private void UpdateInput()
     {
-        Direction direction = GetDirection();
 
-   
-        //攻撃入力を保持
-        if(m_Input.Player.LightKick.WasPressedThisFrame())
-        {
-            m_IsLightKick = true;
-        }
+        var player = m_Input.Player;
 
-        if(m_Input.Player.HeavyKick.WasPressedThisFrame())
-        {
-            m_IsHeavyKick = true;
-        }
-
-        if(m_Input.Player.LightPunch.WasPressedThisFrame())
-        {
-            m_IsLightPunch = true;
-        }
-
-        if(m_Input.Player.HeavyPunch.WasPressedThisFrame())
-        {
-            m_IsHeavyPunch = true;
-        }
-
-        if(m_Input.Player.Jump.WasPressedThisFrame())
-        {
-            m_IsJump = true;
-        }
+       
+        //押された入力は消費されるまで保持する
+        m_IsLightKick |= player.LightKick.WasPressedThisFrame();
+        m_IsMidKick |= player.MidKick.WasPressedThisFrame();
+        m_IsHeavyKick |= player.HeavyKick.WasPressedThisFrame();
+        m_IsLightPunch |= player.LightPunch.WasPressedThisFrame();
+        m_IsMidPunch |= player.MidPunch.WasPressedThisFrame();
+        m_IsHeavyPunch |= player.HeavyPunch.WasPressedThisFrame();
+        m_IsJump |= player.Jump.WasPressedThisFrame();
 
         bool isGuard = m_Input.Player.Guard.IsPressed();
 
         State.SetInput(
-            direction,
+            GetDirection(),
             m_IsLightKick,
             m_IsHeavyKick,
             m_IsLightPunch,
             m_IsHeavyPunch,
+            m_IsMidPunch,
+            m_IsMidKick,
             m_IsJump,
             isGuard);
     }
@@ -91,8 +84,10 @@ public class InputController : MonoBehaviour
     {
         //InputController側の保持フラグをリセット
         m_IsLightKick = false;
+        m_IsMidKick = false;
         m_IsHeavyKick = false;
         m_IsLightPunch = false;
+        m_IsMidPunch = false;
         m_IsHeavyPunch = false;
         m_IsJump = false;
 
@@ -119,44 +114,34 @@ public class InputController : MonoBehaviour
 
         Vector2 input = m_Input.Player.Move.ReadValue<Vector2>();
 
-        bool isUp = input.y > 0.5f;
-        bool isDown = input.y < -0.5f;
-        bool isLeft = input.x < -0.5f;
-        bool isRight = input.x > 0.5f;
 
-        if (isDown && isRight)
-        {
-            return Direction.DownRight;
-        }
-        if (isDown && isLeft)
-        {
-            return Direction.DownLeft;
-        }
-        if (isUp && isRight)
-        {
-            return Direction.UpRight;
-        }
-        if (isUp && isLeft)
-        {
-            return Direction.UpLeft;
-        }
-        if (isUp)
-        {
-            return Direction.Up;
-        }
-        if (isDown)
-        {
-            return Direction.Down;
-        }
-        if (isRight)
-        {
-            return Direction.Right;
-        }
-        if (isLeft)
-        {
-            return Direction.Left;
-        }
+        int x = ToAxis(input.x);
+        int y = ToAxis(input.y);
 
-        return Direction.Neutral;
+        switch(x,y)
+        {
+            case (-1, 1):  return Direction.UpLeft;
+            case (0, 1):   return Direction.Up;
+            case (1, 1):   return Direction.UpRight;
+            case (-1, 0):  return Direction.Left;
+            case (1, 0):   return Direction.Right;
+            case (-1, -1): return Direction.DownLeft;
+            case (0, -1):  return Direction.Down;
+            case (1, -1):  return Direction.DownRight;
+            default:       return Direction.Neutral;
+        }
     }
+
+    /// <summary>
+    /// 軸の値を -1 / 0 / 1に変換する
+    /// </summary>
+    /// <param name="value"></param>
+    /// <returns></returns>
+    private static int ToAxis(float value)
+    {
+        if (value > DirectionThreshold) return 1;
+        if (value < -DirectionThreshold) return -1;
+        return 0;
+    }
+
 }
