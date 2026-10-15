@@ -398,7 +398,7 @@ public class Player : NetworkBehaviour
     /// </summary>
     /// <param name="state"></param>
     [Rpc(RpcSources.StateAuthority,RpcTargets.All)]
-    public void RPC__PlayAnimation(AnimationState state)
+    public void RPC_PlayAnimation(AnimationState state)
     {
         PlayAnimationLocal(state);
     }
@@ -510,6 +510,25 @@ public class Player : NetworkBehaviour
     {
         //地面に着地し、落下が終わったらジャンプ終了
         return m_Controller.isGrounded && m_Move.y <= 0.0f;
+    }
+
+
+    public float GetAnimationNormalizedTime(AnimationState state)
+    {
+        if (m_Anim == null) return 0.0f;
+
+        //遷移中は再生時間を取得しない
+        if (m_Anim.IsInTransition(0)) return 0.0f;
+
+        if (!AnimationNames.TryGetValue(state, out string stateName)) return 0.0f;
+
+        AnimatorStateInfo stateInfo = m_Anim.GetCurrentAnimatorStateInfo(0);
+
+        //指定したアニメーション以外なら取得しない
+        if (!stateInfo.IsName(stateName)) return 0.0f;
+
+        //0.0 = 再生開始、1.0= 1周再生完了
+        return stateInfo.normalizedTime;
     }
 
     /// <summary>

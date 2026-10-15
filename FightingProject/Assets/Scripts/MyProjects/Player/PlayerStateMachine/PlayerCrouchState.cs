@@ -12,7 +12,7 @@ public class PlayerCrouchState : PlayerState
 
     public override void Enter()
     {
-        m_Player.RPC__PlayAnimation(Player.AnimationState.Crouch);
+        m_Player.RPC_PlayAnimation(Player.AnimationState.Crouch);
     }
 
 

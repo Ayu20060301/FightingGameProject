@@ -1,35 +1,64 @@
+using System;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class AttackTrailController : MonoBehaviour
 {
+    public enum Part 
+    { 
+        RightHand,
+        LeftHand,
+        RightFoot,
+        LeftFoot
+    }
+
+    [Serializable]
+    private class TrailEntry
+    {
+        public Part part;
+        public TrailRenderer trail;
+    }
+
     [SerializeField]
-    private TrailRenderer m_Trail;
+    private TrailEntry[] trails;
 
     private void Awake()
     {
-        if(m_Trail == null)
+        foreach(var t in trails)
         {
-            m_Trail = GetComponent<TrailRenderer>();
-        }
-
-
-        if(m_Trail != null)
-        {
-            m_Trail.emitting = false;
-            m_Trail.Clear();
+            t.trail.emitting = false;
         }
     }
 
-    /// <summary>
-    /// 攻撃開始時
-    /// </summary>
-    public void StartTrail()
+    //AnimationEventから呼ぶ
+    public void TrailOn(string partName)
     {
-        if (m_Trail == null) return;
+        if (!Enum.TryParse(partName, out Part part)) return;
+        foreach(var t in trails)
+        {
+            if (t.part != part) continue;
+            t.trail.Clear();    //前回の軌跡を消す
+            t.trail.emitting = true;
+        }
+    }
 
-        //前回の軌跡を残さない
-        m_Trail.Clear();
-        m_Trail.emitting = true;
+    public void TrailOff(string partName)
+    {
+        if (!Enum.TryParse(partName, out Part part)) return;
+        foreach(var t in trails)
+        {
+            if(t.part == part)
+            {
+                t.trail.emitting = false;
+            }
+        }
+    }
+
+    // 被弾・キャンセル時などに全停止
+    public void TrailOffAll()
+    {
+        foreach (var t in trails)
+            t.trail.emitting = false;
     }
 
 }

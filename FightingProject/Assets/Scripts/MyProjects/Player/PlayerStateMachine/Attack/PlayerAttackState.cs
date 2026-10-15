@@ -24,7 +24,7 @@ public abstract class PlayerAttackState : PlayerState
 
     public override void Enter()
     {
-        m_Player.RPC__PlayAnimation(m_Animation);
+        m_Player.RPC_PlayAnimation(m_Animation);
     }
 
     public override void Update()

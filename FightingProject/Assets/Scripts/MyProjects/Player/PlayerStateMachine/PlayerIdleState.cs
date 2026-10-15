@@ -12,7 +12,7 @@ public class PlayerIdleState : PlayerState
 
     public override void Enter()
     {
-        m_Player.RPC__PlayAnimation(Player.AnimationState.Idle);
+        m_Player.RPC_PlayAnimation(Player.AnimationState.Idle);
     }
 
     public override void Update()

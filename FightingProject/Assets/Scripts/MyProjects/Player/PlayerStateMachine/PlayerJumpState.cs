@@ -16,7 +16,7 @@ public class PlayerJumpState : PlayerState
         m_Player.Jump();
 
         //ジャンプアニメーション
-        m_Player.RPC__PlayAnimation(Player.AnimationState.Jump);
+        m_Player.RPC_PlayAnimation(Player.AnimationState.Jump);
     }
 
     public override void Update()

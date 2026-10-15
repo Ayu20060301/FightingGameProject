@@ -12,7 +12,7 @@ public class PlayerWalkState : PlayerState
 
     public override void Enter()
     {
-        m_Player.RPC__PlayAnimation(Player.AnimationState.Walk);
+        m_Player.RPC_PlayAnimation(Player.AnimationState.Walk);
     }
 
 
