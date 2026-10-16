@@ -46,6 +46,20 @@ public class NetworkManager : MonoBehaviour, INetworkRunnerCallbacks
 
     public NetworkRunner Runner => m_Runner;
 
+    //スポーン位置と向き
+    private static readonly Vector3[] SpawnPositions =
+    {
+        new Vector3(-2.0f, 0.5f,0.0f),
+        new Vector3(2.0f, 0.5f,0.0f),
+    };
+
+
+    private static readonly float[] SpawnYaws = { 90.0f, -90.0f };
+
+    //参加中のプレイヤーが使っているスロット
+    private readonly Dictionary<PlayerRef, int> m_Slots = new Dictionary<PlayerRef, int>();
+
+
     async void Start()
     {
         //ランナーの設定
@@ -101,23 +115,22 @@ public class NetworkManager : MonoBehaviour, INetworkRunnerCallbacks
         }
 
 
-        Vector3 spawnPos;
-        Quaternion spawnRot;
+        //空いている最小のスロットを使う
+        int slot = 0;
 
-      
-        //参加したプレイヤーごとに位置を設定
-        if(player == PlayerRef.FromIndex(0))
+        while(m_Slots.ContainsValue(slot))
         {
-            //1P : 左側
-            spawnPos = new Vector3(-2.0f, 0.5f, 0.0f);
-            spawnRot = Quaternion.Euler(0.0f, -90.0f, 0.0f);
+            slot++;
         }
-        else
-        {
-            //2P:右側
-            spawnPos = new Vector3(2.0f, 0.5f, 0.0f);
-            spawnRot = Quaternion.Euler(0.0f, 90.0f, 0.0f);
-        }
+
+        //定員オーバーの場合は何もしない
+        if (slot >= SpawnPositions.Length) return;
+
+
+        m_Slots[player] = slot;
+
+        Vector3 spawnPos = SpawnPositions[slot];
+        Quaternion spawnRot = Quaternion.Euler(0.0f, SpawnYaws[slot], 0.0f);
 
         //プレイヤーをスポーン
         NetworkObject obj = runner.Spawn(m_PlayerPrefab, spawnPos, spawnRot,player);

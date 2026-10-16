@@ -8,6 +8,8 @@ public class PlayerHeavyKickState : PlayerAttackState
     {
     }
 
+    protected override AttackData Data => m_Player.HeavyKickData;
+
     protected override bool IsFinished()
     {
         return m_Player.IsHeavyKickFinished();

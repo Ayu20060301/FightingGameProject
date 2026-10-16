@@ -1,11 +1,7 @@
 using Fusion;
-using NUnit.Framework.Constraints;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Runtime.CompilerServices;
-using UnityEditor;
 using UnityEngine;
-using UnityEngine.XR;
 using Debug = UnityEngine.Debug;
 
 
@@ -34,6 +30,10 @@ public class Player : NetworkBehaviour
 
         //コマンド攻撃
         Tatsumaki, //竜巻旋風脚
+
+        //ダメージを受けた際の各アニメーション
+        Hit,             //立ち喰らい
+        GuardHit,       //立ちガード喰らい
     }
 
 
@@ -47,6 +47,10 @@ public class Player : NetworkBehaviour
 
     //アニメーションのクロスフェード時間
     private const float CrossFadeDuration = 0.05f;
+
+
+    //初期HP
+    public const int MaxHP = 100;
 
     //Animatorパラメーター
     private static readonly int SpeedParam = Animator.StringToHash("Speed");
@@ -70,6 +74,8 @@ public class Player : NetworkBehaviour
         { AnimationState.MidKick,       "MidKick"},
         { AnimationState.MidPunch,      "MidPunch"},
         { AnimationState.Tatsumaki,     "Tatsumaki"},
+        { AnimationState.Hit,           "Hit"},
+        { AnimationState.GuardHit,      "GuardHit"},
     };
 
     #endregion
@@ -117,6 +123,17 @@ public class Player : NetworkBehaviour
     private Player m_Opponent;
 
 
+    [Header("当たり判定")]
+    [SerializeField]
+    private LayerMask m_HurtMask;
+
+    //判定用バッファ
+    private readonly Collider[] m_HitBuffer = new Collider[4];
+
+    //デバッグ表示用
+    private Vector3 m_DebugCenter;
+    private Vector3 m_DebugSize;
+
 
     //StateMachine
     public PlayerStateMachine m_StateMachine;
@@ -134,6 +151,31 @@ public class Player : NetworkBehaviour
     public PlayerHeavyKickState HeavyKickState { get; private set; }
     public PlayerMidKickState MidKickState { get; private set; }
     public PlayerMidPunchState MidPunchState { get; private set; }
+    public PlayerHitState HitState { get; private set; }
+    public PlayerGuardHitState GuardHitState { get; private set; }
+
+
+    [Header("攻撃データ")]
+    [SerializeField]
+    private AttackData m_LightPunchData;
+    [SerializeField]
+    private AttackData m_MidPunchData;
+    [SerializeField]
+    private AttackData m_HeavyPunchData;
+    [SerializeField]
+    private AttackData m_LightKickData;
+    [SerializeField]
+    private AttackData m_MidKickData;
+    [SerializeField]
+    private AttackData m_HeavyKickData;
+
+
+    public AttackData LightPunchData => m_LightPunchData;
+    public AttackData MidPunchData => m_MidPunchData;
+    public AttackData HeavyPunchData => m_HeavyPunchData;
+    public AttackData LightKickData => m_LightKickData;
+    public AttackData MidKickData => m_MidKickData;
+    public AttackData HeavyKickData => m_HeavyKickData;
 
 
     /// <summary>
@@ -159,6 +201,17 @@ public class Player : NetworkBehaviour
     private float FacingYaw { get; set; }
 
     /// <summary>
+    /// ネットワーク同期するHP
+    /// </summary>
+    [Networked]
+    public int HP { get; set; }
+
+    /// <summary>
+    /// KOしているか(HPはサーバーから同期されるので全クライアントで判定できる)
+    /// </summary>
+    public bool IsKO => HP <= 0;
+
+    /// <summary>
     /// 左右移動出来ない状態か(ガード・しゃがみ・攻撃中)
     /// </summary>
     private bool IsHorizontalMoveLocked =>
@@ -169,7 +222,8 @@ public class Player : NetworkBehaviour
         CurrentState == LightKickState ||
         CurrentState == HeavyKickState ||
         CurrentState == MidKickState ||
-        CurrentState == MidPunchState;
+        CurrentState == MidPunchState ||
+        CurrentState == HitState;
 
     #endregion
 
@@ -192,8 +246,17 @@ public class Player : NetworkBehaviour
 
     public override void Spawned()
     {
-        //最初はIdle
-        ChangeState(IdleState);
+
+        //HPの初期化
+        if(Object.HasStateAuthority)
+        {
+            HP = MaxHP;
+
+            FacingYaw = this.transform.eulerAngles.y;
+
+            //最初はIdle
+            ChangeState(IdleState);
+        }
     }
 
     public override void FixedUpdateNetwork()
@@ -244,6 +307,8 @@ public class Player : NetworkBehaviour
         HeavyKickState = new PlayerHeavyKickState(this);
         MidKickState = new PlayerMidKickState(this);
         MidPunchState = new PlayerMidPunchState(this);
+        HitState = new PlayerHitState(this);
+        GuardHitState = new PlayerGuardHitState(this);
     }
 
     #endregion
@@ -389,6 +454,99 @@ public class Player : NetworkBehaviour
     public void SetOpponent(Player opponent)
     {
         m_Opponent = opponent;
+    }
+
+    /// <summary>
+    /// ダメージを受ける(StateAuthority側のみ実行)
+    /// </summary>
+    /// <param name="damage">ダメージ量</param>
+    /// <param name="hitStunTicks">喰らい硬直(Tick数)</param>
+    /// <param name="guardStunTicks">ガード硬直(Tick数)</param>
+    public void TakeDamage(int damage,int hitStunTicks,int guardStunTicks)
+    {
+        if (!Object.HasStateAuthority) return;
+
+        //KO済みなら以降の攻撃は無視
+        if (HP <= 0) return;
+
+      
+        //ガード中、またはガード喰らい中なら成立
+        if(CurrentState == GuardState || CurrentState == GuardHitState)
+        {
+            GuardHitState.Setup(guardStunTicks);
+
+            if(CurrentState == GuardHitState)
+            {
+                GuardHitState.Restart();
+            }
+            else
+            {
+                ChangeState(GuardHitState);
+            }
+
+            return;
+        }
+
+        //通常の喰らい
+        HP = Mathf.Max(0, HP - damage);
+
+        //HPが0になったらKO
+        if(HP <= 0)
+        {
+            //ChangeState(KOState);
+
+            return;
+        }
+
+        HitState.Setup(AnimationState.Hit, hitStunTicks);
+
+        //喰らい中に再度喰らった場合は硬直とアニメーションをやり直す
+        if(CurrentState == HitState)
+        {
+            HitState.Restart();
+        }
+        else
+        {
+            ChangeState(HitState);
+        }
+
+    }
+
+
+
+    //攻撃判定を行い、当たったらtrueを返す
+    public bool CheckAttackHit(AttackData data)
+    {
+        //向きに応じてオフセットのXを反転
+        float dir = this.transform.forward.x >= 0.0f ? 1.0f : -1.0f;
+        Vector3 offset = new Vector3(data.offset.x * dir, data.offset.y, data.offset.z);
+        Vector3 center = this.transform.position + offset;
+
+        m_DebugCenter = center;
+        m_DebugSize = data.size;
+
+        int count = Physics.OverlapBoxNonAlloc(center, data.size * 0.5f, m_HitBuffer, Quaternion.identity, m_HurtMask);
+
+        for (int i = 0; i < count; i++)
+        {
+            HurtBox hurtBox = m_HitBuffer[i].GetComponent<HurtBox>();
+
+            //自分自身には当てない
+            if (hurtBox == null || hurtBox.Owner == this) continue;
+
+            hurtBox.Owner.TakeDamage(data.damage, data.hitStunTicks, data.guardStunTicks);
+
+            return true;
+        }
+
+        return false;
+
+    }
+
+    private void OnDrawGizmos()
+    {
+        Gizmos.color = Color.red;
+        Gizmos.DrawWireCube(m_DebugCenter, m_DebugSize);
     }
 
     #endregion
@@ -572,4 +730,5 @@ public class Player : NetworkBehaviour
     /// </summary>
     /// <returns></returns>
     public bool IsTatsumakiFinished() => IsAnimationFinished(AnimationState.Tatsumaki);
+
 }

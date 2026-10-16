@@ -7,6 +7,8 @@ public class PlayerHeavyPunchState : PlayerAttackState
     {
     }
 
+    protected override AttackData Data => m_Player.HeavyPunchData;
+
     protected override bool IsFinished()
     {
         return m_Player.IsHeavyPunchFinished();

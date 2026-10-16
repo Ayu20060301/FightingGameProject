@@ -10,6 +10,9 @@ public class PlayerLightKickState : PlayerAttackState
     {
     }
 
+
+    protected override AttackData Data => m_Player.LightKickData;
+
     protected override bool IsFinished()
     {
         return m_Player.IsLightKickFinished();

@@ -8,6 +8,8 @@ public class PlayerLightPunchState : PlayerAttackState
 
     }
 
+    protected override AttackData Data => m_Player.LightPunchData;
+
     protected override bool IsFinished()
     {
         return m_Player.IsLightPunchFinished();

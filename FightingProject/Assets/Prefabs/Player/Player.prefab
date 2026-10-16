@@ -1,5 +1,72 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
+--- !u!1 &1931657952959231196
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 6865239476641147749}
+  - component: {fileID: 4614823942104202917}
+  - component: {fileID: 2659793686217039800}
+  m_Layer: 3
+  m_Name: HurtBox
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &6865239476641147749
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1931657952959231196}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0.697, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 8629965704264507371}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!65 &4614823942104202917
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1931657952959231196}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 1
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 0.5, y: 1, z: 0.3}
+  m_Center: {x: 0, y: 0, z: 0}
+--- !u!114 &2659793686217039800
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1931657952959231196}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ab9808f6fcbb3bc41b3915dbebdd9d0e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::HurtBox
+  m_Owner: {fileID: 4344006448894161646}
 --- !u!1 &3028825950848869378
 GameObject:
   m_ObjectHideFlags: 0
@@ -690,11 +757,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: d2d9d280d7727ef4e9cffb4c46e54272, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -2
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: d2d9d280d7727ef4e9cffb4c46e54272, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 0.5
+      value: 0.541
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: d2d9d280d7727ef4e9cffb4c46e54272, type: 3}
       propertyPath: m_LocalPosition.z
@@ -743,6 +810,9 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects:
+    - targetCorrespondingSourceObject: {fileID: -8679921383154817045, guid: d2d9d280d7727ef4e9cffb4c46e54272, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 6865239476641147749}
     - targetCorrespondingSourceObject: {fileID: -2072040086291044643, guid: d2d9d280d7727ef4e9cffb4c46e54272, type: 3}
       insertIndex: -1
       addedObject: {fileID: 5152605520901621709}
@@ -794,6 +864,11 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 1852576806548013000, guid: d2d9d280d7727ef4e9cffb4c46e54272, type: 3}
   m_PrefabInstance: {fileID: 8091127298788440064}
   m_PrefabAsset: {fileID: 0}
+--- !u!4 &8629965704264507371 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: d2d9d280d7727ef4e9cffb4c46e54272, type: 3}
+  m_PrefabInstance: {fileID: 8091127298788440064}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &8973453839383201105 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: d2d9d280d7727ef4e9cffb4c46e54272, type: 3}
@@ -817,6 +892,58 @@ MonoBehaviour:
   m_Anim: {fileID: 2387999347624150417}
   m_MinX: -3.5
   m_MaxX: 3.5
+  m_HurtMask:
+    serializedVersion: 2
+    m_Bits: 8
+  m_LightPunchData:
+    damage: 5
+    hitStunTicks: 20
+    guardStunTicks: 12
+    startupTicks: 6
+    activeTicks: 4
+    offset: {x: 0.6, y: 1, z: 0}
+    size: {x: 0.6, y: 0.4, z: 0.6}
+  m_MidPunchData:
+    damage: 5
+    hitStunTicks: 20
+    guardStunTicks: 12
+    startupTicks: 6
+    activeTicks: 4
+    offset: {x: 0.6, y: 1, z: 0}
+    size: {x: 0.6, y: 0.4, z: 0.6}
+  m_HeavyPunchData:
+    damage: 5
+    hitStunTicks: 20
+    guardStunTicks: 12
+    startupTicks: 6
+    activeTicks: 4
+    offset: {x: 0.6, y: 1, z: 0}
+    size: {x: 0.6, y: 0.4, z: 0.6}
+  m_LightKickData:
+    damage: 5
+    hitStunTicks: 20
+    guardStunTicks: 12
+    startupTicks: 6
+    activeTicks: 4
+    offset: {x: 0.6, y: 1, z: 0}
+    size: {x: 0.6, y: 0.4, z: 0.6}
+  m_MidKickData:
+    damage: 5
+    hitStunTicks: 20
+    guardStunTicks: 12
+    startupTicks: 6
+    activeTicks: 4
+    offset: {x: 0.6, y: 1, z: 0}
+    size: {x: 0.6, y: 0.4, z: 0.6}
+  m_HeavyKickData:
+    damage: 5
+    hitStunTicks: 20
+    guardStunTicks: 12
+    startupTicks: 6
+    activeTicks: 4
+    offset: {x: 0.6, y: 1, z: 0}
+    size: {x: 0.6, y: 0.4, z: 0.6}
+  _HP: 100
 --- !u!114 &1954403616790899850
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -872,10 +999,10 @@ CharacterController:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Height: 1.5
-  m_Radius: 0.3
+  m_Height: 1.2
+  m_Radius: 0.25
   m_SlopeLimit: 45
   m_StepOffset: 0.3
   m_SkinWidth: 0.08
   m_MinMoveDistance: 0.001
-  m_Center: {x: 0, y: 0.75, z: 0}
+  m_Center: {x: 0, y: 0.65, z: 0}

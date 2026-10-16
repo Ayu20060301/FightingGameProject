@@ -9,6 +9,8 @@ public class PlayerMidPunchState : PlayerAttackState
 
     }
 
+    protected override AttackData Data => m_Player.MidPunchData;
+
     protected override bool IsFinished()
     {
         return m_Player.IsMidPunchFinished();
