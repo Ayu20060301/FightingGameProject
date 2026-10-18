@@ -6,6 +6,7 @@ using System.Linq;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Scripting.APIUpdating;
+using UnityEngine.SceneManagement;
 
 public class NetworkManager : MonoBehaviour, INetworkRunnerCallbacks
 {
@@ -86,7 +87,7 @@ public class NetworkManager : MonoBehaviour, INetworkRunnerCallbacks
 
             //最大Player人数
             PlayerCount = m_MaxPlayers,
-
+            Scene = SceneRef.FromIndex(SceneManager.GetActiveScene().buildIndex),
             SceneManager = gameObject.AddComponent<NetworkSceneManagerDefault>() //ネットワーク用のシーン
         });
     }

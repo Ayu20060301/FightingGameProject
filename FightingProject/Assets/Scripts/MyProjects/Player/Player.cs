@@ -200,7 +200,7 @@ public class Player : NetworkBehaviour
     /// </summary>
     public PlayerState CurrentState => m_StateMachine.CurrentState;
 
-  
+ 
     /// <summary>
     /// ネットワーク同期する向き
     /// </summary>
@@ -217,6 +217,9 @@ public class Player : NetworkBehaviour
     /// KOしているか(HPはサーバーから同期されるので全クライアントで判定できる)
     /// </summary>
     public bool IsKO => HP <= 0;
+
+
+    private RoundManager m_RoundManager;
 
     /// <summary>
     /// 左右移動出来ない状態か(ガード・しゃがみ・攻撃中)
@@ -272,10 +275,22 @@ public class Player : NetworkBehaviour
         {
             UpdateFacing();
 
+            if(m_RoundManager == null)
+            {
+                m_RoundManager = FindFirstObjectByType<RoundManager>();
+            }
+
+            bool isCanFight = m_RoundManager != null && m_RoundManager.Phase == RoundManager.RoundPhase.Fight;
 
             //入力が取得できた場合のみゲーム処理を実行
             if(GetInput(out NetworkManager.PlayerInputData data))
             {
+                //試合中以外は入力を無効化
+                if(!isCanFight)
+                {
+                    data = default;
+                }
+
                 //入力取得
                 UpdateInput(data);
 
@@ -560,7 +575,6 @@ public class Player : NetworkBehaviour
 
             return true;
         }
-
         return false;
 
     }
