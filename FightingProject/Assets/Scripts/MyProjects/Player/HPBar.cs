@@ -32,6 +32,16 @@ public class HPBar : MonoBehaviour
 
     private const float FindInterval = 0.5f; //プレイヤーの検索間隔(秒)
 
+    [Header("ピンチ時の色変更")]
+    [SerializeField]
+    private float m_LowHPThreshold = 0.3f; //この割合以下で色を変える
+
+    [SerializeField]
+    private Color m_NormalColor;
+
+    [SerializeField]
+    private Color m_LowHPColor; 
+
     private Player m_Player;
     private float m_FindTimer;
 
@@ -81,16 +91,18 @@ public class HPBar : MonoBehaviour
     /// </summary>
     private void FindPlayer()
     {
-        //PlayerIDの小さい順に並べて、m_PlayerIndex番目に選ぶ
-        List<Player> players = new List<Player>(FindObjectsByType<Player>());
+        List<Player> players = new List<Player>(
+         FindObjectsByType<Player>(FindObjectsSortMode.None));
         players.RemoveAll(p => p.Object == null || !p.Object.IsValid);
-        players.Sort((a, b) => a.Object.InputAuthority.PlayerId.CompareTo(b.Object.InputAuthority));
+
+        // PlayerId同士を比較する(InputAuthorityそのものではなく)
+        players.Sort((a, b) => a.Object.InputAuthority.PlayerId.CompareTo(b.Object.InputAuthority.PlayerId));
 
         if (m_PlayerIndex >= players.Count) return;
 
         m_Player = players[m_PlayerIndex];
         m_LastHP = m_Player.HP;
-        m_DisplayRate = m_DamageRate = (float)m_Player.HP / Player.MaxHP;
+        m_DisplayRate = m_DamageRate = Mathf.Clamp01((float)m_Player.HP / Player.MaxHP);
         Apply(m_DisplayRate, m_DamageRate);
     }
 
@@ -133,8 +145,18 @@ public class HPBar : MonoBehaviour
 
     private void Apply(float rate,float damageRate)
     {
-        if (m_HPImage != null) m_HPImage.fillAmount = rate;
-        if (m_HPDamageImage != null) m_HPDamageImage.fillAmount = damageRate;
+
+        if(m_HPImage != null)
+        {
+            m_HPImage.fillAmount = rate;
+            m_HPImage.color = rate <= m_LowHPThreshold ? m_LowHPColor : m_NormalColor;
+        }
+
+        if(m_HPDamageImage != null)
+        {
+            m_HPDamageImage.fillAmount = damageRate;
+        }
+
     }
 
 }

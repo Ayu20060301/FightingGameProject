@@ -105,6 +105,13 @@ public class Player : NetworkBehaviour
     [SerializeField]
     private float m_MaxX = 3.5f;
 
+    [Header("ノックバック")]
+    [SerializeField]
+    private float m_KnockbackDecay = 20.0f;
+
+    //ノックバックによるX方向の速度
+    private float m_KnockbackVelocityX;
+
     #endregion
 
 
@@ -377,11 +384,15 @@ public class Player : NetworkBehaviour
             m_Move.y = GroundedStickVelocity;
         }
 
+        //左右移動(行動制限中は入力分を停止)
+        float inputX = IsHorizontalMoveLocked ? 0.0f : data.horizontal * m_Speed;
 
-        //左右移動(行動制限中は停止)
-        m_Move.x = IsHorizontalMoveLocked ? 0.0f : data.horizontal * m_Speed;
 
-      
+        //入力 + ノックバックを合成
+        m_Move.x = inputX + m_KnockbackVelocityX;
+
+        //ノックバックを0へ向けて直線的に減衰
+        m_KnockbackVelocityX = Mathf.MoveTowards(m_KnockbackVelocityX, 0.0f, m_KnockbackDecay * Runner.DeltaTime);
 
         //重力(落下中は強める)
         
@@ -456,23 +467,33 @@ public class Player : NetworkBehaviour
         m_Opponent = opponent;
     }
 
+    
+    //攻撃者から離れる方向にノックバックを与える
+    private void ApplyKnockback(float attackerX,float power)
+    {
+        float dir = this.transform.position.x >= attackerX ? 1.0f : -1.0f;
+        m_KnockbackVelocityX = dir * power;
+    }
+
     /// <summary>
     /// ダメージを受ける(StateAuthority側のみ実行)
     /// </summary>
     /// <param name="damage">ダメージ量</param>
     /// <param name="hitStunTicks">喰らい硬直(Tick数)</param>
     /// <param name="guardStunTicks">ガード硬直(Tick数)</param>
-    public void TakeDamage(int damage,int hitStunTicks,int guardStunTicks)
+    public void TakeDamage(int damage,int hitStunTicks,int guardStunTicks,float attackerX,float knockback,float guardKnockback)
     {
         if (!Object.HasStateAuthority) return;
 
         //KO済みなら以降の攻撃は無視
         if (HP <= 0) return;
 
-      
         //ガード中、またはガード喰らい中なら成立
         if(CurrentState == GuardState || CurrentState == GuardHitState)
         {
+
+            ApplyKnockback(attackerX, guardKnockback);
+
             GuardHitState.Setup(guardStunTicks);
 
             if(CurrentState == GuardHitState)
@@ -489,6 +510,7 @@ public class Player : NetworkBehaviour
 
         //通常の喰らい
         HP = Mathf.Max(0, HP - damage);
+        ApplyKnockback(attackerX, guardKnockback);
 
         //HPが0になったらKO
         if(HP <= 0)
@@ -534,7 +556,7 @@ public class Player : NetworkBehaviour
             //自分自身には当てない
             if (hurtBox == null || hurtBox.Owner == this) continue;
 
-            hurtBox.Owner.TakeDamage(data.damage, data.hitStunTicks, data.guardStunTicks);
+            hurtBox.Owner.TakeDamage(data.damage, data.hitStunTicks, data.guardStunTicks,this.transform.position.x,data.knockback,data.guardKnockback);
 
             return true;
         }
