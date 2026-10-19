@@ -890,8 +890,9 @@ MonoBehaviour:
   m_JumpPower: 2
   m_Gravity: -20
   m_Anim: {fileID: 2387999347624150417}
-  m_MinX: -3.5
-  m_MaxX: 3.5
+  m_MinX: -4
+  m_MaxX: 4
+  m_KnockbackDecay: 20
   m_HurtMask:
     serializedVersion: 2
     m_Bits: 8
@@ -903,6 +904,9 @@ MonoBehaviour:
     activeTicks: 4
     offset: {x: 0.6, y: 1, z: 0}
     size: {x: 0.6, y: 0.4, z: 0.6}
+    knockback: 3
+    guardKnockback: 2
+    guardDamage: 10
   m_MidPunchData:
     damage: 5
     hitStunTicks: 20
@@ -911,6 +915,9 @@ MonoBehaviour:
     activeTicks: 4
     offset: {x: 0.6, y: 1, z: 0}
     size: {x: 0.6, y: 0.4, z: 0.6}
+    knockback: 3
+    guardKnockback: 2
+    guardDamage: 10
   m_HeavyPunchData:
     damage: 5
     hitStunTicks: 20
@@ -919,6 +926,9 @@ MonoBehaviour:
     activeTicks: 4
     offset: {x: 0.6, y: 1, z: 0}
     size: {x: 0.6, y: 0.4, z: 0.6}
+    knockback: 3
+    guardKnockback: 2
+    guardDamage: 10
   m_LightKickData:
     damage: 5
     hitStunTicks: 20
@@ -927,6 +937,9 @@ MonoBehaviour:
     activeTicks: 4
     offset: {x: 0.6, y: 1, z: 0}
     size: {x: 0.6, y: 0.4, z: 0.6}
+    knockback: 3
+    guardKnockback: 2
+    guardDamage: 10
   m_MidKickData:
     damage: 5
     hitStunTicks: 20
@@ -935,6 +948,9 @@ MonoBehaviour:
     activeTicks: 4
     offset: {x: 0.6, y: 1, z: 0}
     size: {x: 0.6, y: 0.4, z: 0.6}
+    knockback: 3
+    guardKnockback: 2
+    guardDamage: 10
   m_HeavyKickData:
     damage: 5
     hitStunTicks: 20
@@ -943,7 +959,17 @@ MonoBehaviour:
     activeTicks: 4
     offset: {x: 0.6, y: 1, z: 0}
     size: {x: 0.6, y: 0.4, z: 0.6}
+    knockback: 3
+    guardKnockback: 2
+    guardDamage: 10
   _HP: 100
+  m_MaxGuardGauge: 100
+  m_GuardRecoverPerSecond: 15
+  m_GuardRecoverDelay: 1
+  m_GuardBreakStunTicks: 90
+  m_GuardDrainPerSecond: 5
+  m_GuardUnlockRate: 1
+  _GuardGauge: 0
 --- !u!114 &1954403616790899850
 MonoBehaviour:
   m_ObjectHideFlags: 0

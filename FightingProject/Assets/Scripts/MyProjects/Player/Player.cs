@@ -1,6 +1,7 @@
 using Fusion;
 using System.Collections.Generic;
 using System.Diagnostics;
+using Unity.VisualScripting;
 using UnityEngine;
 using Debug = UnityEngine.Debug;
 
@@ -237,6 +238,46 @@ public class Player : NetworkBehaviour
 
     #endregion
 
+    #region ガード
+
+    [Header("ガードゲージ")]
+    [SerializeField]
+    private float m_MaxGuardGauge = 100.0f;
+    [SerializeField]
+    private float m_GuardRecoverPerSecond = 15.0f; //回復速度
+    [SerializeField]
+    private float m_GuardRecoverDelay = 1.0f; //削られてからの回復開始までの待ち時間
+    [SerializeField]
+    private int m_GuardBreakStunTicks = 90; //クラッシュの硬直(Tick数)
+    [SerializeField]
+    private float m_GuardDrainPerSecond = 5.0f; //ガード構え中二減る速さ(1秒あたり)
+    [SerializeField, Range(0.0f, 1.0f)]
+    private float m_GuardUnlockRate = 0.3f;
+    
+    /// <summary>
+    /// ガードクラッシュ中か
+    /// </summary>
+    [Networked]
+    public NetworkBool IsGuardBroken { get; set; }
+
+    public bool IsCanGuard => !IsGuardBroken;
+
+    /// <summary>
+    /// ネットワーク同期するガードゲージ
+    /// </summary>
+    [Networked]
+    public float GuardGauge { get; set; }
+
+    /// <summary>
+    /// 回復までの待ち時間
+    /// </summary>
+    [Networked]
+    private TickTimer GuardRecoverTimer { get; set; }
+
+    public float MaxGuardGauge => m_MaxGuardGauge;
+
+    #endregion
+
     #region Unity / Fusion コールバック
 
     private void Awake()
@@ -257,10 +298,18 @@ public class Player : NetworkBehaviour
     public override void Spawned()
     {
 
+        //全クライアントでカメラに登録
+        FightCamera cam = FindFirstObjectByType<FightCamera>();
+        if(cam != null)
+        {
+            cam.AddTarget(this.transform);
+        }
+
         //HPの初期化
         if(Object.HasStateAuthority)
         {
-            HP = MaxHP;
+            HP = MaxHP; //HP
+            GuardGauge = m_MaxGuardGauge; //ガードゲージ
 
             FacingYaw = this.transform.eulerAngles.y;
 
@@ -269,11 +318,21 @@ public class Player : NetworkBehaviour
         }
     }
 
+    public override void Despawned(NetworkRunner runner, bool hasState)
+    {
+        FightCamera cam = FindFirstObjectByType<FightCamera>();
+        if(cam != null)
+        {
+            cam.RemoveTarget(this.transform);
+        }
+    }
+
     public override void FixedUpdateNetwork()
     {
         if(Object.HasStateAuthority)
         {
             UpdateFacing();
+            UpdateGuardGauge();
 
             if(m_RoundManager == null)
             {
@@ -345,6 +404,8 @@ public class Player : NetworkBehaviour
     {
         Direction direction = ConvertDirection(data.horizontal, data.vertical);
 
+        //ガードクラッシュ中はガード入力を無効化
+        bool isGuard = data.isGuard && IsCanGuard;
 
         m_Input.SetInput(direction,
                          data.isLightKick,
@@ -354,7 +415,7 @@ public class Player : NetworkBehaviour
                          data.isMidPunch,
                          data.isMidKick,
                          data.isJump,
-                         data.isGuard
+                         isGuard
                          );
     }
 
@@ -496,7 +557,7 @@ public class Player : NetworkBehaviour
     /// <param name="damage">ダメージ量</param>
     /// <param name="hitStunTicks">喰らい硬直(Tick数)</param>
     /// <param name="guardStunTicks">ガード硬直(Tick数)</param>
-    public void TakeDamage(int damage,int hitStunTicks,int guardStunTicks,float attackerX,float knockback,float guardKnockback)
+    public void TakeDamage(int damage,int hitStunTicks,int guardStunTicks,float attackerX,float knockback,float guardKnockback,float guardDamage)
     {
         if (!Object.HasStateAuthority) return;
 
@@ -507,6 +568,18 @@ public class Player : NetworkBehaviour
         if(CurrentState == GuardState || CurrentState == GuardHitState)
         {
 
+            GuardGauge -= guardDamage;
+            GuardRecoverTimer = TickTimer.CreateFromSeconds(Runner, m_GuardRecoverDelay);
+
+            //ゲージが尽きたらガードクラッシュ
+            if(GuardGauge <= 0.0f)
+            {
+                ApplyKnockback(attackerX, knockback);
+                BreakGuard();
+                return;
+            }
+
+            //通常のガード成立
             ApplyKnockback(attackerX, guardKnockback);
 
             GuardHitState.Setup(guardStunTicks);
@@ -525,7 +598,7 @@ public class Player : NetworkBehaviour
 
         //通常の喰らい
         HP = Mathf.Max(0, HP - damage);
-        ApplyKnockback(attackerX, guardKnockback);
+        ApplyKnockback(attackerX,knockback);
 
         //HPが0になったらKO
         if(HP <= 0)
@@ -571,7 +644,7 @@ public class Player : NetworkBehaviour
             //自分自身には当てない
             if (hurtBox == null || hurtBox.Owner == this) continue;
 
-            hurtBox.Owner.TakeDamage(data.damage, data.hitStunTicks, data.guardStunTicks,this.transform.position.x,data.knockback,data.guardKnockback);
+            hurtBox.Owner.TakeDamage(data.damage, data.hitStunTicks, data.guardStunTicks,this.transform.position.x,data.knockback,data.guardKnockback,data.guardDamage);
 
             return true;
         }
@@ -586,6 +659,75 @@ public class Player : NetworkBehaviour
     }
 
     #endregion
+
+    #region ガード処理
+
+    /// <summary>
+    /// ガードゲージの自然回復
+    /// </summary>
+    private void UpdateGuardGauge()
+    {
+       //ガード構え中は継続的に減少
+       if(CurrentState == GuardState)
+       {
+            GuardGauge = Mathf.Max(0.0f, GuardGauge - m_GuardDrainPerSecond * Runner.DeltaTime);
+
+            //ガードを止めてから回復が始まるまでの待ち時間を、構えている間は更新し続ける
+            GuardRecoverTimer = TickTimer.CreateFromSeconds(Runner, m_GuardRecoverDelay);
+
+            if(GuardGauge <= 0.0f)
+            {
+                BreakGuard();
+            }
+
+            return;
+       }
+
+        //ガード位中は回復も減少もしない
+        if (CurrentState == GuardHitState) return;
+
+        //待ち時間中は回復しない
+        if (!GuardRecoverTimer.ExpiredOrNotRunning(Runner)) return;
+
+        GuardGauge = Mathf.Min(m_MaxGuardGauge, GuardGauge + m_GuardRecoverPerSecond * Runner.DeltaTime);
+
+        //一定量までガード可能に戻す
+        if(IsGuardBroken && GuardGauge >= m_MaxGuardGauge * m_GuardUnlockRate)
+        {
+            IsGuardBroken = false;
+        }
+
+    }
+
+    /// <summary>
+    /// ガードクラッシュ
+    /// </summary>
+    private void BreakGuard()
+    {
+        GuardGauge = 0.0f;
+        IsGuardBroken = true;
+
+        //回復開始まで通常より長く待つ
+        GuardRecoverTimer = TickTimer.CreateFromSeconds(Runner, m_GuardRecoverDelay);
+
+        RPC_GuardBreakCamera();
+
+        HitState.Setup(AnimationState.Hit, m_GuardBreakStunTicks);
+
+        if(CurrentState == HitState)
+        {
+            HitState.Restart();
+        }
+        else
+        {
+            ChangeState(HitState);
+        }
+    }
+
+    #endregion
+
+
+    #region アニメーション
 
     /// <summary>
     /// アニメーション開始イベントをRPCで通知
@@ -687,6 +829,26 @@ public class Player : NetworkBehaviour
         return isFinished;
     }
 
+    /// <summary>
+    /// アニメーションの再生速度を変更する
+    /// </summary>
+    /// <param name="speed"></param>
+    public void SetAnimationSpeed(float speed)
+    {
+        if(m_Anim != null)
+        {
+            m_Anim.speed = speed;
+        }
+    }
+
+    [Rpc(RpcSources.StateAuthority,RpcTargets.All)]
+    private void RPC_GuardBreakCamera()
+    {
+        if(GuardBreakCamera.Instance != null)
+        {
+            GuardBreakCamera.Instance.Play(this);
+        }
+    }
 
     //エディタ上のみログ出力
     [Conditional("UNITY_EDITOR")]
@@ -767,4 +929,5 @@ public class Player : NetworkBehaviour
     /// <returns></returns>
     public bool IsTatsumakiFinished() => IsAnimationFinished(AnimationState.Tatsumaki);
 
+    #endregion
 }

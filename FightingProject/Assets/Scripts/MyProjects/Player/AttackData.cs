@@ -21,4 +21,7 @@ public class AttackData
     public float knockback = 3.0f; //ヒット時に飛ばす速度
     public float guardKnockback = 2.0f; //ガード時に押し戻す速度
 
+
+    [Header("ガードゲージ")]
+    public float guardDamage = 10.0f; //ガード時に減らすゲージ量
 }

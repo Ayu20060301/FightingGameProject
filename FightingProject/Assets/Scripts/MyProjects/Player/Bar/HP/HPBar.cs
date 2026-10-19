@@ -16,6 +16,10 @@ public class HPBar : MonoBehaviour
     [SerializeField]
     private Image m_HPImage;
 
+    [Header("グラデーション表示用の子イメージ")]
+    [SerializeField]
+    private Image m_GradientImage;
+
     [Header("ダメージ量を遅れて示すバー")]
     [SerializeField]
     private Image m_HPDamageImage;
@@ -32,15 +36,8 @@ public class HPBar : MonoBehaviour
 
     private const float FindInterval = 0.5f; //プレイヤーの検索間隔(秒)
 
-    [Header("ピンチ時の色変更")]
     [SerializeField]
-    private float m_LowHPThreshold = 0.3f; //この割合以下で色を変える
-
-    [SerializeField]
-    private Color m_NormalColor;
-
-    [SerializeField]
-    private Color m_LowHPColor; 
+    private Gradient m_ColorGradient;
 
     private Player m_Player;
     private float m_FindTimer;
@@ -53,10 +50,35 @@ public class HPBar : MonoBehaviour
     //前回のHP
     private int m_LastHP = Player.MaxHP;
 
+    private Texture2D m_GradientTexture;
+    private Sprite m_GradientSprite;
 
     private void Start()
     {
+        if(m_HPImage != null && m_GradientImage && m_ColorGradient != null)
+        {
+            bool isOriginRight = m_HPImage.fillOrigin == (int)Image.OriginHorizontal.Right;
+
+            m_GradientSprite = GradientSpriteUtil.Create(m_ColorGradient, isOriginRight, out m_GradientTexture);
+
+            m_GradientImage.sprite = m_GradientSprite;
+            m_GradientImage.color = Color.white;
+        }
+
         Apply(1.0f, 1.0f);
+    }
+
+    private void OnDestroy()
+    {
+        if(m_GradientSprite != null)
+        {
+            Destroy(m_GradientSprite);
+        }
+
+        if(m_GradientTexture != null)
+        {
+            Destroy(m_GradientTexture);
+        }
     }
 
     private void Update()
@@ -149,14 +171,11 @@ public class HPBar : MonoBehaviour
         if(m_HPImage != null)
         {
             m_HPImage.fillAmount = rate;
-            m_HPImage.color = rate <= m_LowHPThreshold ? m_LowHPColor : m_NormalColor;
         }
 
         if(m_HPDamageImage != null)
         {
             m_HPDamageImage.fillAmount = damageRate;
         }
-
     }
-
 }
