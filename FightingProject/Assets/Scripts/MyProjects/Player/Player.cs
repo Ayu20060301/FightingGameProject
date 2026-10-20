@@ -113,6 +113,10 @@ public class Player : NetworkBehaviour
     //ノックバックによるX方向の速度
     private float m_KnockbackVelocityX;
 
+
+    [SerializeField]
+    private float m_MaxDistanceX = 8.0f; //相手との最大X距離
+
     #endregion
 
 
@@ -475,21 +479,10 @@ public class Player : NetworkBehaviour
         float gravity = m_Move.y > 0.0f ? m_Gravity : m_Gravity * FallGravityMultiplier;
         m_Move.y += gravity * Runner.DeltaTime;
 
+        Vector3 delta = m_Move * Runner.DeltaTime;
+
         //移動
-        m_Controller.Move(m_Move * Runner.DeltaTime);
-
-        //画面端の移動制限
-        ClampPositionX();
-    }
-
-    /// <summary>
-    /// 画面端の移動制限
-    /// </summary>
-    private void ClampPositionX()
-    {
-        Vector3 position = this.transform.position;
-        position.x = Mathf.Clamp(position.x, m_MinX, m_MaxX);
-        this.transform.position = position;
+        m_Controller.Move(delta);
     }
 
     /// <summary>

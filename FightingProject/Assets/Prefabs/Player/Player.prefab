@@ -745,15 +745,15 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: -8679921383154817045, guid: d2d9d280d7727ef4e9cffb4c46e54272, type: 3}
       propertyPath: m_LocalScale.x
-      value: 1
+      value: 1.5
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: d2d9d280d7727ef4e9cffb4c46e54272, type: 3}
       propertyPath: m_LocalScale.y
-      value: 1
+      value: 1.5
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: d2d9d280d7727ef4e9cffb4c46e54272, type: 3}
       propertyPath: m_LocalScale.z
-      value: 1
+      value: 1.5
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: d2d9d280d7727ef4e9cffb4c46e54272, type: 3}
       propertyPath: m_LocalPosition.x
@@ -886,7 +886,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 01d2e30686808d94fa22ae74f97ae572, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Player
-  m_Speed: 3
+  m_Speed: 4
   m_JumpPower: 2
   m_Gravity: -20
   m_Anim: {fileID: 2387999347624150417}
@@ -969,6 +969,8 @@ MonoBehaviour:
   m_GuardBreakStunTicks: 90
   m_GuardDrainPerSecond: 5
   m_GuardUnlockRate: 1
+  _IsGuardBroken:
+    _value: 0
   _GuardGauge: 0
 --- !u!114 &1954403616790899850
 MonoBehaviour:
