@@ -1,3 +1,4 @@
+using System.Data;
 using System.Runtime.InteropServices.ComTypes;
 using UnityEngine;
 
@@ -13,7 +14,6 @@ public abstract class PlayerAttackState : PlayerState
 
     //この攻撃が既にヒットしたか
     private bool m_IsHit;
-
 
     protected PlayerAttackState(Player player, Player.AnimationState animation) : base(player)
     {
@@ -43,7 +43,6 @@ public abstract class PlayerAttackState : PlayerState
 
     public override void Update()
     {
-
         //当たり判定
         UpdateHit();
 
@@ -57,18 +56,12 @@ public abstract class PlayerAttackState : PlayerState
     private void UpdateHit()
     {
         if (m_IsHit) return;
-
         if (Data == null) return;
 
         int elapsed = m_Player.Runner.Tick - m_StartTick;
 
-        //発生前
-        if (elapsed < Data.startupTicks) return;
-
-        //接続が終わった後
-        if (elapsed >= Data.startupTicks + Data.activeTicks) return;
+        if (!Data.IsActive(elapsed)) return;
 
         m_IsHit = m_Player.CheckAttackHit(Data);
     }
-
 }

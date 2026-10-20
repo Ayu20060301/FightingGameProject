@@ -863,7 +863,7 @@ Transform:
   m_GameObject: {fileID: 330585543}
   serializedVersion: 2
   m_LocalRotation: {x: -0.0000000037234784, y: -7.0748496e-10, z: -5.1554455e-11, w: 1}
-  m_LocalPosition: {x: 0.000000007223676, y: 1.4433756, z: -5}
+  m_LocalPosition: {x: 0.000000008668408, y: 1.7320508, z: -6}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -2489,8 +2489,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1377265293}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 17.64327, y: 5.90991, z: 11.40859}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 17.643269, y: 5.90991, z: 11.40859}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -2600,7 +2600,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 886251e9a18ece04ea8e61686c173e1b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Unity.Cinemachine::Unity.Cinemachine.CinemachinePositionComposer
-  CameraDistance: 6
+  CameraDistance: 7
   DeadZoneDepth: 0
   Composition:
     ScreenPosition: {x: -0.000000011175871, y: 0.099999994}
@@ -2692,7 +2692,7 @@ Transform:
   m_GameObject: {fileID: 1472956065}
   serializedVersion: 2
   m_LocalRotation: {x: -0.0000000037234784, y: -7.0748496e-10, z: -5.1554455e-11, w: 1}
-  m_LocalPosition: {x: 0.00000018737519, y: 1.6928203, z: -6}
+  m_LocalPosition: {x: 0.00000021860438, y: 1.8082904, z: -7}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -3437,7 +3437,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2125451291}
   serializedVersion: 2
-  m_LocalRotation: {x: -0.058815096, y: 0.39790133, z: 0.025603177, w: 0.9151829}
+  m_LocalRotation: {x: -0.0588151, y: 0.39790136, z: 0.025603179, w: 0.91518295}
   m_LocalPosition: {x: -9.2207985, y: 1.1678886, z: -13.645649}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -3551,6 +3551,6 @@ SceneRoots:
   - {fileID: 1472956070}
   - {fileID: 2047411050}
   - {fileID: 1929108976}
+  - {fileID: 1964602097}
   - {fileID: 2125451295}
   - {fileID: 1377265295}
-  - {fileID: 1964602097}

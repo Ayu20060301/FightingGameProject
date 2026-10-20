@@ -100,12 +100,6 @@ public class Player : NetworkBehaviour
     [SerializeField]
     private Animator m_Anim;
 
-    [Header("画面端の移動制限")]
-    [SerializeField]
-    private float m_MinX = -3.5f;
-    [SerializeField]
-    private float m_MaxX = 3.5f;
-
     [Header("ノックバック")]
     [SerializeField]
     private float m_KnockbackDecay = 20.0f;
@@ -113,9 +107,19 @@ public class Player : NetworkBehaviour
     //ノックバックによるX方向の速度
     private float m_KnockbackVelocityX;
 
-
+    [Header("頭上からのすり落ち")]
     [SerializeField]
-    private float m_MaxDistanceX = 8.0f; //相手との最大X距離
+    private float m_SlideOffSpeed = 3.0f; //ずり落ちる速さ
+    [SerializeField, Range(0.0f, 1.0f)]
+    private float m_StandOnNormalY = 0.5f; //接触面の法線Yがこれ 
+    [SerializeField]
+    private float m_StageEdgeMargin = 0.5f; //画面端でずり落ちる方向を反転する余裕
+
+    //相手の頭に乗っているか
+    private bool m_IsOnOpponentHead;
+
+    //ずり落ちる向き(右= +1、左= -1)
+    private float m_SLideOffDir;
 
     #endregion
 
@@ -143,9 +147,13 @@ public class Player : NetworkBehaviour
     private readonly Collider[] m_HitBuffer = new Collider[4];
 
     //デバッグ表示用
+    private const float DebugGizmoDuration = 0.2f;
     private Vector3 m_DebugCenter;
     private Vector3 m_DebugSize;
+    private float m_DebugExpireTime;
 
+    //向き(右= +1、左= -1)
+    private float FacingDir => this.transform.forward.x >= 0.0f ? 1.0f : -1.0f;
 
     //StateMachine
     public PlayerStateMachine m_StateMachine;
@@ -467,9 +475,14 @@ public class Player : NetworkBehaviour
         //左右移動(行動制限中は入力分を停止)
         float inputX = IsHorizontalMoveLocked ? 0.0f : data.horizontal * m_Speed;
 
+        //相手の頭に乗っている場合は、行動制限中でも左右にずり落とす
+        float slideX = m_IsOnOpponentHead ? m_SLideOffDir * m_SlideOffSpeed : 0.0f;
+
+        //Moveの最中にOnControllerColliderHitで再度セットされるので、先にリセットする
+        m_IsOnOpponentHead = false;
 
         //入力 + ノックバックを合成
-        m_Move.x = inputX + m_KnockbackVelocityX;
+        m_Move.x = inputX + m_KnockbackVelocityX + slideX;
 
         //ノックバックを0へ向けて直線的に減衰
         m_KnockbackVelocityX = Mathf.MoveTowards(m_KnockbackVelocityX, 0.0f, m_KnockbackDecay * Runner.DeltaTime);
@@ -620,35 +633,112 @@ public class Player : NetworkBehaviour
     //攻撃判定を行い、当たったらtrueを返す
     public bool CheckAttackHit(AttackData data)
     {
-        //向きに応じてオフセットのXを反転
-        float dir = this.transform.forward.x >= 0.0f ? 1.0f : -1.0f;
-        Vector3 offset = new Vector3(data.offset.x * dir, data.offset.y, data.offset.z);
-        Vector3 center = this.transform.position + offset;
+        Vector3 center = data.GetWorldCenter(this.transform.position, FacingDir);
 
+        //デバッグ表示用に記録
         m_DebugCenter = center;
         m_DebugSize = data.size;
+        m_DebugExpireTime = Time.time + DebugGizmoDuration;
 
-        int count = Physics.OverlapBoxNonAlloc(center, data.size * 0.5f, m_HitBuffer, Quaternion.identity, m_HurtMask);
+        //CharacterControllerで動かした直後のColliderの位置をPhysicsへ反映
+        Physics.SyncTransforms();
 
-        for (int i = 0; i < count; i++)
+        int count = Physics.OverlapBoxNonAlloc(
+                    center,
+                    data.size * 0.5f,
+                    m_HitBuffer,
+                    Quaternion.identity,
+                    m_HurtMask,
+                    QueryTriggerInteraction.Collide
+                    ); //喰らい判定はTriggerなので明示する
+
+        for(int i = 0; i < count; i++)
         {
             HurtBox hurtBox = m_HitBuffer[i].GetComponent<HurtBox>();
 
             //自分自身には当てない
-            if (hurtBox == null || hurtBox.Owner == this) continue;
+            if(hurtBox == null || hurtBox.Owner == null || hurtBox.Owner == this)
+            {
+                continue;
+            }
 
-            hurtBox.Owner.TakeDamage(data.damage, data.hitStunTicks, data.guardStunTicks,this.transform.position.x,data.knockback,data.guardKnockback,data.guardDamage);
+            hurtBox.Owner.TakeDamage(
+                data.damage,
+                data.hitStunTicks,
+                data.guardStunTicks,
+                this.transform.position.x,
+                data.knockback,
+                data.guardKnockback,
+                data.guardDamage);
 
+            //1回の判定で当てるのは1回まで
             return true;
         }
-        return false;
 
+        return false;
     }
 
+
+    private void OnControllerColliderHit(ControllerColliderHit hit)
+    {
+        //移動を行っているStateAuthority側だけで判定
+        if (!Object.HasStateAuthority) return;
+
+        //上から乗っている接触だけを対象にする
+        if (hit.normal.y < m_StandOnNormalY) return;
+
+        //相手プレイヤーか
+        Player other = hit.collider.GetComponentInParent<Player>();
+        if (other == null || other == this) return;
+
+
+        float dx = this.transform.position.x - other.transform.position.x;
+
+        float dir;
+        if(Mathf.Abs(dx) > 0.05f)
+        {
+            //相手から離れる方向
+            dir = dx > 0.0f ? 1.0f : -1.0f;
+        }
+        else
+        {
+            //ほぼ真上に乗った場合は来た側へ
+            //相手の向こう側へ抜けさせたい場合は符号を反転させる
+            dir = -FacingDir;
+        }
+
+        m_IsOnOpponentHead = true;
+        m_SLideOffDir = dir;
+    }
+
+    //判定を出した直後だけ赤い箱を表示
     private void OnDrawGizmos()
     {
+        if (Time.time > m_DebugExpireTime || m_DebugSize == Vector3.zero) return;
+
         Gizmos.color = Color.red;
         Gizmos.DrawWireCube(m_DebugCenter, m_DebugSize);
+    }
+
+    //Playerを選択している間は、全技の判定範囲を色分けして表示
+    private void OnDrawGizmosSelected()
+    {
+        DrawAttackGizmo(m_LightPunchData, Color.yellow);
+        DrawAttackGizmo(m_MidPunchData, new Color(1.0f, 0.6f, 0.0f));
+
+        DrawAttackGizmo(m_HeavyPunchData, Color.red);
+        DrawAttackGizmo(m_LightKickData,  Color.cyan);
+        DrawAttackGizmo(m_MidKickData,    Color.blue);
+        DrawAttackGizmo(m_HeavyKickData,  Color.magenta);
+    }
+
+
+    private void DrawAttackGizmo(AttackData data,Color color)
+    {
+        if (data == null) return;
+
+        Gizmos.color = Color.red;
+        Gizmos.DrawWireCube(data.GetWorldCenter(this.transform.position, FacingDir), data.size);
     }
 
     #endregion

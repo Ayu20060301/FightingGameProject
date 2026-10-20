@@ -24,4 +24,19 @@ public class AttackData
 
     [Header("ガードゲージ")]
     public float guardDamage = 10.0f; //ガード時に減らすゲージ量
+
+    public bool IsActive(int tick)
+    {
+        return tick >= startupTicks && tick <= startupTicks + activeTicks;
+    }
+
+    /// <summary>
+    /// 判定ボックスのワールド座標の中心を返す
+    /// </summary>
+    /// <param name="origin">キャラの位置</param>
+    /// <param name="facingDir">向き(右= +1、左= -1)</param>
+    public Vector3 GetWorldCenter(Vector3 origin, float facingDir)
+    {
+        return origin + new Vector3(offset.x * facingDir, offset.y, offset.z);
+    }
 }
