@@ -1186,8 +1186,8 @@ MonoBehaviour:
   m_Anim: {fileID: 2387999347624150417}
   m_KnockbackDecay: 20
   m_SlideOffSpeed: 3
-  m_StandOnNormalY: 0.5
-  m_StageEdgeMargin: 0.5
+  m_StandOnNormalY: 0.7
+  m_StageEdgeMargin: 0.7
   m_HurtMask:
     serializedVersion: 2
     m_Bits: 8
@@ -1221,7 +1221,7 @@ MonoBehaviour:
     activeTicks: 4
     offset: {x: 0.6, y: 1, z: 0}
     size: {x: 0.6, y: 0.4, z: 0.6}
-    knockback: 3
+    knockback: 5
     guardKnockback: 2
     guardDamage: 10
   m_LightKickData:
@@ -1232,7 +1232,7 @@ MonoBehaviour:
     activeTicks: 4
     offset: {x: 0.6, y: 1, z: 0}
     size: {x: 0.6, y: 0.4, z: 0.6}
-    knockback: 3
+    knockback: 5
     guardKnockback: 2
     guardDamage: 10
   m_MidKickData:
@@ -1254,7 +1254,7 @@ MonoBehaviour:
     activeTicks: 4
     offset: {x: 0.6, y: 1, z: 0}
     size: {x: 0.6, y: 0.4, z: 0.6}
-    knockback: 3
+    knockback: 5
     guardKnockback: 2
     guardDamage: 10
   _HP: 100
