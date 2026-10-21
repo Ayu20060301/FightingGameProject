@@ -1,4 +1,5 @@
 using Fusion;
+using Fusion.LagCompensation;
 using System.Collections.Generic;
 using System.Diagnostics;
 using Unity.VisualScripting;
@@ -8,11 +9,11 @@ using Debug = UnityEngine.Debug;
 
 public class Player : NetworkBehaviour
 {
-
     public enum AnimationState
     {
         Idle,
         Walk, //歩行
+        BackWalk,  //バック移動
         Guard, //ガード
         Crouch, //しゃがみ
         Jump, //ジャンプ
@@ -35,6 +36,11 @@ public class Player : NetworkBehaviour
         //ダメージを受けた際の各アニメーション
         Hit,             //立ち喰らい
         GuardHit,       //立ちガード喰らい
+
+        //掴み
+        Grab,         //掴み
+        Throw,        //投げ
+        Grabbed,      //掴まれ中
     }
 
 
@@ -64,6 +70,7 @@ public class Player : NetworkBehaviour
     {
         { AnimationState.Idle,          "Idle"},
         { AnimationState.Walk,          "Walk"},
+        { AnimationState.BackWalk,      "BackWalk"},
         { AnimationState.Guard,         "Guard"},
         { AnimationState.Crouch,        "Crouch"},
         { AnimationState.Jump,          "Jump"},
@@ -77,6 +84,9 @@ public class Player : NetworkBehaviour
         { AnimationState.Tatsumaki,     "Tatsumaki"},
         { AnimationState.Hit,           "Hit"},
         { AnimationState.GuardHit,      "GuardHit"},
+        { AnimationState.Grab,          "Grab"},
+        { AnimationState.Throw,         "Throw"},
+        { AnimationState.Grabbed,       "Grabbed"},
     };
 
     #endregion
@@ -121,6 +131,14 @@ public class Player : NetworkBehaviour
     //ずり落ちる向き(右= +1、左= -1)
     private float m_SLideOffDir;
 
+
+    //=================
+    //掴み
+    //=================
+
+    [SerializeField]
+    private GrabData m_GrabData;
+    public GrabData GrabData => m_GrabData;
     #endregion
 
 
@@ -153,7 +171,7 @@ public class Player : NetworkBehaviour
     private float m_DebugExpireTime;
 
     //向き(右= +1、左= -1)
-    private float FacingDir => this.transform.forward.x >= 0.0f ? 1.0f : -1.0f;
+    public float FacingDir => this.transform.forward.x >= 0.0f ? 1.0f : -1.0f;
 
     //StateMachine
     public PlayerStateMachine m_StateMachine;
@@ -173,7 +191,8 @@ public class Player : NetworkBehaviour
     public PlayerMidPunchState MidPunchState { get; private set; }
     public PlayerHitState HitState { get; private set; }
     public PlayerGuardHitState GuardHitState { get; private set; }
-
+    public PlayerGrabState GrabState { get; private set; }
+    public PlayerGrabbedState GrabbedState { get; private set; }
 
     [Header("攻撃データ")]
     [SerializeField]
@@ -402,6 +421,8 @@ public class Player : NetworkBehaviour
         MidPunchState = new PlayerMidPunchState(this);
         HitState = new PlayerHitState(this);
         GuardHitState = new PlayerGuardHitState(this);
+        GrabState = new PlayerGrabState(this);
+        GrabbedState = new PlayerGrabbedState(this);
     }
 
     #endregion
@@ -809,6 +830,72 @@ public class Player : NetworkBehaviour
 
     #endregion
 
+    #region 掴み
+
+    public bool CheckGrabHit(GrabData data)
+    {
+        Vector3 center = data.GetWorldCenter(this.transform.position, FacingDir);
+
+        Physics.SyncTransforms();
+
+        int count = Physics.OverlapBoxNonAlloc(
+            center, data.size * 0.5f, m_HitBuffer,
+            Quaternion.identity, m_HurtMask, QueryTriggerInteraction.Collide
+            );
+
+        for(int i = 0; i < count; i++)
+        {
+            HurtBox hurtBox = m_HitBuffer[i].GetComponent<HurtBox>();
+            if (hurtBox == null || hurtBox.Owner == null || hurtBox.Owner == this) continue;
+
+            //掴めたかどうかは相手側が判断する(喰らい中・空中などは失敗)
+            if(hurtBox.Owner.TakeGrab(this,data))
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    
+    public bool TakeGrab(Player attacker,GrabData data)
+    {
+        if (!Object.HasStateAuthority) return false;
+        if (HP <= 0) return false;
+
+
+        //掴めない状態(掴まれ中・喰らい中・空中)
+        if (CurrentState == GrabbedState || CurrentState == HitState || !IsGrounded)
+        {
+            return false;
+        }
+
+        //ガード中・ガード喰らい中でも成立させる
+        GrabbedState.Setup(attacker, data);
+        ChangeState(GrabbedState);
+        return true;
+    }
+    
+
+    //投げのダメージ適用
+    public void TakeThrowDamage(int damage,int hitStunTicks,float attackerX,float knockback)
+    {
+        if (!Object.HasStateAuthority) return;
+
+        HP = Mathf.Max(0, HP - damage);
+        ApplyKnockback(attackerX, knockback);
+
+        if(HP <= 0)
+        {
+            //KOState;
+            return;
+        }
+
+        HitState.Setup(AnimationState.Hit, hitStunTicks);
+        ChangeState(HitState);
+    }
+
+    #endregion
 
     #region アニメーション
 
@@ -858,6 +945,9 @@ public class Player : NetworkBehaviour
         switch(state)
         {
             case AnimationState.Walk:
+                m_Anim.SetFloat(SpeedParam, 1.0f);
+                break;
+            case AnimationState.BackWalk:
                 m_Anim.SetFloat(SpeedParam, 1.0f);
                 break;
             case AnimationState.Guard:
