@@ -1188,75 +1188,85 @@ MonoBehaviour:
   m_SlideOffSpeed: 3
   m_StandOnNormalY: 0.7
   m_StageEdgeMargin: 0.7
+  m_GrabData:
+    startupTicks: 5
+    activeTicks: 2
+    whiffRecoveryTicks: 30
+    offset: {x: 0.4, y: 1, z: 0}
+    size: {x: 0.5, y: 0.6, z: 0.6}
+    grabHoldTicks: 40
+    damage: 12
+    hitStunTicks: 30
+    throwKnockback: 5
   m_HurtMask:
     serializedVersion: 2
     m_Bits: 8
   m_LightPunchData:
-    damage: 2
-    hitStunTicks: 20
-    guardStunTicks: 12
-    startupTicks: 6
-    activeTicks: 4
-    offset: {x: 0.6, y: 1, z: 0}
-    size: {x: 0.6, y: 0.4, z: 0.6}
+    damage: 3
+    hitStunTicks: 16
+    guardStunTicks: 10
+    startupTicks: 4
+    activeTicks: 3
+    offset: {x: 0.5, y: 1, z: 0}
+    size: {x: 0.5, y: 0.4, z: 0.6}
     knockback: 3
-    guardKnockback: 2
-    guardDamage: 10
+    guardKnockback: 1
+    guardDamage: 4
   m_MidPunchData:
-    damage: 2
-    hitStunTicks: 20
-    guardStunTicks: 12
-    startupTicks: 6
+    damage: 6
+    hitStunTicks: 22
+    guardStunTicks: 14
+    startupTicks: 7
     activeTicks: 4
     offset: {x: 0.6, y: 1, z: 0}
     size: {x: 0.6, y: 0.4, z: 0.6}
-    knockback: 3
+    knockback: 4
     guardKnockback: 2
-    guardDamage: 10
+    guardDamage: 8
   m_HeavyPunchData:
-    damage: 5
-    hitStunTicks: 20
-    guardStunTicks: 12
-    startupTicks: 6
+    damage: 8
+    hitStunTicks: 28
+    guardStunTicks: 18
+    startupTicks: 10
     activeTicks: 4
-    offset: {x: 0.6, y: 1, z: 0}
-    size: {x: 0.6, y: 0.4, z: 0.6}
+    offset: {x: 0.8, y: 1, z: 0}
+    size: {x: 0.7, y: 0.4, z: 0.6}
     knockback: 5
-    guardKnockback: 2
-    guardDamage: 10
+    guardKnockback: 3.5
+    guardDamage: 15
   m_LightKickData:
-    damage: 2
-    hitStunTicks: 20
-    guardStunTicks: 12
-    startupTicks: 6
-    activeTicks: 4
-    offset: {x: 0.6, y: 1, z: 0}
-    size: {x: 0.6, y: 0.4, z: 0.6}
-    knockback: 5
-    guardKnockback: 2
-    guardDamage: 10
-  m_MidKickData:
-    damage: 2
-    hitStunTicks: 20
-    guardStunTicks: 12
-    startupTicks: 6
-    activeTicks: 4
-    offset: {x: 0.6, y: 1, z: 0}
+    damage: 4
+    hitStunTicks: 18
+    guardStunTicks: 11
+    startupTicks: 5
+    activeTicks: 3
+    offset: {x: 0.7, y: 1, z: 0}
     size: {x: 0.6, y: 0.4, z: 0.6}
     knockback: 3
-    guardKnockback: 2
-    guardDamage: 10
-  m_HeavyKickData:
-    damage: 5
-    hitStunTicks: 20
-    guardStunTicks: 12
-    startupTicks: 6
+    guardKnockback: 1.2
+    guardDamage: 5
+  m_MidKickData:
+    damage: 7
+    hitStunTicks: 24
+    guardStunTicks: 15
+    startupTicks: 8
     activeTicks: 4
-    offset: {x: 0.6, y: 1, z: 0}
-    size: {x: 0.6, y: 0.4, z: 0.6}
-    knockback: 5
-    guardKnockback: 2
-    guardDamage: 10
+    offset: {x: 0.8, y: 1, z: 0}
+    size: {x: 0.7, y: 0.4, z: 0.6}
+    knockback: 4
+    guardKnockback: 2.2
+    guardDamage: 9
+  m_HeavyKickData:
+    damage: 8
+    hitStunTicks: 12
+    guardStunTicks: 5
+    startupTicks: 30
+    activeTicks: 20
+    offset: {x: 1, y: 1, z: 0}
+    size: {x: 0.8, y: 0.4, z: 0.6}
+    knockback: 6
+    guardKnockback: 4
+    guardDamage: 18
   _HP: 100
   m_MaxGuardGauge: 100
   m_GuardRecoverPerSecond: 15
