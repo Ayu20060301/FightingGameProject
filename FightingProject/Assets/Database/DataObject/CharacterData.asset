@@ -1,0 +1,100 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c2d658f680a9b53479acee04049db056, type: 3}
+  m_Name: CharacterData
+  m_EditorClassIdentifier: Assembly-CSharp::CharacterData
+  characterName: 
+  maxHP: 100
+  speed: 2
+  jumpPower: 3
+  maxGuardGauge: 100
+  guardRecoverPerSecond: 15
+  guardRecoverDelay: 1
+  guardBreakStunTicks: 90
+  guardDrainPerSecond: 5
+  guardUnlockRate: 0.3
+  m_LightPunch:
+    damage: 5
+    hitStunTicks: 20
+    guardStunTicks: 12
+    startupTicks: 6
+    activeTicks: 4
+    offset: {x: 0.6, y: 1, z: 0}
+    size: {x: 0.6, y: 0.4, z: 0.6}
+    knockback: 3
+    guardKnockback: 2
+    guardDamage: 10
+  m_MidPunch:
+    damage: 5
+    hitStunTicks: 20
+    guardStunTicks: 12
+    startupTicks: 6
+    activeTicks: 4
+    offset: {x: 0.6, y: 1, z: 0}
+    size: {x: 0.6, y: 0.4, z: 0.6}
+    knockback: 3
+    guardKnockback: 2
+    guardDamage: 10
+  m_HeavyPunch:
+    damage: 5
+    hitStunTicks: 20
+    guardStunTicks: 12
+    startupTicks: 6
+    activeTicks: 4
+    offset: {x: 0.6, y: 1, z: 0}
+    size: {x: 0.6, y: 0.4, z: 0.6}
+    knockback: 3
+    guardKnockback: 2
+    guardDamage: 10
+  m_LightKick:
+    damage: 5
+    hitStunTicks: 20
+    guardStunTicks: 12
+    startupTicks: 6
+    activeTicks: 4
+    offset: {x: 0.6, y: 1, z: 0}
+    size: {x: 0.6, y: 0.4, z: 0.6}
+    knockback: 3
+    guardKnockback: 2
+    guardDamage: 10
+  m_MidKick:
+    damage: 5
+    hitStunTicks: 20
+    guardStunTicks: 12
+    startupTicks: 6
+    activeTicks: 4
+    offset: {x: 0.6, y: 1, z: 0}
+    size: {x: 0.6, y: 0.4, z: 0.6}
+    knockback: 3
+    guardKnockback: 2
+    guardDamage: 10
+  m_HeavyKick:
+    damage: 5
+    hitStunTicks: 20
+    guardStunTicks: 12
+    startupTicks: 6
+    activeTicks: 4
+    offset: {x: 0.6, y: 1, z: 0}
+    size: {x: 0.6, y: 0.4, z: 0.6}
+    knockback: 3
+    guardKnockback: 2
+    guardDamage: 10
+  grab:
+    startupTicks: 5
+    activeTicks: 2
+    whiffRecoveryTicks: 30
+    offset: {x: 0.4, y: 1, z: 0}
+    size: {x: 0.5, y: 0.6, z: 0.6}
+    grabHoldTicks: 40
+    damage: 12
+    hitStunTicks: 30
+    throwKnockback: 5

@@ -1180,100 +1180,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 01d2e30686808d94fa22ae74f97ae572, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Player
-  m_Speed: 5
-  m_JumpPower: 3.5
+  m_CharacterData: {fileID: 11400000, guid: 3c6fbf9858a88324c9cdc10c011a6578, type: 2}
   m_Gravity: -60
   m_Anim: {fileID: 2387999347624150417}
   m_KnockbackDecay: 20
   m_SlideOffSpeed: 3
   m_StandOnNormalY: 0.7
   m_StageEdgeMargin: 0.7
-  m_GrabData:
-    startupTicks: 5
-    activeTicks: 2
-    whiffRecoveryTicks: 30
-    offset: {x: 0.4, y: 1, z: 0}
-    size: {x: 0.5, y: 0.6, z: 0.6}
-    grabHoldTicks: 40
-    damage: 12
-    hitStunTicks: 30
-    throwKnockback: 5
   m_HurtMask:
     serializedVersion: 2
     m_Bits: 8
-  m_LightPunchData:
-    damage: 3
-    hitStunTicks: 16
-    guardStunTicks: 10
-    startupTicks: 4
-    activeTicks: 3
-    offset: {x: 0.5, y: 1, z: 0}
-    size: {x: 0.5, y: 0.4, z: 0.6}
-    knockback: 3
-    guardKnockback: 1
-    guardDamage: 4
-  m_MidPunchData:
-    damage: 6
-    hitStunTicks: 22
-    guardStunTicks: 14
-    startupTicks: 7
-    activeTicks: 4
-    offset: {x: 0.6, y: 1, z: 0}
-    size: {x: 0.6, y: 0.4, z: 0.6}
-    knockback: 4
-    guardKnockback: 2
-    guardDamage: 8
-  m_HeavyPunchData:
-    damage: 8
-    hitStunTicks: 28
-    guardStunTicks: 18
-    startupTicks: 10
-    activeTicks: 4
-    offset: {x: 0.8, y: 1, z: 0}
-    size: {x: 0.7, y: 0.4, z: 0.6}
-    knockback: 5
-    guardKnockback: 3.5
-    guardDamage: 15
-  m_LightKickData:
-    damage: 4
-    hitStunTicks: 18
-    guardStunTicks: 11
-    startupTicks: 5
-    activeTicks: 3
-    offset: {x: 0.7, y: 1, z: 0}
-    size: {x: 0.6, y: 0.4, z: 0.6}
-    knockback: 3
-    guardKnockback: 1.2
-    guardDamage: 5
-  m_MidKickData:
-    damage: 7
-    hitStunTicks: 24
-    guardStunTicks: 15
-    startupTicks: 8
-    activeTicks: 4
-    offset: {x: 0.8, y: 1, z: 0}
-    size: {x: 0.7, y: 0.4, z: 0.6}
-    knockback: 4
-    guardKnockback: 2.2
-    guardDamage: 9
-  m_HeavyKickData:
-    damage: 8
-    hitStunTicks: 12
-    guardStunTicks: 5
-    startupTicks: 30
-    activeTicks: 20
-    offset: {x: 1, y: 1, z: 0}
-    size: {x: 0.8, y: 0.4, z: 0.6}
-    knockback: 6
-    guardKnockback: 4
-    guardDamage: 18
   _HP: 100
-  m_MaxGuardGauge: 100
-  m_GuardRecoverPerSecond: 15
-  m_GuardRecoverDelay: 1
-  m_GuardBreakStunTicks: 90
-  m_GuardDrainPerSecond: 5
-  m_GuardUnlockRate: 1
   _IsGuardBroken:
     _value: 0
   _GuardGauge: 0

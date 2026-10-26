@@ -47,7 +47,7 @@ public class RoundManager : NetworkBehaviour
         {
             case RoundPhase.Waiting:
                 //2人揃ったら開始
-                if(FindObjectsByType<Player>(FindObjectsSortMode.None).Length >= RequiredPlayers)
+                if (FindObjectsByType<Player>(FindObjectsSortMode.None).Length >= RequiredPlayers)
                 {
                     StartRound();
                 }
@@ -69,9 +69,9 @@ public class RoundManager : NetworkBehaviour
         Player[] players = FindObjectsByType<Player>(FindObjectsSortMode.None);
 
         //KOがでたら終了
-        foreach(Player p in players)
+        foreach (Player p in players)
         {
-            if(p.IsKO)
+            if (p.IsKO)
             {
                 EndRound();
                 return;
@@ -80,7 +80,7 @@ public class RoundManager : NetworkBehaviour
 
 
         //時間切れ
-        if(RoundTimer.Expired(Runner))
+        if (RoundTimer.Expired(Runner))
         {
             EndRound();
         }

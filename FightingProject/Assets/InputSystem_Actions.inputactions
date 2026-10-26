@@ -16,42 +16,6 @@
                     "initialStateCheck": true
                 },
                 {
-                    "name": "LightKick",
-                    "type": "Button",
-                    "id": "dfe74aca-0663-4673-b622-1d8fcec1aa48",
-                    "expectedControlType": "",
-                    "processors": "",
-                    "interactions": "",
-                    "initialStateCheck": false
-                },
-                {
-                    "name": "HeavyKick",
-                    "type": "Button",
-                    "id": "bd17b2ca-b9b2-4717-a1e9-79744ea9db0f",
-                    "expectedControlType": "",
-                    "processors": "",
-                    "interactions": "",
-                    "initialStateCheck": false
-                },
-                {
-                    "name": "LightPunch",
-                    "type": "Button",
-                    "id": "e95843ca-f651-4eae-b2d6-66faa28c7236",
-                    "expectedControlType": "",
-                    "processors": "",
-                    "interactions": "",
-                    "initialStateCheck": false
-                },
-                {
-                    "name": "HeavyPunch",
-                    "type": "Button",
-                    "id": "7159f8cc-47ea-444e-896f-6b09105f96d3",
-                    "expectedControlType": "",
-                    "processors": "",
-                    "interactions": "",
-                    "initialStateCheck": false
-                },
-                {
                     "name": "Guard",
                     "type": "Button",
                     "id": "3e77a433-a982-489d-a2be-14dc6d3263a5",
@@ -79,18 +43,45 @@
                     "initialStateCheck": false
                 },
                 {
-                    "name": "MidPunch",
+                    "name": "NormalAttack",
                     "type": "Button",
-                    "id": "caa4140b-bfed-42eb-b5de-3375551382c6",
+                    "id": "ca3e752a-a91c-447e-9155-4eac86f598f2",
                     "expectedControlType": "",
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": false
                 },
                 {
-                    "name": "MidKick",
+                    "name": "LowAttack",
                     "type": "Button",
-                    "id": "f128c0ca-265e-4026-9ef2-76469a514081",
+                    "id": "0c0cc89d-6067-4f94-bbd9-cb1422c2a344",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "UpAttack",
+                    "type": "Button",
+                    "id": "709313bb-f8f3-4264-bacb-4ed51d771168",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "BackAttack",
+                    "type": "Button",
+                    "id": "b27427f1-bd8a-4a14-b7f7-540cb7fe3984",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "ForwardAttack",
+                    "type": "Button",
+                    "id": "bffe00a8-6dce-4423-8c64-09b60c331f8a",
                     "expectedControlType": "",
                     "processors": "",
                     "interactions": "",
@@ -232,94 +223,6 @@
                 },
                 {
                     "name": "",
-                    "id": "3fb5e265-0173-4d00-b278-60f321f3fd0c",
-                    "path": "<Gamepad>/buttonSouth",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": ";Gamepad",
-                    "action": "LightKick",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                },
-                {
-                    "name": "",
-                    "id": "4ca4849b-9471-4534-b514-5b256eb52ffa",
-                    "path": "<Keyboard>/#(K)",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": ";Keyboard&Mouse",
-                    "action": "LightKick",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                },
-                {
-                    "name": "",
-                    "id": "b698b737-a974-4b68-847c-5b600067162a",
-                    "path": "<Gamepad>/rightTrigger",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": ";Gamepad",
-                    "action": "HeavyKick",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                },
-                {
-                    "name": "",
-                    "id": "92d974aa-79c2-4715-8425-7190f5ae91d7",
-                    "path": "<Keyboard>/#(L)",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": ";Keyboard&Mouse",
-                    "action": "HeavyKick",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                },
-                {
-                    "name": "",
-                    "id": "d7504e57-3b10-4de6-bf49-e736ece48198",
-                    "path": "<Gamepad>/buttonWest",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": ";Gamepad",
-                    "action": "LightPunch",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                },
-                {
-                    "name": "",
-                    "id": "124ccfbb-a5fb-40ac-b44a-d2949910e3ff",
-                    "path": "<Keyboard>/#(J)",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": ";Keyboard&Mouse",
-                    "action": "LightPunch",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                },
-                {
-                    "name": "",
-                    "id": "4f820ec7-3c8c-43fd-ae21-b3a0f00288a3",
-                    "path": "<Gamepad>/rightShoulder",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": ";Gamepad",
-                    "action": "HeavyPunch",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                },
-                {
-                    "name": "",
-                    "id": "a34cfc00-4dfd-41c0-81d6-21e76658170e",
-                    "path": "<Keyboard>/#(I)",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": ";Keyboard&Mouse",
-                    "action": "HeavyPunch",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                },
-                {
-                    "name": "",
                     "id": "9bddebe0-a6d5-41b8-ba7c-905ae170571a",
                     "path": "<Gamepad>/leftTrigger",
                     "interactions": "",
@@ -386,23 +289,67 @@
                 },
                 {
                     "name": "",
-                    "id": "f098e0b8-9451-4f9f-8c01-4963b904b9de",
-                    "path": "<Gamepad>/buttonNorth",
+                    "id": "ca501803-4376-4c89-8689-67b32907edf8",
+                    "path": "<Gamepad>/buttonWest",
                     "interactions": "",
                     "processors": "",
-                    "groups": ";Gamepad",
-                    "action": "MidPunch",
+                    "groups": "",
+                    "action": "NormalAttack",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },
                 {
                     "name": "",
-                    "id": "19418a72-f9d8-477e-b95c-e2fd0c5e0b59",
+                    "id": "d14ea3c0-b1d0-4cc9-bdbe-cba34bed6145",
+                    "path": "",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "NormalAttack",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "2cdb5ae6-a2f7-4003-826f-5aea6e3209f6",
+                    "path": "<Gamepad>/buttonSouth",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": ";Gamepad",
+                    "action": "LowAttack",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "6c0855b5-61f0-417e-bbaa-3d91db04e3fc",
+                    "path": "<Gamepad>/buttonNorth",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": ";Gamepad",
+                    "action": "UpAttack",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "c4d4c56c-2f50-4b59-a960-d4c4b2391cee",
                     "path": "<Gamepad>/buttonEast",
                     "interactions": "",
                     "processors": "",
                     "groups": ";Gamepad",
-                    "action": "MidKick",
+                    "action": "BackAttack",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "4e3df5ae-8cac-42fe-904e-819d016ce0dd",
+                    "path": "<Gamepad>/buttonEast",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": ";Gamepad",
+                    "action": "ForwardAttack",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

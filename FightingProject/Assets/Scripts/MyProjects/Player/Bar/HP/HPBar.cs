@@ -48,7 +48,7 @@ public class HPBar : MonoBehaviour
     private float m_DamageTimer;
 
     //前回のHP
-    private int m_LastHP = Player.MaxHP;
+    private int m_LastHP;
 
     private Texture2D m_GradientTexture;
     private Sprite m_GradientSprite;
@@ -124,7 +124,7 @@ public class HPBar : MonoBehaviour
 
         m_Player = players[m_PlayerIndex];
         m_LastHP = m_Player.HP;
-        m_DisplayRate = m_DamageRate = Mathf.Clamp01((float)m_Player.HP / Player.MaxHP);
+        m_DisplayRate = m_DamageRate = GetHPRate(m_Player.HP);
         Apply(m_DisplayRate, m_DamageRate);
     }
 
@@ -134,7 +134,7 @@ public class HPBar : MonoBehaviour
     private void UpdateBar()
     {
         int hp = m_Player.HP;
-        float targetRate = Mathf.Clamp01((float)hp / Player.MaxHP);
+        float targetRate = GetHPRate(hp);
 
         //ダメージを受けた瞬間にダメージバーの待ち時間を開始
         if(hp < m_LastHP)
@@ -177,5 +177,11 @@ public class HPBar : MonoBehaviour
         {
             m_HPDamageImage.fillAmount = damageRate;
         }
+    }
+
+
+    private float GetHPRate(int hp)
+    {
+        return Mathf.Clamp01((float)hp / Mathf.Max(1, m_Player.MaxHP));
     }
 }

@@ -19,14 +19,11 @@ public class NetworkManager : MonoBehaviour, INetworkRunnerCallbacks
 
         public NetworkBool isGuard;
 
-        public NetworkBool isLightKick;
-        public NetworkBool isHeavyKick;
+        public NetworkBool isNormalAttack;
+        public NetworkBool isLowAttack;
+        public NetworkBool isUpAttack;
+        public NetworkBool isForwardAttack;
 
-        public NetworkBool isLightPunch;
-        public NetworkBool isHeavyPunch;
-
-        public NetworkBool isMidPunch;
-        public NetworkBool isMidKick;
     }
 
     [Header("入力")]
@@ -273,14 +270,11 @@ public class NetworkManager : MonoBehaviour, INetworkRunnerCallbacks
         data.isJump = state.IsJump;
         data.isGuard = state.IsGuard;
 
-        data.isLightKick = state.IsLightKick;
-        data.isHeavyKick = state.IsHeavyKick;
+        data.isNormalAttack = state.IsNormalAttack;
+        data.isLowAttack = state.IsLowAttack;
 
-        data.isLightPunch = state.IsLightPunch;
-        data.isHeavyPunch = state.IsHeavyPunch;
-
-        data.isMidKick = state.IsMidKick;
-        data.isMidPunch = state.IsMidPunch;
+        data.isUpAttack = state.IsUpAttack;
+        data.isForwardAttack = state.IsForwardAttack;
 
         //Fusionへ入力を渡す
         input.Set(data);

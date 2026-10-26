@@ -2,8 +2,6 @@ using UnityEngine;
 
 public class InputController : MonoBehaviour
 {
-
-
     //方向入力とみなすスティックの値
     private const float DirectionThreshold = 0.5f;
 
@@ -15,13 +13,13 @@ public class InputController : MonoBehaviour
     private InputSystem_Actions m_Input;
 
     //押下を保持するフラグ
-    private bool m_IsLightKick;
-    private bool m_IsHeavyKick;
-    private bool m_IsLightPunch;
-    private bool m_IsHeavyPunch;
-    private bool m_IsMidPunch;
-    private bool m_IsMidKick;
     private bool m_IsJump;
+
+    //New
+    private bool m_IsNormalAttack;
+    public bool m_IsLowAttack;
+    public bool m_IsUpAttack;
+    private bool m_IsForwardAttack;
 
     private void Awake()
     {
@@ -54,24 +52,20 @@ public class InputController : MonoBehaviour
 
        
         //押された入力は消費されるまで保持する
-        m_IsLightKick |= player.LightKick.WasPressedThisFrame();
-        m_IsMidKick |= player.MidKick.WasPressedThisFrame();
-        m_IsHeavyKick |= player.HeavyKick.WasPressedThisFrame();
-        m_IsLightPunch |= player.LightPunch.WasPressedThisFrame();
-        m_IsMidPunch |= player.MidPunch.WasPressedThisFrame();
-        m_IsHeavyPunch |= player.HeavyPunch.WasPressedThisFrame();
         m_IsJump |= player.Jump.WasPressedThisFrame();
+        m_IsNormalAttack |= player.NormalAttack.WasPressedThisFrame();
+        m_IsLowAttack |= player.LowAttack.WasPressedThisFrame();
+        m_IsUpAttack |= player.UpAttack.WasPressedThisFrame();
+        m_IsForwardAttack |= player.ForwardAttack.WasPressedThisFrame();
 
         bool isGuard = m_Input.Player.Guard.IsPressed();
 
         State.SetInput(
             GetDirection(),
-            m_IsLightKick,
-            m_IsHeavyKick,
-            m_IsLightPunch,
-            m_IsHeavyPunch,
-            m_IsMidPunch,
-            m_IsMidKick,
+            m_IsNormalAttack,
+            m_IsLowAttack,
+            m_IsUpAttack,
+            m_IsForwardAttack,
             m_IsJump,
             isGuard);
     }
@@ -83,12 +77,10 @@ public class InputController : MonoBehaviour
     public void ConsumeButtonInput()
     {
         //InputController側の保持フラグをリセット
-        m_IsLightKick = false;
-        m_IsMidKick = false;
-        m_IsHeavyKick = false;
-        m_IsLightPunch = false;
-        m_IsMidPunch = false;
-        m_IsHeavyPunch = false;
+        m_IsNormalAttack = false;
+        m_IsLowAttack = false;
+        m_IsUpAttack = false;
+        m_IsForwardAttack = false;
         m_IsJump = false;
 
         //InputState側もリセット

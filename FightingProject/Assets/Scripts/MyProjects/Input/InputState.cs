@@ -26,12 +26,11 @@ public enum Direction
 /// </summary>
 public enum AttackButton
 {
-    LightKick,
-    HeavyKick,
-    LightPunch,
-    HeavyPunch,
-    MidPunch,
-    MidKick,
+    NormalAttack, //通常攻撃(Bボタン入力)
+    LowAttack, //下攻撃(Aボタン)
+    UpAttack, //上攻撃(Yボタン入力)
+
+    ForwardAttack, //前攻撃(Xボタン入力)
 }
 
 /// <summary>
@@ -45,36 +44,6 @@ public class InputState
     public Direction Direction { get; private set; }
 
     /// <summary>
-    /// 弱キック
-    /// </summary>
-    public bool IsLightKick { get; private set; }
-
-    /// <summary>
-    /// 強キック
-    /// </summary>
-    public bool IsHeavyKick { get; private set; }
-
-    /// <summary>
-    /// 弱パンチ
-    /// </summary>
-    public bool IsLightPunch { get; private set; }
-
-    /// <summary>
-    /// 強パンチ
-    /// </summary>
-    public bool IsHeavyPunch { get; private set; }
-
-    /// <summary>
-    /// 中パンチ
-    /// </summary>
-    public bool IsMidPunch { get; private set; }
-
-    /// <summary>
-    /// 中キック
-    /// </summary>
-    public bool IsMidKick { get; private set; }
-
-    /// <summary>
     /// ジャンプ入力
     /// </summary>
     public bool IsJump { get; private set; }
@@ -86,27 +55,44 @@ public class InputState
 
     public bool ISCrouch { get; private set; }
 
+
+    /// <summary>
+    /// 通常攻撃
+    /// </summary>
+    public bool IsNormalAttack { get; private set; }
+
+    /// <summary>
+    /// 下攻撃
+    /// </summary>
+    public bool IsLowAttack { get; private set; }
+
+    /// <summary>
+    /// 上攻撃
+    /// </summary>
+    public bool IsUpAttack { get; private set; }
+
+    /// <summary>
+    /// 前攻撃
+    /// </summary>
+    public bool IsForwardAttack { get; private set; }
+
     /// <summary>
     /// 入力状態を更新する
     /// </summary>
     public void SetInput(
         Direction direction,
-        bool isLightKick,
-        bool isHeavyKick,
-        bool isLightPunch,
-        bool isHeavyPunch,
-        bool isMidPunch,
-        bool isMidKick,
+        bool isNormalAttack,
+        bool isLowAttack,
+        bool isUpAttack,
+        bool isForwardAttack,
         bool isJump,
         bool isGuard)
     {
         Direction = direction;
-        IsLightKick = isLightKick;
-        IsHeavyKick = isHeavyKick;
-        IsLightPunch = isLightPunch;
-        IsHeavyPunch = isHeavyPunch;
-        IsMidPunch = isMidPunch;
-        IsMidKick = isMidKick;
+        IsNormalAttack = isNormalAttack;
+        IsLowAttack = isLowAttack;
+        IsUpAttack = isUpAttack;
+        IsForwardAttack = isForwardAttack;
         IsJump = isJump;
         IsGuard = isGuard;
     }
@@ -116,12 +102,10 @@ public class InputState
     /// </summary>
     public void ConsumeAttackInput()
     {
-        IsLightKick = false;
-        IsHeavyKick = false;
-        IsLightPunch = false;
-        IsHeavyPunch = false;
-        IsMidPunch = false;
-        IsMidKick = false;
+        IsNormalAttack = false;
+        IsLowAttack = false;
+        IsUpAttack = false;
+        IsForwardAttack = false;
     }
 
     /// <summary>

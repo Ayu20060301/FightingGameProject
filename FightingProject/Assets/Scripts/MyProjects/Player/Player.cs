@@ -1,10 +1,6 @@
 using Fusion;
-using Fusion.LagCompensation;
 using System.Collections.Generic;
-using System.Diagnostics;
-using Unity.VisualScripting;
 using UnityEngine;
-using Debug = UnityEngine.Debug;
 
 
 public class Player : NetworkBehaviour
@@ -12,35 +8,30 @@ public class Player : NetworkBehaviour
     public enum AnimationState
     {
         Idle,
-        Walk, //歩行
-        BackWalk,  //バック移動
-        Guard, //ガード
-        Crouch, //しゃがみ
-        Jump, //ジャンプ
-
-        Land, //着地
+        Walk,       //歩行
+        BackWalk,   //バック移動
+        Guard,      //ガード
+        Crouch,     //しゃがみ
+        Jump,       //ジャンプ
+        Land,       //着地
 
         //攻撃
-
-        LightPunch,  //弱パンチ
-        HeavyPunch,  //強パンチ
-        LightKick,  //弱キック
-        HeavyKick,  //強キック
-
-        MidKick,    //中キック
-        MidPunch,  //中パンチ
+        NormalAttack,   //通常攻撃
+        LowAttack,      //下攻撃
+        UpAttack,       //上攻撃
+        ForwardAttack,  //前攻撃
 
         //コマンド攻撃
-        Tatsumaki, //竜巻旋風脚
+        Tatsumaki,      //竜巻旋風脚
 
         //ダメージを受けた際の各アニメーション
-        Hit,             //立ち喰らい
+        Hit,            //立ち喰らい
         GuardHit,       //立ちガード喰らい
 
         //掴み
-        Grab,         //掴み
-        Throw,        //投げ
-        Grabbed,      //掴まれ中
+        Grab,           //掴み
+        Throw,          //投げ
+        Grabbed,        //掴まれ中
     }
 
 
@@ -55,15 +46,23 @@ public class Player : NetworkBehaviour
     //アニメーションのクロスフェード時間
     private const float CrossFadeDuration = 0.05f;
 
+    //頭上に乗っている判定で、ほぼ真上とみなすX差
+    private const float HeadOverlapThreshold = 0.05f;
 
-    //初期HP
-    public const int MaxHP = 100;
+    //向きの判定で、同じ位置とみなすX差
+    private const float FacingThreshold = 0.001f;
+
+    //モデルの正面がローカル+Zの場合のY回転
+    private const float FaceRightYaw = 90.0f;
+    private const float FaceLeftYaw = -90.0f;
+
+    //デバッグ表示時間
+    private const float DebugGizmoDuration = 0.2f;
 
     //Animatorパラメーター
     private static readonly int SpeedParam = Animator.StringToHash("Speed");
     private static readonly int IsGuardParam = Animator.StringToHash("IsGuard");
     private static readonly int IsCrouchParam = Animator.StringToHash("IsCrouch");
-
 
     //AnimationState→Animatorのステート名
     private static readonly Dictionary<AnimationState, string> AnimationNames = new Dictionary<AnimationState, string>
@@ -75,12 +74,10 @@ public class Player : NetworkBehaviour
         { AnimationState.Crouch,        "Crouch"},
         { AnimationState.Jump,          "Jump"},
         { AnimationState.Land,          "Land"},
-        { AnimationState.LightPunch,    "LightPunch"},
-        { AnimationState.HeavyPunch,    "HeavyPunch"},
-        { AnimationState.LightKick,     "LightKick"},
-        { AnimationState.HeavyKick,     "HeavyKick"},
-        { AnimationState.MidKick,       "MidKick"},
-        { AnimationState.MidPunch,      "MidPunch"},
+        { AnimationState.NormalAttack,  "NormalAttack"},
+        { AnimationState.LowAttack,     "LowAttack"},
+        { AnimationState.UpAttack,      "UpAttack"},
+        { AnimationState.ForwardAttack, "ForwardAttack"},
         { AnimationState.Tatsumaki,     "Tatsumaki"},
         { AnimationState.Hit,           "Hit"},
         { AnimationState.GuardHit,      "GuardHit"},
@@ -89,18 +86,21 @@ public class Player : NetworkBehaviour
         { AnimationState.Grabbed,       "Grabbed"},
     };
 
+    //AttackSlot順に対応するGizmoの色
+    private static readonly Color[] GizmoColors =
+    {
+        Color.yellow, new Color(1.0f, 0.6f, 0.0f), Color.red, Color.cyan,
+        Color.blue, Color.magenta, Color.green, Color.white,
+    };
+
     #endregion
 
 
     #region Inspector
 
-    [Header("移動")]
+    [Header("キャラクター")]
     [SerializeField]
-    private float m_Speed = 2.0f;
-
-    [Header("ジャンプ")]
-    [SerializeField]
-    private float m_JumpPower = 3.0f;
+    private CharacterData m_CharacterData;
 
     [Header("重力")]
     [SerializeField]
@@ -114,125 +114,110 @@ public class Player : NetworkBehaviour
     [SerializeField]
     private float m_KnockbackDecay = 20.0f;
 
-    //ノックバックによるX方向の速度
-    private float m_KnockbackVelocityX;
-
     [Header("頭上からのすり落ち")]
     [SerializeField]
-    private float m_SlideOffSpeed = 3.0f; //ずり落ちる速さ
+    private float m_SlideOffSpeed = 3.0f;   //ずり落ちる速さ
     [SerializeField, Range(0.0f, 1.0f)]
-    private float m_StandOnNormalY = 0.5f; //接触面の法線Yがこれ 
-    [SerializeField]
-    private float m_StageEdgeMargin = 0.5f; //画面端でずり落ちる方向を反転する余裕
-
-    //相手の頭に乗っているか
-    private bool m_IsOnOpponentHead;
-
-    //ずり落ちる向き(右= +1、左= -1)
-    private float m_SLideOffDir;
-
-
-    //=================
-    //掴み
-    //=================
-
-    [SerializeField]
-    private GrabData m_GrabData;
-    public GrabData GrabData => m_GrabData;
-    #endregion
-
-
-    #region フィールド・プロパティ
-
-    //CharacterController
-    private CharacterController m_Controller;
-
-    //移動量
-    private Vector3 m_Move;
-
-    //入力状態
-    private InputState m_Input;
-
-    //対戦相手
-    private Player m_Opponent;
-
+    private float m_StandOnNormalY = 0.5f;  //接触面の法線Yがこれ以上なら「乗っている」とみなす
 
     [Header("当たり判定")]
     [SerializeField]
     private LayerMask m_HurtMask;
 
-    //判定用バッファ
+    #endregion
+
+
+    #region フィールド・プロパティ
+
+    //--- コンポーネント・参照 ---
+    private CharacterController m_Controller;
+    private RoundManager m_RoundManager;
+    private Player m_Opponent;
+
+    //--- 入力・コマンド ---
+    private InputState m_Input;
+    private readonly CommandDetector m_Command = new CommandDetector();
+
+    //--- 移動 ---
+    private Vector3 m_Move;
+    private float m_KnockbackVelocityX;
+
+    //相手の頭に乗っているか・ずり落ちる向き(右= +1、左= -1)
+    private bool m_IsOnOpponentHead;
+    private float m_SlideOffDir;
+
+    //--- 判定 ---
     private readonly Collider[] m_HitBuffer = new Collider[4];
 
     //デバッグ表示用
-    private const float DebugGizmoDuration = 0.2f;
     private Vector3 m_DebugCenter;
     private Vector3 m_DebugSize;
     private float m_DebugExpireTime;
 
-    //向き(右= +1、左= -1)
-    public float FacingDir => this.transform.forward.x >= 0.0f ? 1.0f : -1.0f;
-
-    //StateMachine
+    //--- StateMachine ---
     public PlayerStateMachine m_StateMachine;
 
     public PlayerIdleState IdleState { get; private set; }
     public PlayerWalkState WalkState { get; private set; }
     public PlayerGuardState GuardState { get; private set; }
     public PlayerCrouchState CrouchState { get; private set; }
-
     public PlayerJumpState JumpState { get; private set; }
-
-    public PlayerLightPunchState LightPunchState { get; private set; }
-    public PlayerHeavyPunchState HeavyPunchState { get; private set; }
-    public PlayerLightKickState LightKickState { get; private set; }
-    public PlayerHeavyKickState HeavyKickState { get; private set; }
-    public PlayerMidKickState MidKickState { get; private set; }
-    public PlayerMidPunchState MidPunchState { get; private set; }
+    public PlayerNormalAttackState NormalAttackState { get; private set; }
+    public PlayerLowAttackState LowAttackState { get; private set; }
+    public PlayerUpAttackState UpAttackState { get; private set; }
+    public PlayerForwardAttackState ForwardAttackState { get; private set; }
     public PlayerHitState HitState { get; private set; }
     public PlayerGuardHitState GuardHitState { get; private set; }
     public PlayerGrabState GrabState { get; private set; }
     public PlayerGrabbedState GrabbedState { get; private set; }
 
-    [Header("攻撃データ")]
-    [SerializeField]
-    private AttackData m_LightPunchData;
-    [SerializeField]
-    private AttackData m_MidPunchData;
-    [SerializeField]
-    private AttackData m_HeavyPunchData;
-    [SerializeField]
-    private AttackData m_LightKickData;
-    [SerializeField]
-    private AttackData m_MidKickData;
-    [SerializeField]
-    private AttackData m_HeavyKickData;
+    //--- キャラクターデータ ---
+    public CharacterData Data => m_CharacterData;
+    public int MaxHP => m_CharacterData.maxHP;
+    public float MaxGuardGauge => m_CharacterData.maxGuardGauge;
 
+    public AttackData NormalAttackData => m_CharacterData.GetAttack(AttackSlot.NormalAttack);
+    public AttackData LowAttackData => m_CharacterData.GetAttack(AttackSlot.LowAttack);
+    public AttackData UpAttackData => m_CharacterData.GetAttack(AttackSlot.UpAttack);
+    public AttackData ForwardAttackData => m_CharacterData.GetAttack(AttackSlot.ForwardAttack);
+    public AttackData RushMoveData => m_CharacterData.GetAttack(AttackSlot.RushMove);
+    public AttackData GeigekiData => m_CharacterData.GetAttack(AttackSlot.Geigeki);
+    public AttackData AirMoveData => m_CharacterData.GetAttack(AttackSlot.AirMove);
+    public AttackData DownMoveData => m_CharacterData.GetAttack(AttackSlot.DownMove);
 
-    public AttackData LightPunchData => m_LightPunchData;
-    public AttackData MidPunchData => m_MidPunchData;
-    public AttackData HeavyPunchData => m_HeavyPunchData;
-    public AttackData LightKickData => m_LightKickData;
-    public AttackData MidKickData => m_MidKickData;
-    public AttackData HeavyKickData => m_HeavyKickData;
+    //掴みデータ(既存のStateから参照されているため維持)
+    public GrabData GrabData => m_CharacterData.grab;
 
-
-    /// <summary>
-    /// 着地しているか
-    /// </summary>
+    //--- 状態参照 ---
     public bool IsGrounded => m_Controller.isGrounded;
-
-    /// <summary>
-    /// 現在の入力
-    /// </summary>
     public InputState Input => m_Input;
-
-    /// <summary>
-    /// 現在のState
-    /// </summary>
     public PlayerState CurrentState => m_StateMachine.CurrentState;
 
- 
+    //向き(右= +1、左= -1)
+    public float FacingDir => this.transform.forward.x >= 0.0f ? 1.0f : -1.0f;
+    public bool IsFacingRight => FacingDir > 0.0f;
+
+    //KOしているか(HPはサーバーから同期されるので全クライアントで判定できる)
+    public bool IsKO => HP <= 0;
+
+    //ガード構え中、またはガード喰らい中か
+    private bool IsGuarding => CurrentState == GuardState || CurrentState == GuardHitState;
+
+    //左右移動出来ない状態か
+    private bool IsHorizontalMoveLocked =>
+        CurrentState == GuardState ||
+        CurrentState == GuardHitState ||
+        CurrentState == CrouchState ||
+        CurrentState == NormalAttackState ||
+        CurrentState == LowAttackState ||
+        CurrentState == UpAttackState ||
+        CurrentState == ForwardAttackState ||
+        CurrentState == HitState ||
+        CurrentState == GrabState ||
+        CurrentState == GrabbedState;
+
+    //--- ネットワーク同期 ---
+
     /// <summary>
     /// ネットワーク同期する向き
     /// </summary>
@@ -245,46 +230,11 @@ public class Player : NetworkBehaviour
     [Networked]
     public int HP { get; set; }
 
-    /// <summary>
-    /// KOしているか(HPはサーバーから同期されるので全クライアントで判定できる)
-    /// </summary>
-    public bool IsKO => HP <= 0;
-
-
-    private RoundManager m_RoundManager;
-
-    /// <summary>
-    /// 左右移動出来ない状態か(ガード・しゃがみ・攻撃中)
-    /// </summary>
-    private bool IsHorizontalMoveLocked =>
-        CurrentState == GuardState ||
-        CurrentState == CrouchState ||
-        CurrentState == LightPunchState ||
-        CurrentState == HeavyPunchState ||
-        CurrentState == LightKickState ||
-        CurrentState == HeavyKickState ||
-        CurrentState == MidKickState ||
-        CurrentState == MidPunchState ||
-        CurrentState == HitState;
-
     #endregion
 
-    #region ガード
 
-    [Header("ガードゲージ")]
-    [SerializeField]
-    private float m_MaxGuardGauge = 100.0f;
-    [SerializeField]
-    private float m_GuardRecoverPerSecond = 15.0f; //回復速度
-    [SerializeField]
-    private float m_GuardRecoverDelay = 1.0f; //削られてからの回復開始までの待ち時間
-    [SerializeField]
-    private int m_GuardBreakStunTicks = 90; //クラッシュの硬直(Tick数)
-    [SerializeField]
-    private float m_GuardDrainPerSecond = 5.0f; //ガード構え中二減る速さ(1秒あたり)
-    [SerializeField, Range(0.0f, 1.0f)]
-    private float m_GuardUnlockRate = 0.3f;
-    
+    #region ガード(ネットワーク同期)
+
     /// <summary>
     /// ガードクラッシュ中か
     /// </summary>
@@ -305,96 +255,57 @@ public class Player : NetworkBehaviour
     [Networked]
     private TickTimer GuardRecoverTimer { get; set; }
 
-    public float MaxGuardGauge => m_MaxGuardGauge;
-
     #endregion
+
 
     #region Unity / Fusion コールバック
 
     private void Awake()
     {
+        if (m_CharacterData == null)
+        {
+            Debug.LogError($"[Player] CharacterDataが未設定です : {name}", this);
+        }
+
         m_Controller = GetComponent<CharacterController>();
-
-        //入力状態の初期化
         m_Input = new InputState();
-
-        //StateMachineの生成
         m_StateMachine = new PlayerStateMachine();
 
-        //State生成
         CreateStates();
     }
 
 
     public override void Spawned()
     {
-
         //全クライアントでカメラに登録
-        FightCamera cam = FindFirstObjectByType<FightCamera>();
-        if(cam != null)
-        {
-            cam.AddTarget(this.transform);
-        }
+        RegisterToCamera(true);
 
-        //HPの初期化
-        if(Object.HasStateAuthority)
-        {
-            HP = MaxHP; //HP
-            GuardGauge = m_MaxGuardGauge; //ガードゲージ
+        if (!Object.HasStateAuthority) return;
 
-            FacingYaw = this.transform.eulerAngles.y;
+        HP = MaxHP;
+        GuardGauge = MaxGuardGauge;
+        FacingYaw = this.transform.eulerAngles.y;
 
-            //最初はIdle
-            ChangeState(IdleState);
-        }
+        //最初はIdle
+        ChangeState(IdleState);
     }
 
     public override void Despawned(NetworkRunner runner, bool hasState)
     {
-        FightCamera cam = FindFirstObjectByType<FightCamera>();
-        if(cam != null)
-        {
-            cam.RemoveTarget(this.transform);
-        }
+        RegisterToCamera(false);
     }
 
     public override void FixedUpdateNetwork()
     {
-        if(Object.HasStateAuthority)
+        if (Object.HasStateAuthority)
         {
             UpdateFacing();
             UpdateGuardGauge();
-
-            if(m_RoundManager == null)
-            {
-                m_RoundManager = FindFirstObjectByType<RoundManager>();
-            }
-
-            bool isCanFight = m_RoundManager != null && m_RoundManager.Phase == RoundManager.RoundPhase.Fight;
-
-            //入力が取得できた場合のみゲーム処理を実行
-            if(GetInput(out NetworkManager.PlayerInputData data))
-            {
-                //試合中以外は入力を無効化
-                if(!isCanFight)
-                {
-                    data = default;
-                }
-
-                //入力取得
-                UpdateInput(data);
-
-                //State更新
-                m_StateMachine.Update();
-
-                //移動
-                UpdateMovement(data);
-            }
+            UpdateAuthority();
         }
 
         //同期された向きを各クライアントに適用
         this.transform.rotation = Quaternion.Euler(0.0f, FacingYaw, 0.0f);
-
     }
 
     #endregion
@@ -407,32 +318,79 @@ public class Player : NetworkBehaviour
     /// </summary>
     private void CreateStates()
     {
-        //State生成
         IdleState = new PlayerIdleState(this);
         WalkState = new PlayerWalkState(this);
         GuardState = new PlayerGuardState(this);
         CrouchState = new PlayerCrouchState(this);
         JumpState = new PlayerJumpState(this);
-        LightPunchState = new PlayerLightPunchState(this);
-        HeavyPunchState = new PlayerHeavyPunchState(this);
-        LightKickState = new PlayerLightKickState(this);
-        HeavyKickState = new PlayerHeavyKickState(this);
-        MidKickState = new PlayerMidKickState(this);
-        MidPunchState = new PlayerMidPunchState(this);
+        NormalAttackState = new PlayerNormalAttackState(this);
+        LowAttackState = new PlayerLowAttackState(this);
+        UpAttackState = new PlayerUpAttackState(this);
+        ForwardAttackState = new PlayerForwardAttackState(this);
         HitState = new PlayerHitState(this);
         GuardHitState = new PlayerGuardHitState(this);
         GrabState = new PlayerGrabState(this);
         GrabbedState = new PlayerGrabbedState(this);
     }
 
+    /// <summary>
+    /// FightCameraの追従対象へ登録・解除する
+    /// </summary>
+    private void RegisterToCamera(bool isAdd)
+    {
+        FightCamera cam = FindFirstObjectByType<FightCamera>();
+        if (cam == null) return;
+
+        if (isAdd)
+        {
+            cam.AddTarget(this.transform);
+        }
+        else
+        {
+            cam.RemoveTarget(this.transform);
+        }
+    }
+
     #endregion
 
-    #region 入力
+
+    #region 入力・更新(StateAuthority)
+
+    /// <summary>
+    /// 入力取得 → State更新 → 移動(StateAuthority側のみ)
+    /// </summary>
+    private void UpdateAuthority()
+    {
+        //入力が取得できた場合のみゲーム処理を実行
+        if (!GetInput(out NetworkManager.PlayerInputData data)) return;
+
+        //試合中以外は入力を無効化
+        if (!IsFightPhase())
+        {
+            data = default;
+        }
+
+        UpdateInput(data);
+        m_StateMachine.Update();
+        UpdateMovement(data);
+    }
+
+    /// <summary>
+    /// 試合中(Fightフェーズ)か
+    /// </summary>
+    private bool IsFightPhase()
+    {
+        if (m_RoundManager == null)
+        {
+            m_RoundManager = FindFirstObjectByType<RoundManager>();
+        }
+
+        return m_RoundManager != null && m_RoundManager.Phase == RoundManager.RoundPhase.Fight;
+    }
 
     /// <summary>
     /// 入力状態を更新する
     /// </summary>
-    /// <param name="data">入力データ</param>
     private void UpdateInput(NetworkManager.PlayerInputData data)
     {
         Direction direction = ConvertDirection(data.horizontal, data.vertical);
@@ -441,37 +399,33 @@ public class Player : NetworkBehaviour
         bool isGuard = data.isGuard && IsCanGuard;
 
         m_Input.SetInput(direction,
-                         data.isLightKick,
-                         data.isHeavyKick,
-                         data.isLightPunch,
-                         data.isHeavyPunch,
-                         data.isMidPunch,
-                         data.isMidKick,
+                         data.isNormalAttack,
+                         data.isLowAttack,
+                         data.isUpAttack,
+                         data.isForwardAttack,
                          data.isJump,
-                         isGuard
-                         );
+                         isGuard);
     }
-
 
     /// <summary>
     /// NetworkInputをDirectionへ変換する
     /// </summary>
-    private Direction ConvertDirection(float horizontal,float vertical)
+    private static Direction ConvertDirection(float horizontal, float vertical)
     {
         int h = horizontal > 0.0f ? 1 : (horizontal < 0.0f ? -1 : 0);
         int v = vertical > 0.0f ? 1 : (vertical < 0.0f ? -1 : 0);
 
-        switch(h,v)
+        switch (h, v)
         {
-            case (-1, 1):  return Direction.UpLeft;
-            case (1, 1):   return Direction.UpRight;
+            case (-1, 1): return Direction.UpLeft;
+            case (1, 1): return Direction.UpRight;
             case (-1, -1): return Direction.DownLeft;
-            case (1, -1):  return Direction.DownRight;
-            case (-1, 0):  return Direction.Left;
-            case (1, 0):   return Direction.Right;
-            case (0, 1):   return Direction.Up;
-            case (0, -1):  return Direction.Down;
-            default:       return Direction.Neutral;
+            case (1, -1): return Direction.DownRight;
+            case (-1, 0): return Direction.Left;
+            case (1, 0): return Direction.Right;
+            case (0, 1): return Direction.Up;
+            case (0, -1): return Direction.Down;
+            default: return Direction.Neutral;
         }
     }
 
@@ -483,40 +437,34 @@ public class Player : NetworkBehaviour
     /// <summary>
     /// 移動処理
     /// </summary>
-    /// <param name="data">入力データ</param>
     private void UpdateMovement(NetworkManager.PlayerInputData data)
     {
-
         //接地中は落下速度をリセット
-        if(m_Controller.isGrounded && m_Move.y < 0.0f)
+        if (m_Controller.isGrounded && m_Move.y < 0.0f)
         {
             m_Move.y = GroundedStickVelocity;
         }
 
         //左右移動(行動制限中は入力分を停止)
-        float inputX = IsHorizontalMoveLocked ? 0.0f : data.horizontal * m_Speed;
+        float inputX = IsHorizontalMoveLocked ? 0.0f : data.horizontal * m_CharacterData.speed;
 
         //相手の頭に乗っている場合は、行動制限中でも左右にずり落とす
-        float slideX = m_IsOnOpponentHead ? m_SLideOffDir * m_SlideOffSpeed : 0.0f;
+        float slideX = m_IsOnOpponentHead ? m_SlideOffDir * m_SlideOffSpeed : 0.0f;
 
         //Moveの最中にOnControllerColliderHitで再度セットされるので、先にリセットする
         m_IsOnOpponentHead = false;
 
-        //入力 + ノックバックを合成
+        //入力 + ノックバック + ずり落ちを合成
         m_Move.x = inputX + m_KnockbackVelocityX + slideX;
 
         //ノックバックを0へ向けて直線的に減衰
         m_KnockbackVelocityX = Mathf.MoveTowards(m_KnockbackVelocityX, 0.0f, m_KnockbackDecay * Runner.DeltaTime);
 
         //重力(落下中は強める)
-        
         float gravity = m_Move.y > 0.0f ? m_Gravity : m_Gravity * FallGravityMultiplier;
         m_Move.y += gravity * Runner.DeltaTime;
 
-        Vector3 delta = m_Move * Runner.DeltaTime;
-
-        //移動
-        m_Controller.Move(delta);
+        m_Controller.Move(m_Move * Runner.DeltaTime);
     }
 
     /// <summary>
@@ -527,9 +475,17 @@ public class Player : NetworkBehaviour
         if (!m_Controller.isGrounded) return;
 
         //ジャンプ速度を設定
-        m_Move.y = Mathf.Sqrt(m_JumpPower * -2.0f * m_Gravity);
+        m_Move.y = Mathf.Sqrt(m_CharacterData.jumpPower * -2.0f * m_Gravity);
     }
 
+    /// <summary>
+    /// ジャンプが終了したか
+    /// </summary>
+    public bool IsJumpFinished()
+    {
+        //地面に着地し、落下が終わったらジャンプ終了
+        return m_Controller.isGrounded && m_Move.y <= 0.0f;
+    }
 
     /// <summary>
     /// 相手の位置に応じて向きを更新する
@@ -538,13 +494,43 @@ public class Player : NetworkBehaviour
     {
         if (m_Opponent == null) return;
 
-        //相手とのX座標差
         float deltaX = m_Opponent.transform.position.x - this.transform.position.x;
+        if (Mathf.Abs(deltaX) < FacingThreshold) return;
 
-        if (Mathf.Abs(deltaX) < 0.001f) return;
+        FacingYaw = deltaX > 0.0f ? FaceRightYaw : FaceLeftYaw;
+    }
 
-        //モデルの正面がローカル+Zの場合
-        FacingYaw = deltaX > 0.0f ? 90.0f : -90.0f;
+    /// <summary>
+    /// 攻撃者から離れる方向にノックバックを与える
+    /// </summary>
+    private void ApplyKnockback(float attackerX, float power)
+    {
+        float dir = this.transform.position.x >= attackerX ? 1.0f : -1.0f;
+        m_KnockbackVelocityX = dir * power;
+    }
+
+    private void OnControllerColliderHit(ControllerColliderHit hit)
+    {
+        //移動を行っているStateAuthority側だけで判定
+        if (!Object.HasStateAuthority) return;
+
+        //上から乗っている接触だけを対象にする
+        if (hit.normal.y < m_StandOnNormalY) return;
+
+        //相手プレイヤーか
+        Player other = hit.collider.GetComponentInParent<Player>();
+        if (other == null || other == this) return;
+
+        float dx = this.transform.position.x - other.transform.position.x;
+
+        //相手から離れる方向。ほぼ真上に乗った場合は来た側へ
+        //(相手の向こう側へ抜けさせたい場合は符号を反転させる)
+        float dir = Mathf.Abs(dx) > HeadOverlapThreshold
+            ? (dx > 0.0f ? 1.0f : -1.0f)
+            : -FacingDir;
+
+        m_IsOnOpponentHead = true;
+        m_SlideOffDir = dir;
     }
 
     #endregion
@@ -555,7 +541,6 @@ public class Player : NetworkBehaviour
     /// <summary>
     /// Stateの変更
     /// </summary>
-    /// <param name="state">次に遷移するState</param>
     public void ChangeState(PlayerState state)
     {
         m_StateMachine.ChangeState(state);
@@ -564,19 +549,15 @@ public class Player : NetworkBehaviour
     /// <summary>
     /// 対戦相手を登録
     /// </summary>
-    /// <param name="opponent">対戦相手</param>
     public void SetOpponent(Player opponent)
     {
         m_Opponent = opponent;
     }
 
-    
-    //攻撃者から離れる方向にノックバックを与える
-    private void ApplyKnockback(float attackerX,float power)
-    {
-        float dir = this.transform.position.x >= attackerX ? 1.0f : -1.0f;
-        m_KnockbackVelocityX = dir * power;
-    }
+    #endregion
+
+
+    #region ダメージ
 
     /// <summary>
     /// ダメージを受ける(StateAuthority側のみ実行)
@@ -584,61 +565,93 @@ public class Player : NetworkBehaviour
     /// <param name="damage">ダメージ量</param>
     /// <param name="hitStunTicks">喰らい硬直(Tick数)</param>
     /// <param name="guardStunTicks">ガード硬直(Tick数)</param>
-    public void TakeDamage(int damage,int hitStunTicks,int guardStunTicks,float attackerX,float knockback,float guardKnockback,float guardDamage)
+    public void TakeDamage(int damage, int hitStunTicks, int guardStunTicks, float attackerX, float knockback, float guardKnockback, float guardDamage)
     {
         if (!Object.HasStateAuthority) return;
 
         //KO済みなら以降の攻撃は無視
-        if (HP <= 0) return;
+        if (IsKO) return;
 
-        //ガード中、またはガード喰らい中なら成立
-        if(CurrentState == GuardState || CurrentState == GuardHitState)
+        if (IsGuarding)
         {
+            TakeGuardedHit(guardStunTicks, attackerX, knockback, guardKnockback, guardDamage);
+        }
+        else
+        {
+            TakeUnguardedHit(damage, hitStunTicks, attackerX, knockback);
+        }
+    }
 
-            GuardGauge -= guardDamage;
-            GuardRecoverTimer = TickTimer.CreateFromSeconds(Runner, m_GuardRecoverDelay);
+    /// <summary>
+    /// 投げのダメージ適用
+    /// </summary>
+    public void TakeThrowDamage(int damage, int hitStunTicks, float attackerX, float knockback)
+    {
+        if (!Object.HasStateAuthority) return;
 
-            //ゲージが尽きたらガードクラッシュ
-            if(GuardGauge <= 0.0f)
-            {
-                ApplyKnockback(attackerX, knockback);
-                BreakGuard();
-                return;
-            }
+        //KO済みなら以降の攻撃は無視
+        if (IsKO) return;
 
-            //通常のガード成立
-            ApplyKnockback(attackerX, guardKnockback);
+        TakeUnguardedHit(damage, hitStunTicks, attackerX, knockback);
+    }
 
-            GuardHitState.Setup(guardStunTicks);
+    /// <summary>
+    /// ガード成立時の処理
+    /// </summary>
+    private void TakeGuardedHit(int guardStunTicks, float attackerX, float knockback, float guardKnockback, float guardDamage)
+    {
+        GuardGauge -= guardDamage;
+        ResetGuardRecoverTimer();
 
-            if(CurrentState == GuardHitState)
-            {
-                GuardHitState.Restart();
-            }
-            else
-            {
-                ChangeState(GuardHitState);
-            }
-
+        //ゲージが尽きたらガードクラッシュ
+        if (GuardGauge <= 0.0f)
+        {
+            ApplyKnockback(attackerX, knockback);
+            BreakGuard();
             return;
         }
 
-        //通常の喰らい
+        //通常のガード成立
+        ApplyKnockback(attackerX, guardKnockback);
+
+        GuardHitState.Setup(guardStunTicks);
+
+        if (CurrentState == GuardHitState)
+        {
+            GuardHitState.Restart();
+        }
+        else
+        {
+            ChangeState(GuardHitState);
+        }
+    }
+
+    /// <summary>
+    /// ガードされなかった場合(通常の喰らい・投げ)の処理
+    /// </summary>
+    private void TakeUnguardedHit(int damage, int hitStunTicks, float attackerX, float knockback)
+    {
         HP = Mathf.Max(0, HP - damage);
-        ApplyKnockback(attackerX,knockback);
+        ApplyKnockback(attackerX, knockback);
 
         //HPが0になったらKO
-        if(HP <= 0)
+        if (IsKO)
         {
             //ChangeState(KOState);
-
             return;
         }
 
+        EnterHitState(hitStunTicks);
+    }
+
+    /// <summary>
+    /// 喰らい状態へ遷移する(喰らい中なら硬直とアニメーションをやり直す)
+    /// </summary>
+    private void EnterHitState(int hitStunTicks)
+    {
         HitState.Setup(AnimationState.Hit, hitStunTicks);
 
-        //喰らい中に再度喰らった場合は硬直とアニメーションをやり直す
-        if(CurrentState == HitState)
+        if (CurrentState == HitState)
         {
             HitState.Restart();
         }
@@ -646,12 +659,16 @@ public class Player : NetworkBehaviour
         {
             ChangeState(HitState);
         }
-
     }
 
+    #endregion
 
 
-    //攻撃判定を行い、当たったらtrueを返す
+    #region 攻撃・掴み判定
+
+    /// <summary>
+    /// 攻撃判定を行い、当たったらtrueを返す
+    /// </summary>
     public bool CheckAttackHit(AttackData data)
     {
         Vector3 center = data.GetWorldCenter(this.transform.position, FacingDir);
@@ -661,29 +678,13 @@ public class Player : NetworkBehaviour
         m_DebugSize = data.size;
         m_DebugExpireTime = Time.time + DebugGizmoDuration;
 
-        //CharacterControllerで動かした直後のColliderの位置をPhysicsへ反映
-        Physics.SyncTransforms();
+        int count = OverlapHurtBoxes(center, data.size);
 
-        int count = Physics.OverlapBoxNonAlloc(
-                    center,
-                    data.size * 0.5f,
-                    m_HitBuffer,
-                    Quaternion.identity,
-                    m_HurtMask,
-                    QueryTriggerInteraction.Collide
-                    ); //喰らい判定はTriggerなので明示する
-
-        for(int i = 0; i < count; i++)
+        for (int i = 0; i < count; i++)
         {
-            HurtBox hurtBox = m_HitBuffer[i].GetComponent<HurtBox>();
+            if (!TryGetTarget(i, out Player target)) continue;
 
-            //自分自身には当てない
-            if(hurtBox == null || hurtBox.Owner == null || hurtBox.Owner == this)
-            {
-                continue;
-            }
-
-            hurtBox.Owner.TakeDamage(
+            target.TakeDamage(
                 data.damage,
                 data.hitStunTicks,
                 data.guardStunTicks,
@@ -699,170 +700,33 @@ public class Player : NetworkBehaviour
         return false;
     }
 
-
-    private void OnControllerColliderHit(ControllerColliderHit hit)
-    {
-        //移動を行っているStateAuthority側だけで判定
-        if (!Object.HasStateAuthority) return;
-
-        //上から乗っている接触だけを対象にする
-        if (hit.normal.y < m_StandOnNormalY) return;
-
-        //相手プレイヤーか
-        Player other = hit.collider.GetComponentInParent<Player>();
-        if (other == null || other == this) return;
-
-
-        float dx = this.transform.position.x - other.transform.position.x;
-
-        float dir;
-        if(Mathf.Abs(dx) > 0.05f)
-        {
-            //相手から離れる方向
-            dir = dx > 0.0f ? 1.0f : -1.0f;
-        }
-        else
-        {
-            //ほぼ真上に乗った場合は来た側へ
-            //相手の向こう側へ抜けさせたい場合は符号を反転させる
-            dir = -FacingDir;
-        }
-
-        m_IsOnOpponentHead = true;
-        m_SLideOffDir = dir;
-    }
-
-    //判定を出した直後だけ赤い箱を表示
-    private void OnDrawGizmos()
-    {
-        if (Time.time > m_DebugExpireTime || m_DebugSize == Vector3.zero) return;
-
-        Gizmos.color = Color.red;
-        Gizmos.DrawWireCube(m_DebugCenter, m_DebugSize);
-    }
-
-    //Playerを選択している間は、全技の判定範囲を色分けして表示
-    private void OnDrawGizmosSelected()
-    {
-        DrawAttackGizmo(m_LightPunchData, Color.yellow);
-        DrawAttackGizmo(m_MidPunchData, new Color(1.0f, 0.6f, 0.0f));
-
-        DrawAttackGizmo(m_HeavyPunchData, Color.red);
-        DrawAttackGizmo(m_LightKickData,  Color.cyan);
-        DrawAttackGizmo(m_MidKickData,    Color.blue);
-        DrawAttackGizmo(m_HeavyKickData,  Color.magenta);
-    }
-
-
-    private void DrawAttackGizmo(AttackData data,Color color)
-    {
-        if (data == null) return;
-
-        Gizmos.color = Color.red;
-        Gizmos.DrawWireCube(data.GetWorldCenter(this.transform.position, FacingDir), data.size);
-    }
-
-    #endregion
-
-    #region ガード処理
-
     /// <summary>
-    /// ガードゲージの自然回復
+    /// 掴み判定を行い、掴めたらtrueを返す
     /// </summary>
-    private void UpdateGuardGauge()
-    {
-       //ガード構え中は継続的に減少
-       if(CurrentState == GuardState)
-       {
-            GuardGauge = Mathf.Max(0.0f, GuardGauge - m_GuardDrainPerSecond * Runner.DeltaTime);
-
-            //ガードを止めてから回復が始まるまでの待ち時間を、構えている間は更新し続ける
-            GuardRecoverTimer = TickTimer.CreateFromSeconds(Runner, m_GuardRecoverDelay);
-
-            if(GuardGauge <= 0.0f)
-            {
-                BreakGuard();
-            }
-
-            return;
-       }
-
-        //ガード位中は回復も減少もしない
-        if (CurrentState == GuardHitState) return;
-
-        //待ち時間中は回復しない
-        if (!GuardRecoverTimer.ExpiredOrNotRunning(Runner)) return;
-
-        GuardGauge = Mathf.Min(m_MaxGuardGauge, GuardGauge + m_GuardRecoverPerSecond * Runner.DeltaTime);
-
-        //一定量までガード可能に戻す
-        if(IsGuardBroken && GuardGauge >= m_MaxGuardGauge * m_GuardUnlockRate)
-        {
-            IsGuardBroken = false;
-        }
-
-    }
-
-    /// <summary>
-    /// ガードクラッシュ
-    /// </summary>
-    private void BreakGuard()
-    {
-        GuardGauge = 0.0f;
-        IsGuardBroken = true;
-
-        //回復開始まで通常より長く待つ
-        GuardRecoverTimer = TickTimer.CreateFromSeconds(Runner, m_GuardRecoverDelay);
-
-        RPC_GuardBreakCamera();
-
-        HitState.Setup(AnimationState.Hit, m_GuardBreakStunTicks);
-
-        if(CurrentState == HitState)
-        {
-            HitState.Restart();
-        }
-        else
-        {
-            ChangeState(HitState);
-        }
-    }
-
-    #endregion
-
-    #region 掴み
-
     public bool CheckGrabHit(GrabData data)
     {
         Vector3 center = data.GetWorldCenter(this.transform.position, FacingDir);
 
-        Physics.SyncTransforms();
+        int count = OverlapHurtBoxes(center, data.size);
 
-        int count = Physics.OverlapBoxNonAlloc(
-            center, data.size * 0.5f, m_HitBuffer,
-            Quaternion.identity, m_HurtMask, QueryTriggerInteraction.Collide
-            );
-
-        for(int i = 0; i < count; i++)
+        for (int i = 0; i < count; i++)
         {
-            HurtBox hurtBox = m_HitBuffer[i].GetComponent<HurtBox>();
-            if (hurtBox == null || hurtBox.Owner == null || hurtBox.Owner == this) continue;
+            if (!TryGetTarget(i, out Player target)) continue;
 
             //掴めたかどうかは相手側が判断する(喰らい中・空中などは失敗)
-            if(hurtBox.Owner.TakeGrab(this,data))
+            if (target.TakeGrab(this, data))
             {
                 return true;
             }
         }
+
         return false;
     }
 
-    
-    public bool TakeGrab(Player attacker,GrabData data)
+    public bool TakeGrab(Player attacker, GrabData data)
     {
         if (!Object.HasStateAuthority) return false;
-        if (HP <= 0) return false;
-
+        if (IsKO) return false;
 
         //掴めない状態(掴まれ中・喰らい中・空中)
         if (CurrentState == GrabbedState || CurrentState == HitState || !IsGrounded)
@@ -875,55 +739,142 @@ public class Player : NetworkBehaviour
         ChangeState(GrabbedState);
         return true;
     }
-    
 
-    //投げのダメージ適用
-    public void TakeThrowDamage(int damage,int hitStunTicks,float attackerX,float knockback)
+    /// <summary>
+    /// 指定範囲のHurtBoxを判定バッファへ取得し、ヒット数を返す
+    /// </summary>
+    private int OverlapHurtBoxes(Vector3 center, Vector3 size)
     {
-        if (!Object.HasStateAuthority) return;
+        //CharacterControllerで動かした直後のColliderの位置をPhysicsへ反映
+        Physics.SyncTransforms();
 
-        HP = Mathf.Max(0, HP - damage);
-        ApplyKnockback(attackerX, knockback);
+        //喰らい判定はTriggerなので明示する
+        return Physics.OverlapBoxNonAlloc(
+            center,
+            size * 0.5f,
+            m_HitBuffer,
+            Quaternion.identity,
+            m_HurtMask,
+            QueryTriggerInteraction.Collide);
+    }
 
-        if(HP <= 0)
+    /// <summary>
+    /// 判定バッファのi番目から、自分以外のPlayerを取得する
+    /// </summary>
+    private bool TryGetTarget(int index, out Player target)
+    {
+        target = null;
+
+        HurtBox hurtBox = m_HitBuffer[index].GetComponent<HurtBox>();
+        if (hurtBox == null || hurtBox.Owner == null || hurtBox.Owner == this)
         {
-            //KOState;
-            return;
+            return false;
         }
 
-        HitState.Setup(AnimationState.Hit, hitStunTicks);
-        ChangeState(HitState);
+        target = hurtBox.Owner;
+        return true;
     }
 
     #endregion
+
+
+    #region ガード処理
+
+    /// <summary>
+    /// ガードゲージの消費・自然回復
+    /// </summary>
+    private void UpdateGuardGauge()
+    {
+        //ガード構え中は継続的に減少
+        if (CurrentState == GuardState)
+        {
+            GuardGauge = Mathf.Max(0.0f, GuardGauge - m_CharacterData.guardDrainPerSecond * Runner.DeltaTime);
+
+            //構えている間は、回復開始までの待ち時間を更新し続ける
+            ResetGuardRecoverTimer();
+
+            if (GuardGauge <= 0.0f)
+            {
+                BreakGuard();
+            }
+
+            return;
+        }
+
+        //ガード喰らい中は回復も減少もしない
+        if (CurrentState == GuardHitState) return;
+
+        //待ち時間中は回復しない
+        if (!GuardRecoverTimer.ExpiredOrNotRunning(Runner)) return;
+
+        GuardGauge = Mathf.Min(MaxGuardGauge, GuardGauge + m_CharacterData.guardRecoverPerSecond * Runner.DeltaTime);
+
+        //一定量まで回復したらガード可能に戻す
+        if (IsGuardBroken && GuardGauge >= MaxGuardGauge * m_CharacterData.guardUnlockRate)
+        {
+            IsGuardBroken = false;
+        }
+    }
+
+    /// <summary>
+    /// ガードクラッシュ
+    /// </summary>
+    private void BreakGuard()
+    {
+        GuardGauge = 0.0f;
+        IsGuardBroken = true;
+
+        //回復開始までの待ち時間
+        ResetGuardRecoverTimer();
+
+        RPC_GuardBreakCamera();
+
+        EnterHitState(m_CharacterData.guardBreakStunTicks);
+    }
+
+    /// <summary>
+    /// ガードゲージ回復までの待ち時間を開始し直す
+    /// </summary>
+    private void ResetGuardRecoverTimer()
+    {
+        GuardRecoverTimer = TickTimer.CreateFromSeconds(Runner, m_CharacterData.guardRecoverDelay);
+    }
+
+    [Rpc(RpcSources.StateAuthority, RpcTargets.All)]
+    private void RPC_GuardBreakCamera()
+    {
+        if (GuardBreakCamera.Instance != null)
+        {
+            GuardBreakCamera.Instance.Play(this);
+        }
+    }
+
+    #endregion
+
 
     #region アニメーション
 
     /// <summary>
     /// アニメーション開始イベントをRPCで通知
     /// </summary>
-    /// <param name="state"></param>
-    [Rpc(RpcSources.StateAuthority,RpcTargets.All)]
+    [Rpc(RpcSources.StateAuthority, RpcTargets.All)]
     public void RPC_PlayAnimation(AnimationState state)
     {
         PlayAnimationLocal(state);
     }
 
-
     /// <summary>
     /// 各クライアントでアニメーションを再生
     /// </summary>
-    /// <param name="state"></param>
     private void PlayAnimationLocal(AnimationState state)
     {
         ResetAnimationParameters();
         ApplyAnimationParameters(state);
 
-        if(AnimationNames.TryGetValue(state,out string stateName))
+        if (AnimationNames.TryGetValue(state, out string stateName))
         {
             m_Anim.CrossFade(stateName, CrossFadeDuration);
         }
-
     }
 
     /// <summary>
@@ -939,14 +890,11 @@ public class Player : NetworkBehaviour
     /// <summary>
     /// ステートごとに必要なAnimatorパラメーターを設定
     /// </summary>
-    /// <param name="state"></param>
     private void ApplyAnimationParameters(AnimationState state)
     {
-        switch(state)
+        switch (state)
         {
             case AnimationState.Walk:
-                m_Anim.SetFloat(SpeedParam, 1.0f);
-                break;
             case AnimationState.BackWalk:
                 m_Anim.SetFloat(SpeedParam, 1.0f);
                 break;
@@ -960,41 +908,47 @@ public class Player : NetworkBehaviour
     }
 
     /// <summary>
+    /// アニメーションの再生速度を変更する
+    /// </summary>
+    public void SetAnimationSpeed(float speed)
+    {
+        if (m_Anim != null)
+        {
+            m_Anim.speed = speed;
+        }
+    }
+
+    /// <summary>
     /// アニメーション終了判定
     /// </summary>
-    /// <param name="state"></param>
-    /// <returns></returns>
     private bool IsAnimationFinished(AnimationState state)
     {
         string stateName = AnimationNames[state];
 
         //Animatorが遷移中なら終了判定しない
-        if(m_Anim.IsInTransition(0))
+        if (m_Anim.IsInTransition(0))
         {
             LogAnimation($"{stateName} : 遷移中");
             return false;
         }
 
-
         AnimatorStateInfo stateInfo = m_Anim.GetCurrentAnimatorStateInfo(0);
 
-        if(!stateInfo.IsName(stateName))
+        if (!stateInfo.IsName(stateName))
         {
-            LogAnimationWarning($"ステート名不一致 : 期待={stateName},現在のhssh = {stateInfo.fullPathHash}");
-
+            LogAnimationWarning($"ステート名不一致 : 期待={stateName}, 現在のhash={stateInfo.fullPathHash}");
             return false;
         }
 
-        if(stateInfo.loop)
+        if (stateInfo.loop)
         {
             LogAnimationWarning($"{stateName} : Loop設定がON");
-
             return false;
         }
 
         bool isFinished = stateInfo.normalizedTime >= 1.0f;
 
-        if(isFinished)
+        if (isFinished)
         {
             LogAnimation($"{stateName} : 再生終了 normalizedTime = {stateInfo.normalizedTime:F2}");
         }
@@ -1003,45 +957,8 @@ public class Player : NetworkBehaviour
     }
 
     /// <summary>
-    /// アニメーションの再生速度を変更する
+    /// 指定アニメーションの正規化再生時間を取得する(0.0 = 開始、1.0 = 1周完了)
     /// </summary>
-    /// <param name="speed"></param>
-    public void SetAnimationSpeed(float speed)
-    {
-        if(m_Anim != null)
-        {
-            m_Anim.speed = speed;
-        }
-    }
-
-    [Rpc(RpcSources.StateAuthority,RpcTargets.All)]
-    private void RPC_GuardBreakCamera()
-    {
-        if(GuardBreakCamera.Instance != null)
-        {
-            GuardBreakCamera.Instance.Play(this);
-        }
-    }
-
-    //エディタ上のみログ出力
-    [Conditional("UNITY_EDITOR")]
-    private static void LogAnimation(string message) => Debug.Log($"[Animation] {message}");
-
-    [Conditional("UNITY_EDITOR")]
-    private static void LogAnimationWarning(string message) => Debug.LogWarning($"[Animation] {message}");
-
-
-    /// <summary>
-    /// ジャンプが終了したか
-    /// </summary>
-    /// <returns></returns>
-    public bool IsJumpFinished()
-    {
-        //地面に着地し、落下が終わったらジャンプ終了
-        return m_Controller.isGrounded && m_Move.y <= 0.0f;
-    }
-
-
     public float GetAnimationNormalizedTime(AnimationState state)
     {
         if (m_Anim == null) return 0.0f;
@@ -1056,51 +973,55 @@ public class Player : NetworkBehaviour
         //指定したアニメーション以外なら取得しない
         if (!stateInfo.IsName(stateName)) return 0.0f;
 
-        //0.0 = 再生開始、1.0= 1周再生完了
         return stateInfo.normalizedTime;
     }
 
-    /// <summary>
-    /// 弱パンチのアニメーションが終了したか
-    /// </summary>
-    /// <returns></returns>
-    public bool IsLightPunchFinished() => IsAnimationFinished(AnimationState.LightPunch);
-
-    /// <summary>
-    /// 強パンチのアニメーションが終了したか
-    /// </summary>
-    /// <returns></returns>
-    public bool IsHeavyPunchFinished() => IsAnimationFinished(AnimationState.HeavyPunch);
-
-    /// <summary>
-    /// 弱キックのアニメーションが終了したか
-    /// </summary>
-    /// <returns></returns>
-    public bool IsLightKickFinished() => IsAnimationFinished(AnimationState.LightKick);
-    
-    /// <summary>
-    /// 強キックのアニメーションが終了したか
-    /// </summary>
-    /// <returns></returns>
-    public bool IsHeavyKickFinished() => IsAnimationFinished(AnimationState.HeavyKick);
-
-    /// <summary>
-    /// 中キックのアニメーションが終了したか
-    /// </summary>
-    /// <returns></returns>
-    public bool IsMidKickFinished() => IsAnimationFinished(AnimationState.MidKick);
-
-    /// <summary>
-    /// 中パンチのアニメーションが終了したか
-    /// </summary>
-    /// <returns></returns>
-    public bool IsMidPunchFinished() => IsAnimationFinished(AnimationState.MidPunch);
-
-    /// <summary>
-    /// 竜巻旋風脚のアニメーションが終了したか
-    /// </summary>
-    /// <returns></returns>
+    //各攻撃アニメーションの終了判定
     public bool IsTatsumakiFinished() => IsAnimationFinished(AnimationState.Tatsumaki);
+    public bool IsNormalAttackFinished() => IsAnimationFinished(AnimationState.NormalAttack);
+    public bool IsLowAttackFinished() => IsAnimationFinished(AnimationState.LowAttack);
+    public bool IsUpAttackFinished() => IsAnimationFinished(AnimationState.UpAttack);
+    public bool IsForwardAttackFinished() => IsAnimationFinished(AnimationState.ForwardAttack);
+
+    //エディタ上のみログ出力
+    [System.Diagnostics.Conditional("UNITY_EDITOR")]
+    private static void LogAnimation(string message) => Debug.Log($"[Animation] {message}");
+
+    [System.Diagnostics.Conditional("UNITY_EDITOR")]
+    private static void LogAnimationWarning(string message) => Debug.LogWarning($"[Animation] {message}");
+
+    #endregion
+
+
+    #region デバッグ表示
+
+    //判定を出した直後だけ赤い箱を表示
+    private void OnDrawGizmos()
+    {
+        if (Time.time > m_DebugExpireTime || m_DebugSize == Vector3.zero) return;
+
+        Gizmos.color = Color.red;
+        Gizmos.DrawWireCube(m_DebugCenter, m_DebugSize);
+    }
+
+    //Playerを選択している間は、全技の判定範囲を色分けして表示
+    private void OnDrawGizmosSelected()
+    {
+        if (m_CharacterData == null) return;
+
+        for (int i = 0; i < GizmoColors.Length; i++)
+        {
+            DrawAttackGizmo(m_CharacterData.GetAttack((AttackSlot)i), GizmoColors[i]);
+        }
+    }
+
+    private void DrawAttackGizmo(AttackData data, Color color)
+    {
+        if (data == null) return;
+
+        Gizmos.color = color;
+        Gizmos.DrawWireCube(data.GetWorldCenter(this.transform.position, FacingDir), data.size);
+    }
 
     #endregion
 }

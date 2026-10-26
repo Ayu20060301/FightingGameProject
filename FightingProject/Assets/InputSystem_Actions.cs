@@ -102,42 +102,6 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
                     ""initialStateCheck"": true
                 },
                 {
-                    ""name"": ""LightKick"",
-                    ""type"": ""Button"",
-                    ""id"": ""dfe74aca-0663-4673-b622-1d8fcec1aa48"",
-                    ""expectedControlType"": """",
-                    ""processors"": """",
-                    ""interactions"": """",
-                    ""initialStateCheck"": false
-                },
-                {
-                    ""name"": ""HeavyKick"",
-                    ""type"": ""Button"",
-                    ""id"": ""bd17b2ca-b9b2-4717-a1e9-79744ea9db0f"",
-                    ""expectedControlType"": """",
-                    ""processors"": """",
-                    ""interactions"": """",
-                    ""initialStateCheck"": false
-                },
-                {
-                    ""name"": ""LightPunch"",
-                    ""type"": ""Button"",
-                    ""id"": ""e95843ca-f651-4eae-b2d6-66faa28c7236"",
-                    ""expectedControlType"": """",
-                    ""processors"": """",
-                    ""interactions"": """",
-                    ""initialStateCheck"": false
-                },
-                {
-                    ""name"": ""HeavyPunch"",
-                    ""type"": ""Button"",
-                    ""id"": ""7159f8cc-47ea-444e-896f-6b09105f96d3"",
-                    ""expectedControlType"": """",
-                    ""processors"": """",
-                    ""interactions"": """",
-                    ""initialStateCheck"": false
-                },
-                {
                     ""name"": ""Guard"",
                     ""type"": ""Button"",
                     ""id"": ""3e77a433-a982-489d-a2be-14dc6d3263a5"",
@@ -165,18 +129,45 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
                     ""initialStateCheck"": false
                 },
                 {
-                    ""name"": ""MidPunch"",
+                    ""name"": ""NormalAttack"",
                     ""type"": ""Button"",
-                    ""id"": ""caa4140b-bfed-42eb-b5de-3375551382c6"",
+                    ""id"": ""ca3e752a-a91c-447e-9155-4eac86f598f2"",
                     ""expectedControlType"": """",
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
                 },
                 {
-                    ""name"": ""MidKick"",
+                    ""name"": ""LowAttack"",
                     ""type"": ""Button"",
-                    ""id"": ""f128c0ca-265e-4026-9ef2-76469a514081"",
+                    ""id"": ""0c0cc89d-6067-4f94-bbd9-cb1422c2a344"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""UpAttack"",
+                    ""type"": ""Button"",
+                    ""id"": ""709313bb-f8f3-4264-bacb-4ed51d771168"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""BackAttack"",
+                    ""type"": ""Button"",
+                    ""id"": ""b27427f1-bd8a-4a14-b7f7-540cb7fe3984"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""ForwardAttack"",
+                    ""type"": ""Button"",
+                    ""id"": ""bffe00a8-6dce-4423-8c64-09b60c331f8a"",
                     ""expectedControlType"": """",
                     ""processors"": """",
                     ""interactions"": """",
@@ -318,94 +309,6 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
                 },
                 {
                     ""name"": """",
-                    ""id"": ""3fb5e265-0173-4d00-b278-60f321f3fd0c"",
-                    ""path"": ""<Gamepad>/buttonSouth"",
-                    ""interactions"": """",
-                    ""processors"": """",
-                    ""groups"": "";Gamepad"",
-                    ""action"": ""LightKick"",
-                    ""isComposite"": false,
-                    ""isPartOfComposite"": false
-                },
-                {
-                    ""name"": """",
-                    ""id"": ""4ca4849b-9471-4534-b514-5b256eb52ffa"",
-                    ""path"": ""<Keyboard>/#(K)"",
-                    ""interactions"": """",
-                    ""processors"": """",
-                    ""groups"": "";Keyboard&Mouse"",
-                    ""action"": ""LightKick"",
-                    ""isComposite"": false,
-                    ""isPartOfComposite"": false
-                },
-                {
-                    ""name"": """",
-                    ""id"": ""b698b737-a974-4b68-847c-5b600067162a"",
-                    ""path"": ""<Gamepad>/rightTrigger"",
-                    ""interactions"": """",
-                    ""processors"": """",
-                    ""groups"": "";Gamepad"",
-                    ""action"": ""HeavyKick"",
-                    ""isComposite"": false,
-                    ""isPartOfComposite"": false
-                },
-                {
-                    ""name"": """",
-                    ""id"": ""92d974aa-79c2-4715-8425-7190f5ae91d7"",
-                    ""path"": ""<Keyboard>/#(L)"",
-                    ""interactions"": """",
-                    ""processors"": """",
-                    ""groups"": "";Keyboard&Mouse"",
-                    ""action"": ""HeavyKick"",
-                    ""isComposite"": false,
-                    ""isPartOfComposite"": false
-                },
-                {
-                    ""name"": """",
-                    ""id"": ""d7504e57-3b10-4de6-bf49-e736ece48198"",
-                    ""path"": ""<Gamepad>/buttonWest"",
-                    ""interactions"": """",
-                    ""processors"": """",
-                    ""groups"": "";Gamepad"",
-                    ""action"": ""LightPunch"",
-                    ""isComposite"": false,
-                    ""isPartOfComposite"": false
-                },
-                {
-                    ""name"": """",
-                    ""id"": ""124ccfbb-a5fb-40ac-b44a-d2949910e3ff"",
-                    ""path"": ""<Keyboard>/#(J)"",
-                    ""interactions"": """",
-                    ""processors"": """",
-                    ""groups"": "";Keyboard&Mouse"",
-                    ""action"": ""LightPunch"",
-                    ""isComposite"": false,
-                    ""isPartOfComposite"": false
-                },
-                {
-                    ""name"": """",
-                    ""id"": ""4f820ec7-3c8c-43fd-ae21-b3a0f00288a3"",
-                    ""path"": ""<Gamepad>/rightShoulder"",
-                    ""interactions"": """",
-                    ""processors"": """",
-                    ""groups"": "";Gamepad"",
-                    ""action"": ""HeavyPunch"",
-                    ""isComposite"": false,
-                    ""isPartOfComposite"": false
-                },
-                {
-                    ""name"": """",
-                    ""id"": ""a34cfc00-4dfd-41c0-81d6-21e76658170e"",
-                    ""path"": ""<Keyboard>/#(I)"",
-                    ""interactions"": """",
-                    ""processors"": """",
-                    ""groups"": "";Keyboard&Mouse"",
-                    ""action"": ""HeavyPunch"",
-                    ""isComposite"": false,
-                    ""isPartOfComposite"": false
-                },
-                {
-                    ""name"": """",
                     ""id"": ""9bddebe0-a6d5-41b8-ba7c-905ae170571a"",
                     ""path"": ""<Gamepad>/leftTrigger"",
                     ""interactions"": """",
@@ -472,23 +375,67 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
                 },
                 {
                     ""name"": """",
-                    ""id"": ""f098e0b8-9451-4f9f-8c01-4963b904b9de"",
-                    ""path"": ""<Gamepad>/buttonNorth"",
+                    ""id"": ""ca501803-4376-4c89-8689-67b32907edf8"",
+                    ""path"": ""<Gamepad>/buttonWest"",
                     ""interactions"": """",
                     ""processors"": """",
-                    ""groups"": "";Gamepad"",
-                    ""action"": ""MidPunch"",
+                    ""groups"": """",
+                    ""action"": ""NormalAttack"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 },
                 {
                     ""name"": """",
-                    ""id"": ""19418a72-f9d8-477e-b95c-e2fd0c5e0b59"",
+                    ""id"": ""d14ea3c0-b1d0-4cc9-bdbe-cba34bed6145"",
+                    ""path"": """",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""NormalAttack"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""2cdb5ae6-a2f7-4003-826f-5aea6e3209f6"",
+                    ""path"": ""<Gamepad>/buttonSouth"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": "";Gamepad"",
+                    ""action"": ""LowAttack"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""6c0855b5-61f0-417e-bbaa-3d91db04e3fc"",
+                    ""path"": ""<Gamepad>/buttonNorth"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": "";Gamepad"",
+                    ""action"": ""UpAttack"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""c4d4c56c-2f50-4b59-a960-d4c4b2391cee"",
                     ""path"": ""<Gamepad>/buttonEast"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": "";Gamepad"",
-                    ""action"": ""MidKick"",
+                    ""action"": ""BackAttack"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""4e3df5ae-8cac-42fe-904e-819d016ce0dd"",
+                    ""path"": ""<Gamepad>/buttonEast"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": "";Gamepad"",
+                    ""action"": ""ForwardAttack"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 }
@@ -1077,15 +1024,14 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
         // Player
         m_Player = asset.FindActionMap("Player", throwIfNotFound: true);
         m_Player_Move = m_Player.FindAction("Move", throwIfNotFound: true);
-        m_Player_LightKick = m_Player.FindAction("LightKick", throwIfNotFound: true);
-        m_Player_HeavyKick = m_Player.FindAction("HeavyKick", throwIfNotFound: true);
-        m_Player_LightPunch = m_Player.FindAction("LightPunch", throwIfNotFound: true);
-        m_Player_HeavyPunch = m_Player.FindAction("HeavyPunch", throwIfNotFound: true);
         m_Player_Guard = m_Player.FindAction("Guard", throwIfNotFound: true);
         m_Player_Jump = m_Player.FindAction("Jump", throwIfNotFound: true);
         m_Player_Crouch = m_Player.FindAction("Crouch", throwIfNotFound: true);
-        m_Player_MidPunch = m_Player.FindAction("MidPunch", throwIfNotFound: true);
-        m_Player_MidKick = m_Player.FindAction("MidKick", throwIfNotFound: true);
+        m_Player_NormalAttack = m_Player.FindAction("NormalAttack", throwIfNotFound: true);
+        m_Player_LowAttack = m_Player.FindAction("LowAttack", throwIfNotFound: true);
+        m_Player_UpAttack = m_Player.FindAction("UpAttack", throwIfNotFound: true);
+        m_Player_BackAttack = m_Player.FindAction("BackAttack", throwIfNotFound: true);
+        m_Player_ForwardAttack = m_Player.FindAction("ForwardAttack", throwIfNotFound: true);
         // UI
         m_UI = asset.FindActionMap("UI", throwIfNotFound: true);
         m_UI_Navigate = m_UI.FindAction("Navigate", throwIfNotFound: true);
@@ -1180,15 +1126,14 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
     private readonly InputActionMap m_Player;
     private List<IPlayerActions> m_PlayerActionsCallbackInterfaces = new List<IPlayerActions>();
     private readonly InputAction m_Player_Move;
-    private readonly InputAction m_Player_LightKick;
-    private readonly InputAction m_Player_HeavyKick;
-    private readonly InputAction m_Player_LightPunch;
-    private readonly InputAction m_Player_HeavyPunch;
     private readonly InputAction m_Player_Guard;
     private readonly InputAction m_Player_Jump;
     private readonly InputAction m_Player_Crouch;
-    private readonly InputAction m_Player_MidPunch;
-    private readonly InputAction m_Player_MidKick;
+    private readonly InputAction m_Player_NormalAttack;
+    private readonly InputAction m_Player_LowAttack;
+    private readonly InputAction m_Player_UpAttack;
+    private readonly InputAction m_Player_BackAttack;
+    private readonly InputAction m_Player_ForwardAttack;
     /// <summary>
     /// Provides access to input actions defined in input action map "Player".
     /// </summary>
@@ -1205,22 +1150,6 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
         /// </summary>
         public InputAction @Move => m_Wrapper.m_Player_Move;
         /// <summary>
-        /// Provides access to the underlying input action "Player/LightKick".
-        /// </summary>
-        public InputAction @LightKick => m_Wrapper.m_Player_LightKick;
-        /// <summary>
-        /// Provides access to the underlying input action "Player/HeavyKick".
-        /// </summary>
-        public InputAction @HeavyKick => m_Wrapper.m_Player_HeavyKick;
-        /// <summary>
-        /// Provides access to the underlying input action "Player/LightPunch".
-        /// </summary>
-        public InputAction @LightPunch => m_Wrapper.m_Player_LightPunch;
-        /// <summary>
-        /// Provides access to the underlying input action "Player/HeavyPunch".
-        /// </summary>
-        public InputAction @HeavyPunch => m_Wrapper.m_Player_HeavyPunch;
-        /// <summary>
         /// Provides access to the underlying input action "Player/Guard".
         /// </summary>
         public InputAction @Guard => m_Wrapper.m_Player_Guard;
@@ -1233,13 +1162,25 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
         /// </summary>
         public InputAction @Crouch => m_Wrapper.m_Player_Crouch;
         /// <summary>
-        /// Provides access to the underlying input action "Player/MidPunch".
+        /// Provides access to the underlying input action "Player/NormalAttack".
         /// </summary>
-        public InputAction @MidPunch => m_Wrapper.m_Player_MidPunch;
+        public InputAction @NormalAttack => m_Wrapper.m_Player_NormalAttack;
         /// <summary>
-        /// Provides access to the underlying input action "Player/MidKick".
+        /// Provides access to the underlying input action "Player/LowAttack".
         /// </summary>
-        public InputAction @MidKick => m_Wrapper.m_Player_MidKick;
+        public InputAction @LowAttack => m_Wrapper.m_Player_LowAttack;
+        /// <summary>
+        /// Provides access to the underlying input action "Player/UpAttack".
+        /// </summary>
+        public InputAction @UpAttack => m_Wrapper.m_Player_UpAttack;
+        /// <summary>
+        /// Provides access to the underlying input action "Player/BackAttack".
+        /// </summary>
+        public InputAction @BackAttack => m_Wrapper.m_Player_BackAttack;
+        /// <summary>
+        /// Provides access to the underlying input action "Player/ForwardAttack".
+        /// </summary>
+        public InputAction @ForwardAttack => m_Wrapper.m_Player_ForwardAttack;
         /// <summary>
         /// Provides access to the underlying input action map instance.
         /// </summary>
@@ -1269,18 +1210,6 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
             @Move.started += instance.OnMove;
             @Move.performed += instance.OnMove;
             @Move.canceled += instance.OnMove;
-            @LightKick.started += instance.OnLightKick;
-            @LightKick.performed += instance.OnLightKick;
-            @LightKick.canceled += instance.OnLightKick;
-            @HeavyKick.started += instance.OnHeavyKick;
-            @HeavyKick.performed += instance.OnHeavyKick;
-            @HeavyKick.canceled += instance.OnHeavyKick;
-            @LightPunch.started += instance.OnLightPunch;
-            @LightPunch.performed += instance.OnLightPunch;
-            @LightPunch.canceled += instance.OnLightPunch;
-            @HeavyPunch.started += instance.OnHeavyPunch;
-            @HeavyPunch.performed += instance.OnHeavyPunch;
-            @HeavyPunch.canceled += instance.OnHeavyPunch;
             @Guard.started += instance.OnGuard;
             @Guard.performed += instance.OnGuard;
             @Guard.canceled += instance.OnGuard;
@@ -1290,12 +1219,21 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
             @Crouch.started += instance.OnCrouch;
             @Crouch.performed += instance.OnCrouch;
             @Crouch.canceled += instance.OnCrouch;
-            @MidPunch.started += instance.OnMidPunch;
-            @MidPunch.performed += instance.OnMidPunch;
-            @MidPunch.canceled += instance.OnMidPunch;
-            @MidKick.started += instance.OnMidKick;
-            @MidKick.performed += instance.OnMidKick;
-            @MidKick.canceled += instance.OnMidKick;
+            @NormalAttack.started += instance.OnNormalAttack;
+            @NormalAttack.performed += instance.OnNormalAttack;
+            @NormalAttack.canceled += instance.OnNormalAttack;
+            @LowAttack.started += instance.OnLowAttack;
+            @LowAttack.performed += instance.OnLowAttack;
+            @LowAttack.canceled += instance.OnLowAttack;
+            @UpAttack.started += instance.OnUpAttack;
+            @UpAttack.performed += instance.OnUpAttack;
+            @UpAttack.canceled += instance.OnUpAttack;
+            @BackAttack.started += instance.OnBackAttack;
+            @BackAttack.performed += instance.OnBackAttack;
+            @BackAttack.canceled += instance.OnBackAttack;
+            @ForwardAttack.started += instance.OnForwardAttack;
+            @ForwardAttack.performed += instance.OnForwardAttack;
+            @ForwardAttack.canceled += instance.OnForwardAttack;
         }
 
         /// <summary>
@@ -1310,18 +1248,6 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
             @Move.started -= instance.OnMove;
             @Move.performed -= instance.OnMove;
             @Move.canceled -= instance.OnMove;
-            @LightKick.started -= instance.OnLightKick;
-            @LightKick.performed -= instance.OnLightKick;
-            @LightKick.canceled -= instance.OnLightKick;
-            @HeavyKick.started -= instance.OnHeavyKick;
-            @HeavyKick.performed -= instance.OnHeavyKick;
-            @HeavyKick.canceled -= instance.OnHeavyKick;
-            @LightPunch.started -= instance.OnLightPunch;
-            @LightPunch.performed -= instance.OnLightPunch;
-            @LightPunch.canceled -= instance.OnLightPunch;
-            @HeavyPunch.started -= instance.OnHeavyPunch;
-            @HeavyPunch.performed -= instance.OnHeavyPunch;
-            @HeavyPunch.canceled -= instance.OnHeavyPunch;
             @Guard.started -= instance.OnGuard;
             @Guard.performed -= instance.OnGuard;
             @Guard.canceled -= instance.OnGuard;
@@ -1331,12 +1257,21 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
             @Crouch.started -= instance.OnCrouch;
             @Crouch.performed -= instance.OnCrouch;
             @Crouch.canceled -= instance.OnCrouch;
-            @MidPunch.started -= instance.OnMidPunch;
-            @MidPunch.performed -= instance.OnMidPunch;
-            @MidPunch.canceled -= instance.OnMidPunch;
-            @MidKick.started -= instance.OnMidKick;
-            @MidKick.performed -= instance.OnMidKick;
-            @MidKick.canceled -= instance.OnMidKick;
+            @NormalAttack.started -= instance.OnNormalAttack;
+            @NormalAttack.performed -= instance.OnNormalAttack;
+            @NormalAttack.canceled -= instance.OnNormalAttack;
+            @LowAttack.started -= instance.OnLowAttack;
+            @LowAttack.performed -= instance.OnLowAttack;
+            @LowAttack.canceled -= instance.OnLowAttack;
+            @UpAttack.started -= instance.OnUpAttack;
+            @UpAttack.performed -= instance.OnUpAttack;
+            @UpAttack.canceled -= instance.OnUpAttack;
+            @BackAttack.started -= instance.OnBackAttack;
+            @BackAttack.performed -= instance.OnBackAttack;
+            @BackAttack.canceled -= instance.OnBackAttack;
+            @ForwardAttack.started -= instance.OnForwardAttack;
+            @ForwardAttack.performed -= instance.OnForwardAttack;
+            @ForwardAttack.canceled -= instance.OnForwardAttack;
         }
 
         /// <summary>
@@ -1645,34 +1580,6 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
         /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
         void OnMove(InputAction.CallbackContext context);
         /// <summary>
-        /// Method invoked when associated input action "LightKick" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
-        /// </summary>
-        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
-        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
-        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
-        void OnLightKick(InputAction.CallbackContext context);
-        /// <summary>
-        /// Method invoked when associated input action "HeavyKick" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
-        /// </summary>
-        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
-        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
-        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
-        void OnHeavyKick(InputAction.CallbackContext context);
-        /// <summary>
-        /// Method invoked when associated input action "LightPunch" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
-        /// </summary>
-        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
-        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
-        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
-        void OnLightPunch(InputAction.CallbackContext context);
-        /// <summary>
-        /// Method invoked when associated input action "HeavyPunch" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
-        /// </summary>
-        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
-        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
-        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
-        void OnHeavyPunch(InputAction.CallbackContext context);
-        /// <summary>
         /// Method invoked when associated input action "Guard" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
         /// </summary>
         /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
@@ -1694,19 +1601,40 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
         /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
         void OnCrouch(InputAction.CallbackContext context);
         /// <summary>
-        /// Method invoked when associated input action "MidPunch" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// Method invoked when associated input action "NormalAttack" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
         /// </summary>
         /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
         /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
         /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
-        void OnMidPunch(InputAction.CallbackContext context);
+        void OnNormalAttack(InputAction.CallbackContext context);
         /// <summary>
-        /// Method invoked when associated input action "MidKick" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// Method invoked when associated input action "LowAttack" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
         /// </summary>
         /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
         /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
         /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
-        void OnMidKick(InputAction.CallbackContext context);
+        void OnLowAttack(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "UpAttack" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnUpAttack(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "BackAttack" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnBackAttack(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "ForwardAttack" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnForwardAttack(InputAction.CallbackContext context);
     }
     /// <summary>
     /// Interface to implement callback methods for all input action callbacks associated with input actions defined by "UI" which allows adding and removing callbacks.

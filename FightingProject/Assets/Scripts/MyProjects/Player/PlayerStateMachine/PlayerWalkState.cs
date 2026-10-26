@@ -23,13 +23,10 @@ public class PlayerWalkState : PlayerState
         //上にあるほど優先度が高い
         if (IsTryChangeState(!input.Direction.IsHorizontal(), m_Player.IdleState) ||  //左右入力がなくなったらIdle
             IsTryChangeState(input.IsGuard, m_Player.GuardState) ||
-            IsTryChangeState(input.IsLightPunch, m_Player.LightPunchState) ||
-            IsTryChangeState(input.IsHeavyPunch, m_Player.HeavyPunchState) ||
-            IsTryChangeState(input.IsLightKick, m_Player.LightKickState) ||
-            IsTryChangeState(input.IsMidKick, m_Player.MidKickState) ||
-            IsTryChangeState(input.IsMidPunch, m_Player.MidPunchState) ||
-            IsTryChangeState(input.IsHeavyKick, m_Player.HeavyKickState))
-        {
+            IsTryChangeState(input.IsNormalAttack,m_Player.NormalAttackState) ||
+            IsTryChangeState(input.IsLowAttack,m_Player.LowAttackState) ||
+            IsTryChangeState(input.IsUpAttack,m_Player.UpAttackState) ||
+            IsTryChangeState(input.IsForwardAttack,m_Player.ForwardAttackState))        {
             return;
         }
     }
