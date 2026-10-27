@@ -156,15 +156,6 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
                     ""initialStateCheck"": false
                 },
                 {
-                    ""name"": ""BackAttack"",
-                    ""type"": ""Button"",
-                    ""id"": ""b27427f1-bd8a-4a14-b7f7-540cb7fe3984"",
-                    ""expectedControlType"": """",
-                    ""processors"": """",
-                    ""interactions"": """",
-                    ""initialStateCheck"": false
-                },
-                {
                     ""name"": ""ForwardAttack"",
                     ""type"": ""Button"",
                     ""id"": ""bffe00a8-6dce-4423-8c64-09b60c331f8a"",
@@ -321,7 +312,7 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
                 {
                     ""name"": """",
                     ""id"": ""e6096157-8995-425b-b14c-a9c40d9de491"",
-                    ""path"": ""<Keyboard>/#(H)"",
+                    ""path"": ""<Keyboard>/#(L)"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": "";Keyboard&Mouse"",
@@ -387,10 +378,10 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
                 {
                     ""name"": """",
                     ""id"": ""d14ea3c0-b1d0-4cc9-bdbe-cba34bed6145"",
-                    ""path"": """",
+                    ""path"": ""<Keyboard>/#(J)"",
                     ""interactions"": """",
                     ""processors"": """",
-                    ""groups"": """",
+                    ""groups"": "";Keyboard&Mouse"",
                     ""action"": ""NormalAttack"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
@@ -408,6 +399,17 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
                 },
                 {
                     ""name"": """",
+                    ""id"": ""b6bc9419-35f3-4f9d-bd06-668c8a5f3e01"",
+                    ""path"": ""<Keyboard>/#(I)"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": "";Keyboard&Mouse"",
+                    ""action"": ""LowAttack"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
                     ""id"": ""6c0855b5-61f0-417e-bbaa-3d91db04e3fc"",
                     ""path"": ""<Gamepad>/buttonNorth"",
                     ""interactions"": """",
@@ -419,12 +421,12 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
                 },
                 {
                     ""name"": """",
-                    ""id"": ""c4d4c56c-2f50-4b59-a960-d4c4b2391cee"",
-                    ""path"": ""<Gamepad>/buttonEast"",
+                    ""id"": ""075f3fbb-775c-43c4-9386-8756077340a4"",
+                    ""path"": ""<Keyboard>/#(U)"",
                     ""interactions"": """",
                     ""processors"": """",
-                    ""groups"": "";Gamepad"",
-                    ""action"": ""BackAttack"",
+                    ""groups"": "";Keyboard&Mouse"",
+                    ""action"": ""UpAttack"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 },
@@ -435,6 +437,17 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": "";Gamepad"",
+                    ""action"": ""ForwardAttack"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""7bfa398a-c22e-437b-a116-352f81e57738"",
+                    ""path"": ""<Keyboard>/#(K)"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": "";Keyboard&Mouse"",
                     ""action"": ""ForwardAttack"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
@@ -1030,7 +1043,6 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
         m_Player_NormalAttack = m_Player.FindAction("NormalAttack", throwIfNotFound: true);
         m_Player_LowAttack = m_Player.FindAction("LowAttack", throwIfNotFound: true);
         m_Player_UpAttack = m_Player.FindAction("UpAttack", throwIfNotFound: true);
-        m_Player_BackAttack = m_Player.FindAction("BackAttack", throwIfNotFound: true);
         m_Player_ForwardAttack = m_Player.FindAction("ForwardAttack", throwIfNotFound: true);
         // UI
         m_UI = asset.FindActionMap("UI", throwIfNotFound: true);
@@ -1132,7 +1144,6 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
     private readonly InputAction m_Player_NormalAttack;
     private readonly InputAction m_Player_LowAttack;
     private readonly InputAction m_Player_UpAttack;
-    private readonly InputAction m_Player_BackAttack;
     private readonly InputAction m_Player_ForwardAttack;
     /// <summary>
     /// Provides access to input actions defined in input action map "Player".
@@ -1173,10 +1184,6 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
         /// Provides access to the underlying input action "Player/UpAttack".
         /// </summary>
         public InputAction @UpAttack => m_Wrapper.m_Player_UpAttack;
-        /// <summary>
-        /// Provides access to the underlying input action "Player/BackAttack".
-        /// </summary>
-        public InputAction @BackAttack => m_Wrapper.m_Player_BackAttack;
         /// <summary>
         /// Provides access to the underlying input action "Player/ForwardAttack".
         /// </summary>
@@ -1228,9 +1235,6 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
             @UpAttack.started += instance.OnUpAttack;
             @UpAttack.performed += instance.OnUpAttack;
             @UpAttack.canceled += instance.OnUpAttack;
-            @BackAttack.started += instance.OnBackAttack;
-            @BackAttack.performed += instance.OnBackAttack;
-            @BackAttack.canceled += instance.OnBackAttack;
             @ForwardAttack.started += instance.OnForwardAttack;
             @ForwardAttack.performed += instance.OnForwardAttack;
             @ForwardAttack.canceled += instance.OnForwardAttack;
@@ -1266,9 +1270,6 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
             @UpAttack.started -= instance.OnUpAttack;
             @UpAttack.performed -= instance.OnUpAttack;
             @UpAttack.canceled -= instance.OnUpAttack;
-            @BackAttack.started -= instance.OnBackAttack;
-            @BackAttack.performed -= instance.OnBackAttack;
-            @BackAttack.canceled -= instance.OnBackAttack;
             @ForwardAttack.started -= instance.OnForwardAttack;
             @ForwardAttack.performed -= instance.OnForwardAttack;
             @ForwardAttack.canceled -= instance.OnForwardAttack;
@@ -1621,13 +1622,6 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
         /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
         /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
         void OnUpAttack(InputAction.CallbackContext context);
-        /// <summary>
-        /// Method invoked when associated input action "BackAttack" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
-        /// </summary>
-        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
-        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
-        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
-        void OnBackAttack(InputAction.CallbackContext context);
         /// <summary>
         /// Method invoked when associated input action "ForwardAttack" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
         /// </summary>

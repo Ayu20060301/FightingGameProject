@@ -36,7 +36,7 @@ public class NetworkManager : MonoBehaviour, INetworkRunnerCallbacks
 
     [Header("ネットワーク設定")]
     [SerializeField, Min(1)]
-    private int m_MaxPlayers = 2;
+    private int m_MaxPlayers = 20;
 
     //ネットワークシステムの根幹であるランナー
     private NetworkRunner m_Runner;

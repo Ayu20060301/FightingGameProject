@@ -70,15 +70,6 @@
                     "initialStateCheck": false
                 },
                 {
-                    "name": "BackAttack",
-                    "type": "Button",
-                    "id": "b27427f1-bd8a-4a14-b7f7-540cb7fe3984",
-                    "expectedControlType": "",
-                    "processors": "",
-                    "interactions": "",
-                    "initialStateCheck": false
-                },
-                {
                     "name": "ForwardAttack",
                     "type": "Button",
                     "id": "bffe00a8-6dce-4423-8c64-09b60c331f8a",
@@ -235,7 +226,7 @@
                 {
                     "name": "",
                     "id": "e6096157-8995-425b-b14c-a9c40d9de491",
-                    "path": "<Keyboard>/#(H)",
+                    "path": "<Keyboard>/#(L)",
                     "interactions": "",
                     "processors": "",
                     "groups": ";Keyboard&Mouse",
@@ -301,10 +292,10 @@
                 {
                     "name": "",
                     "id": "d14ea3c0-b1d0-4cc9-bdbe-cba34bed6145",
-                    "path": "",
+                    "path": "<Keyboard>/#(J)",
                     "interactions": "",
                     "processors": "",
-                    "groups": "",
+                    "groups": ";Keyboard&Mouse",
                     "action": "NormalAttack",
                     "isComposite": false,
                     "isPartOfComposite": false
@@ -322,6 +313,17 @@
                 },
                 {
                     "name": "",
+                    "id": "b6bc9419-35f3-4f9d-bd06-668c8a5f3e01",
+                    "path": "<Keyboard>/#(I)",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": ";Keyboard&Mouse",
+                    "action": "LowAttack",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
                     "id": "6c0855b5-61f0-417e-bbaa-3d91db04e3fc",
                     "path": "<Gamepad>/buttonNorth",
                     "interactions": "",
@@ -333,12 +335,12 @@
                 },
                 {
                     "name": "",
-                    "id": "c4d4c56c-2f50-4b59-a960-d4c4b2391cee",
-                    "path": "<Gamepad>/buttonEast",
+                    "id": "075f3fbb-775c-43c4-9386-8756077340a4",
+                    "path": "<Keyboard>/#(U)",
                     "interactions": "",
                     "processors": "",
-                    "groups": ";Gamepad",
-                    "action": "BackAttack",
+                    "groups": ";Keyboard&Mouse",
+                    "action": "UpAttack",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },
@@ -349,6 +351,17 @@
                     "interactions": "",
                     "processors": "",
                     "groups": ";Gamepad",
+                    "action": "ForwardAttack",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "7bfa398a-c22e-437b-a116-352f81e57738",
+                    "path": "<Keyboard>/#(K)",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": ";Keyboard&Mouse",
                     "action": "ForwardAttack",
                     "isComposite": false,
                     "isPartOfComposite": false

@@ -32,6 +32,7 @@ Transform:
   m_Children:
   - {fileID: 7941242915071332627}
   - {fileID: 1529175086233895326}
+  - {fileID: 2155330288198649602}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &941835029142203931
@@ -46,10 +47,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 22aae7e097bdf4644a95ac6361b34cd6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::NetworkManager
-  m_Input: {fileID: 5353014534451672316, guid: e10006b31f6b2ad469b1ae410d83fdfa, type: 3}
+  m_Input: {fileID: 5952261425657842770}
   m_PlayerPrefab:
     RawGuidValue: aa576aa4aee6dbd4c8457ddd32895204
-  m_MaxPlayers: 2
+  m_MaxPlayers: 20
 --- !u!1 &7065674419166186312
 GameObject:
   m_ObjectHideFlags: 0
@@ -112,3 +113,76 @@ Transform:
   m_Children: []
   m_Father: {fileID: 2567965631662753610}
   m_LocalEulerAnglesHint: {x: 0, y: 90, z: 0}
+--- !u!1001 &1788795885550188718
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 2567965631662753610}
+    m_Modifications:
+    - target: {fileID: 376702695989231532, guid: e10006b31f6b2ad469b1ae410d83fdfa, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -1.27762
+      objectReference: {fileID: 0}
+    - target: {fileID: 376702695989231532, guid: e10006b31f6b2ad469b1ae410d83fdfa, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 4.15036
+      objectReference: {fileID: 0}
+    - target: {fileID: 376702695989231532, guid: e10006b31f6b2ad469b1ae410d83fdfa, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 5.91731
+      objectReference: {fileID: 0}
+    - target: {fileID: 376702695989231532, guid: e10006b31f6b2ad469b1ae410d83fdfa, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 376702695989231532, guid: e10006b31f6b2ad469b1ae410d83fdfa, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 376702695989231532, guid: e10006b31f6b2ad469b1ae410d83fdfa, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 376702695989231532, guid: e10006b31f6b2ad469b1ae410d83fdfa, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 376702695989231532, guid: e10006b31f6b2ad469b1ae410d83fdfa, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 376702695989231532, guid: e10006b31f6b2ad469b1ae410d83fdfa, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 376702695989231532, guid: e10006b31f6b2ad469b1ae410d83fdfa, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 737914747272960399, guid: e10006b31f6b2ad469b1ae410d83fdfa, type: 3}
+      propertyPath: m_Name
+      value: InputController
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: e10006b31f6b2ad469b1ae410d83fdfa, type: 3}
+--- !u!4 &2155330288198649602 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 376702695989231532, guid: e10006b31f6b2ad469b1ae410d83fdfa, type: 3}
+  m_PrefabInstance: {fileID: 1788795885550188718}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &5952261425657842770 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 5353014534451672316, guid: e10006b31f6b2ad469b1ae410d83fdfa, type: 3}
+  m_PrefabInstance: {fileID: 1788795885550188718}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f378914ca61052144a5f9554b81845ff, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::InputController
