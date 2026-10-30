@@ -49,8 +49,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::NetworkManager
   m_Input: {fileID: 5952261425657842770}
   m_PlayerPrefab:
-    RawGuidValue: aa576aa4aee6dbd4c8457ddd32895204
-  m_MaxPlayers: 20
+    RawGuidValue: 05c478a0f4b9c2247be91d729c1f18a1
+  m_MaxPlayers: 2
 --- !u!1 &7065674419166186312
 GameObject:
   m_ObjectHideFlags: 0
@@ -66,7 +66,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &1529175086233895326
 Transform:
   m_ObjectHideFlags: 0
@@ -97,7 +97,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &7941242915071332627
 Transform:
   m_ObjectHideFlags: 0

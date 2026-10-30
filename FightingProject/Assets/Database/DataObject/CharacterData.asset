@@ -12,17 +12,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c2d658f680a9b53479acee04049db056, type: 3}
   m_Name: CharacterData
   m_EditorClassIdentifier: Assembly-CSharp::CharacterData
-  characterName: 
+  characterName: Samurai
   maxHP: 100
   speed: 2
-  jumpPower: 3
+  jumpPower: 1.5
   maxGuardGauge: 100
   guardRecoverPerSecond: 15
   guardRecoverDelay: 1
   guardBreakStunTicks: 90
   guardDrainPerSecond: 5
   guardUnlockRate: 0.3
-  m_LightPunch:
+  m_NormalAttack:
     damage: 5
     hitStunTicks: 20
     guardStunTicks: 12
@@ -33,7 +33,7 @@ MonoBehaviour:
     knockback: 3
     guardKnockback: 2
     guardDamage: 10
-  m_MidPunch:
+  m_LowAttack:
     damage: 5
     hitStunTicks: 20
     guardStunTicks: 12
@@ -44,7 +44,7 @@ MonoBehaviour:
     knockback: 3
     guardKnockback: 2
     guardDamage: 10
-  m_HeavyPunch:
+  m_UpAttack:
     damage: 5
     hitStunTicks: 20
     guardStunTicks: 12
@@ -55,7 +55,7 @@ MonoBehaviour:
     knockback: 3
     guardKnockback: 2
     guardDamage: 10
-  m_LightKick:
+  m_ForwardAttack:
     damage: 5
     hitStunTicks: 20
     guardStunTicks: 12
@@ -66,7 +66,7 @@ MonoBehaviour:
     knockback: 3
     guardKnockback: 2
     guardDamage: 10
-  m_MidKick:
+  m_RushMove:
     damage: 5
     hitStunTicks: 20
     guardStunTicks: 12
@@ -77,7 +77,29 @@ MonoBehaviour:
     knockback: 3
     guardKnockback: 2
     guardDamage: 10
-  m_HeavyKick:
+  m_Geigeki:
+    damage: 5
+    hitStunTicks: 20
+    guardStunTicks: 12
+    startupTicks: 6
+    activeTicks: 4
+    offset: {x: 0.6, y: 1, z: 0}
+    size: {x: 0.6, y: 0.4, z: 0.6}
+    knockback: 3
+    guardKnockback: 2
+    guardDamage: 10
+  m_AirMove:
+    damage: 5
+    hitStunTicks: 20
+    guardStunTicks: 12
+    startupTicks: 6
+    activeTicks: 4
+    offset: {x: 0.6, y: 1, z: 0}
+    size: {x: 0.6, y: 0.4, z: 0.6}
+    knockback: 3
+    guardKnockback: 2
+    guardDamage: 10
+  m_DownMove:
     damage: 5
     hitStunTicks: 20
     guardStunTicks: 12

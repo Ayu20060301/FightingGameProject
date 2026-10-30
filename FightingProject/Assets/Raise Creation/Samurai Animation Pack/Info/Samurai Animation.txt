@@ -1,0 +1,19 @@
+Sample Sword is attached with the pack,
+all the
+for Sword animation in these 3 anim
+
+1 Anim_Samurai_Attack_Final_Blow_React
+2 Anim_Samurai_Attack_Strike_Perfect_React
+3 Anim_Samurai_Death
+
+you need to socket ik_hand_r
+
+______________________________________________
+
+These are the perfect position of interaction on these 2 animation
+
+1 Anim_Samurai_Attack_Final_Blow_React  -
+ translate x, -11, translate z, 60, Rotate Y, 90 and all on 0
+
+2 Anim_Samurai_Attack_Strike_Perfect_React -
+translate x, -44, translate z, 120, Rotate Y, 180 and all on 0 animation of Sword can be played through hand_r socket
