@@ -4,7 +4,7 @@ using UnityEngine;
 //ガード中に攻撃を受けた場合の状態
 public class PlayerGuardHitState : PlayerState
 {
-    private Player.AnimationState m_AnimationState;
+    private AnimationState m_AnimationState;
     private int m_StunTicks;
     private TickTimer m_Timer;
 
@@ -20,7 +20,7 @@ public class PlayerGuardHitState : PlayerState
 
     public override void Enter()
     {
-        m_Player.RPC_PlayAnimation(Player.AnimationState.GuardHit);
+        m_Player.RPC_PlayAnimation(AnimationState.GuardHit);
         m_Timer = TickTimer.CreateFromTicks(m_Player.Runner, m_StunTicks);
     }
 

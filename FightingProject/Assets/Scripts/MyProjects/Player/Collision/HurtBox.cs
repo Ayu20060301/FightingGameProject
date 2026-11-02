@@ -1,6 +1,6 @@
 using UnityEngine;
 
-//喰らい判定
+[RequireComponent(typeof(BoxCollider))]
 public class HurtBox : MonoBehaviour
 {
     [SerializeField]
@@ -31,5 +31,4 @@ public class HurtBox : MonoBehaviour
             box.isTrigger = true;
         }
     }
-
 }

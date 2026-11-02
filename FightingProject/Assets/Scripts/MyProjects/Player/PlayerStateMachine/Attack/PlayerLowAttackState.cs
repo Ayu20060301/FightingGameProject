@@ -3,7 +3,7 @@ using UnityEngine;
 //下攻撃(Aボタンで入力)
 public class PlayerLowAttackState : PlayerAttackState
 {
-    public PlayerLowAttackState(Player player) : base(player, Player.AnimationState.LowAttack)
+    public PlayerLowAttackState(Player player) : base(player, AnimationState.LowAttack)
     {
 
     }

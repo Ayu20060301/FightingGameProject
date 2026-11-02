@@ -5,7 +5,7 @@ using UnityEngine;
 public class PlayerHitState : PlayerState
 {
 
-    private Player.AnimationState m_AnimationState;
+    private AnimationState m_AnimationState;
     private int m_StunTicks;
     private TickTimer m_Timer;
 
@@ -16,7 +16,7 @@ public class PlayerHitState : PlayerState
     }
 
 
-    public void Setup(Player.AnimationState animation,int stunTicks)
+    public void Setup(AnimationState animation,int stunTicks)
     {
         m_AnimationState = animation;
         m_StunTicks = stunTicks;

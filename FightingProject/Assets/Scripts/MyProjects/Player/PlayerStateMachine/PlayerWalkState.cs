@@ -1,10 +1,12 @@
-using UnityEngine;
 
 /// <summary>
 /// 歩行ステート
 /// </summary>
 public class PlayerWalkState : PlayerState
 {
+    //現在再生中のアニメーション
+    private AnimationState m_CurrentAnim;
+
     public PlayerWalkState(Player player) : base(player)
     {
 
@@ -12,7 +14,8 @@ public class PlayerWalkState : PlayerState
 
     public override void Enter()
     {
-        m_Player.RPC_PlayAnimation(Player.AnimationState.Walk);
+        m_CurrentAnim = GetWalkAnimation();
+        m_Player.RPC_PlayAnimation(AnimationState.Walk);
     }
 
 
@@ -29,5 +32,26 @@ public class PlayerWalkState : PlayerState
             IsTryChangeState(input.IsForwardAttack,m_Player.ForwardAttackState))        {
             return;
         }
+
+
+        //前進⇔後退が切り替わった時だけアニメーションを再生しなおす
+        AnimationState next = GetWalkAnimation();
+        if(next != m_CurrentAnim)
+        {
+            m_CurrentAnim = next;
+            m_Player.RPC_PlayAnimation(m_CurrentAnim);
+        }
     }
+
+
+    /// <summary>
+    /// 入力方向に応じた歩行アニメーションを返す
+    /// </summary>
+    private AnimationState GetWalkAnimation()
+    {
+        return m_Player.IsMovingBackward
+            ? AnimationState.BackWalk
+            : AnimationState.Walk;
+    }
+
 }

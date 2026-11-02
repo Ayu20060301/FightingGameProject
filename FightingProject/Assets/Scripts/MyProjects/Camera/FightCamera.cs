@@ -13,12 +13,16 @@ public class FightCamera : MonoBehaviour
 
     public void AddTarget(Transform target)
     {
+        if (m_Group == null || target == null) return;
+        if (m_Group.FindMember(target) >= 0) return;
         m_Group.AddMember(target, m_Weight, m_Radius);
     }
 
 
     public void RemoveTarget(Transform target)
     {
+        if ((m_Group == null || target == null)) return;
+        if (m_Group.FindMember(target) >= 0) return;
         m_Group.RemoveMember(target);
     }
 }

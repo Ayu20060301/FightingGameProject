@@ -3,7 +3,7 @@ using UnityEngine;
 //上攻撃
 public class PlayerUpAttackState : PlayerAttackState
 {
-    public PlayerUpAttackState(Player player) : base(player,Player.AnimationState.UpAttack)
+    public PlayerUpAttackState(Player player) : base(player,AnimationState.UpAttack)
     {
 
     }

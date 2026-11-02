@@ -14,109 +14,130 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::CharacterData
   characterName: Samurai
   maxHP: 100
-  speed: 2
+  speed: 4
   jumpPower: 1.5
   maxGuardGauge: 100
   guardRecoverPerSecond: 15
   guardRecoverDelay: 1
   guardBreakStunTicks: 90
   guardDrainPerSecond: 5
-  guardUnlockRate: 0.3
+  guardUnlockRate: 1
   m_NormalAttack:
-    damage: 5
-    hitStunTicks: 20
-    guardStunTicks: 12
-    startupTicks: 6
-    activeTicks: 4
-    offset: {x: 0.6, y: 1, z: 0}
-    size: {x: 0.6, y: 0.4, z: 0.6}
-    knockback: 3
-    guardKnockback: 2
-    guardDamage: 10
-  m_LowAttack:
-    damage: 5
-    hitStunTicks: 20
-    guardStunTicks: 12
-    startupTicks: 6
-    activeTicks: 4
-    offset: {x: 0.6, y: 1, z: 0}
-    size: {x: 0.6, y: 0.4, z: 0.6}
-    knockback: 3
-    guardKnockback: 2
-    guardDamage: 10
-  m_UpAttack:
-    damage: 5
-    hitStunTicks: 20
-    guardStunTicks: 12
-    startupTicks: 6
-    activeTicks: 4
-    offset: {x: 0.6, y: 1, z: 0}
-    size: {x: 0.6, y: 0.4, z: 0.6}
-    knockback: 3
-    guardKnockback: 2
-    guardDamage: 10
-  m_ForwardAttack:
-    damage: 5
-    hitStunTicks: 20
-    guardStunTicks: 12
-    startupTicks: 6
-    activeTicks: 4
-    offset: {x: 0.6, y: 1, z: 0}
-    size: {x: 0.6, y: 0.4, z: 0.6}
-    knockback: 3
-    guardKnockback: 2
-    guardDamage: 10
-  m_RushMove:
-    damage: 5
-    hitStunTicks: 20
-    guardStunTicks: 12
-    startupTicks: 6
-    activeTicks: 4
-    offset: {x: 0.6, y: 1, z: 0}
-    size: {x: 0.6, y: 0.4, z: 0.6}
-    knockback: 3
-    guardKnockback: 2
-    guardDamage: 10
-  m_Geigeki:
-    damage: 5
-    hitStunTicks: 20
-    guardStunTicks: 12
-    startupTicks: 6
-    activeTicks: 4
-    offset: {x: 0.6, y: 1, z: 0}
-    size: {x: 0.6, y: 0.4, z: 0.6}
-    knockback: 3
-    guardKnockback: 2
-    guardDamage: 10
-  m_AirMove:
-    damage: 5
-    hitStunTicks: 20
-    guardStunTicks: 12
-    startupTicks: 6
-    activeTicks: 4
-    offset: {x: 0.6, y: 1, z: 0}
-    size: {x: 0.6, y: 0.4, z: 0.6}
-    knockback: 3
-    guardKnockback: 2
-    guardDamage: 10
-  m_DownMove:
-    damage: 5
-    hitStunTicks: 20
-    guardStunTicks: 12
-    startupTicks: 6
-    activeTicks: 4
-    offset: {x: 0.6, y: 1, z: 0}
-    size: {x: 0.6, y: 0.4, z: 0.6}
-    knockback: 3
-    guardKnockback: 2
-    guardDamage: 10
-  grab:
+    label: 
+    damage: 4
+    hitStunTicks: 18
+    guardStunTicks: 11
     startupTicks: 5
-    activeTicks: 2
-    whiffRecoveryTicks: 30
-    offset: {x: 0.4, y: 1, z: 0}
-    size: {x: 0.5, y: 0.6, z: 0.6}
-    grabHoldTicks: 40
-    damage: 12
+    activeTicks: 3
+    knockback: 1.5
+    guardKnockback: 1
+    guardDamage: 8
+    comboStartTicks: 10
+    comboEndTicks: 28
+  m_LowAttack:
+    label: 
+    damage: 8
+    hitStunTicks: 24
+    guardStunTicks: 14
+    startupTicks: 10
+    activeTicks: 5
+    knockback: 2.5
+    guardKnockback: 1.5
+    guardDamage: 12
+    comboStartTicks: 12
+    comboEndTicks: 30
+  m_UpAttack:
+    label: 
+    damage: 7
+    hitStunTicks: 22
+    guardStunTicks: 12
+    startupTicks: 8
+    activeTicks: 5
+    knockback: 3
+    guardKnockback: 1.5
+    guardDamage: 8
+    comboStartTicks: 12
+    comboEndTicks: 30
+  m_ForwardAttack:
+    label: 
+    damage: 10
     hitStunTicks: 30
-    throwKnockback: 5
+    guardStunTicks: 18
+    startupTicks: 12
+    activeTicks: 4
+    knockback: 5
+    guardKnockback: 3
+    guardDamage: 15
+    comboStartTicks: 12
+    comboEndTicks: 30
+  normalCombo:
+  - label: 
+    damage: 5
+    hitStunTicks: 18
+    guardStunTicks: 11
+    startupTicks: 6
+    activeTicks: 3
+    knockback: 1.5
+    guardKnockback: 1.5
+    guardDamage: 8
+    comboStartTicks: 12
+    comboEndTicks: 30
+  - label: 
+    damage: 8
+    hitStunTicks: 6
+    guardStunTicks: 3
+    startupTicks: 9
+    activeTicks: 4
+    knockback: 5
+    guardKnockback: 3
+    guardDamage: 14
+    comboStartTicks: 0
+    comboEndTicks: 0
+  m_RushMove:
+    label: 
+    damage: 5
+    hitStunTicks: 20
+    guardStunTicks: 12
+    startupTicks: 6
+    activeTicks: 4
+    knockback: 3
+    guardKnockback: 2
+    guardDamage: 10
+    comboStartTicks: 12
+    comboEndTicks: 30
+  m_Geigeki:
+    label: 
+    damage: 5
+    hitStunTicks: 20
+    guardStunTicks: 12
+    startupTicks: 6
+    activeTicks: 4
+    knockback: 3
+    guardKnockback: 2
+    guardDamage: 10
+    comboStartTicks: 12
+    comboEndTicks: 30
+  m_AirMove:
+    label: 
+    damage: 5
+    hitStunTicks: 20
+    guardStunTicks: 12
+    startupTicks: 6
+    activeTicks: 4
+    knockback: 3
+    guardKnockback: 2
+    guardDamage: 10
+    comboStartTicks: 12
+    comboEndTicks: 30
+  m_DownMove:
+    label: 
+    damage: 5
+    hitStunTicks: 20
+    guardStunTicks: 12
+    startupTicks: 6
+    activeTicks: 4
+    knockback: 3
+    guardKnockback: 2
+    guardDamage: 10
+    comboStartTicks: 12
+    comboEndTicks: 30

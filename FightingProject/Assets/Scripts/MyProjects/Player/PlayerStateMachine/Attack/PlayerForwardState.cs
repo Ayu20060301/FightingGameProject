@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class PlayerForwardAttackState : PlayerAttackState
 {
-    public PlayerForwardAttackState(Player player) : base(player, Player.AnimationState.ForwardAttack)
+    public PlayerForwardAttackState(Player player) : base(player, AnimationState.ForwardAttack)
     {
 
     }

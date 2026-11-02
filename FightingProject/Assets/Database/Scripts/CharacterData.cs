@@ -61,6 +61,9 @@ public class CharacterData : ScriptableObject
     [SerializeField]
     private AttackData m_ForwardAttack;
 
+    [Header("通常攻撃コンボ(2段目以降)")]
+    public AttackData[] normalCombo = new AttackData[0];
+
 
     [Header("コマンド技")]
     [SerializeField]
@@ -71,11 +74,6 @@ public class CharacterData : ScriptableObject
     private AttackData m_AirMove;
     [SerializeField]
     private AttackData m_DownMove;
-
-
-
-    [Header("掴み")]
-    public GrabData grab;
 
     /// <summary>
     /// スロットから攻撃データを取得
