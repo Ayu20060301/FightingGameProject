@@ -28,7 +28,6 @@ public class PlayerWalkState : PlayerState
             IsTryChangeState(input.IsGuard, m_Player.GuardState) ||
             IsTryChangeState(input.IsNormalAttack,m_Player.NormalAttackState) ||
             IsTryChangeState(input.IsLowAttack,m_Player.LowAttackState) ||
-            IsTryChangeState(input.IsUpAttack,m_Player.UpAttackState) ||
             IsTryChangeState(input.IsForwardAttack,m_Player.ForwardAttackState))        {
             return;
         }

@@ -4,17 +4,16 @@ using UnityEngine;
 
 public class Player : NetworkBehaviour
 {
-    #region 定数・静的データ
+    #region 定数
 
+    //--- 移動・重力 ---
     //接地中に与える押し付け速度
     private const float GroundedStickVelocity = -2.0f;
 
     //落下時の重力倍率
     private const float FallGravityMultiplier = 1.5f;
 
-    //頭上に乗っている判定で、ほぼ真上とみなすX差
-    private const float HeadOverlapThreshold = 0.05f;
-
+    //--- 向き ---
     //向きの判定で、同じ位置とみなすX差
     private const float FacingThreshold = 0.001f;
 
@@ -22,8 +21,25 @@ public class Player : NetworkBehaviour
     private const float FaceRightYaw = 90.0f;
     private const float FaceLeftYaw = -90.0f;
 
+    //--- 押し出し(相手との重なり解消) ---
+    //ほぼ真上・真下に重なっているとみなすX差
+    private const float OverlapCenterThreshold = 0.05f;
+
+    //押し出しの最大速度
+    private const float PushOutSpeed = 10.0f;
+
+    //--- 攻撃・ステップ ---
+    //攻撃中に踏み込みを許可する区間(アニメーションの正規化時間)
+    private const float AttackStepEndTime = 0.3f;
+
+    //ステップ入力として扱うスティックの倒し量
+    private const float StepInputThreshold = 0.5f;
+
+    //2回目の入力を受け付ける時間
+    private const float StepInputWindow = 0.25f;
 
     #endregion
+
 
     #region Inspector
 
@@ -43,12 +59,6 @@ public class Player : NetworkBehaviour
     [SerializeField]
     private float m_KnockbackDecay = 20.0f;
 
-    [Header("頭上からのすり落ち")]
-    [SerializeField]
-    private float m_SlideOffSpeed = 3.0f;   //ずり落ちる速さ
-    [SerializeField, Range(0.0f, 1.0f)]
-    private float m_StandOnNormalY = 0.5f;  //接触面の法線Yがこれ以上なら「乗っている」とみなす
-
     [Header("当たり判定")]
     [SerializeField]
     private LayerMask m_HurtMask;
@@ -57,49 +67,55 @@ public class Player : NetworkBehaviour
     [SerializeField]
     private SwordHitBox m_SwordHitBox;
 
+    [Header("攻撃中の踏み込み")]
+    [SerializeField]
+    private float m_AttackStepSpeed = 2.0f;  //攻撃中に前入力した際の移動速度
+
+    [Header("ステップ")]
+    [SerializeField]
+    private float m_StepSpeed = 8.0f;        //ステップ中の移動速度
+
+    [SerializeField]
+    private float m_StepDuration = 0.15f;    //ステップが続く時間(秒)
+
     #endregion
 
 
-    #region フィールド・プロパティ
+    #region フィールド
 
     //--- コンポーネント・参照 ---
     private CharacterController m_Controller;
     private RoundManager m_RoundManager;
     private Player m_Opponent;
-
     private PlayerAnimator m_PlayerAnim;
 
-    //--- 入力・コマンド ---
+    //--- 入力 ---
     private InputState m_Input;
-    private readonly CommandDetector m_Command = new CommandDetector();
+    private int m_HorizontalSign;        //今フレームの左右入力(-1,0,1)
+
+    private bool m_IsPrevJumpInput;
+    private bool m_IsJumpPressed;
+
+    private bool m_IsPrevNormalAttackInput;
+    private bool m_IsNormalAttackPressed;
 
     //--- 移動 ---
     private Vector3 m_Move;
     private float m_KnockbackVelocityX;
 
-    //相手が離れる方向に入力しているか
-    public bool IsMovingBackward
-    {
-        get
-        {
-            Direction dir = m_Input.Direction;
-            bool isLeft = dir == Direction.Left || dir == Direction.UpLeft || dir == Direction.DownLeft;
-            bool isRight = dir == Direction.Right || dir == Direction.UpRight || dir == Direction.DownRight;
-
-            //右向きなら左入力が後退、左向きなら右入力が後退
-            return IsFacingRight ? isLeft : isRight;
-        }
-    }
-
-    //相手の頭に乗っているか・ずり落ちる向き(右= +1、左= -1)
-    private bool m_IsOnOpponentHead;
-    private float m_SlideOffDir;
+    //--- ステップ入力 ---
+    private int m_PrevHorizontalDir;     //前フレームのスティック方向(-1,0,1)
+    private int m_StepTapDir;            //1回目にタップした方向
+    private float m_StepTapTimer;        //2回目を受け付ける残り時間
 
     //--- 判定 ---
     private readonly Collider[] m_HitBuffer = new Collider[16];
 
+    #endregion
 
-    //--- StateMachine ---
+
+    #region ステートマシン
+
     public PlayerStateMachine m_StateMachine;
 
     public PlayerIdleState IdleState { get; private set; }
@@ -109,52 +125,25 @@ public class Player : NetworkBehaviour
     public PlayerJumpState JumpState { get; private set; }
     public PlayerNormalAttackState NormalAttackState { get; private set; }
     public PlayerLowAttackState LowAttackState { get; private set; }
-    public PlayerUpAttackState UpAttackState { get; private set; }
     public PlayerForwardAttackState ForwardAttackState { get; private set; }
     public PlayerHitState HitState { get; private set; }
     public PlayerGuardHitState GuardHitState { get; private set; }
+    public PlayerStepState StepState { get; private set; }
 
-    //--- キャラクターデータ ---
-    public CharacterData Data => m_CharacterData;
-    public int MaxHP => m_CharacterData.maxHP;
-    public float MaxGuardGauge => m_CharacterData.maxGuardGauge;
-
-    public AttackData NormalAttackData => m_CharacterData.GetAttack(AttackSlot.NormalAttack);
-    public AttackData LowAttackData => m_CharacterData.GetAttack(AttackSlot.LowAttack);
-    public AttackData UpAttackData => m_CharacterData.GetAttack(AttackSlot.UpAttack);
-    public AttackData ForwardAttackData => m_CharacterData.GetAttack(AttackSlot.ForwardAttack);
-    public AttackData RushMoveData => m_CharacterData.GetAttack(AttackSlot.RushMove);
-    public AttackData GeigekiData => m_CharacterData.GetAttack(AttackSlot.Geigeki);
-    public AttackData AirMoveData => m_CharacterData.GetAttack(AttackSlot.AirMove);
-    public AttackData DownMoveData => m_CharacterData.GetAttack(AttackSlot.DownMove);
-
-    //--- 状態参照 ---
-    public bool IsGrounded => m_Controller.isGrounded;
-    public InputState Input => m_Input;
     public PlayerState CurrentState => m_StateMachine.CurrentState;
 
-    //向き(右= +1、左= -1)
-    public float FacingDir => this.transform.forward.x >= 0.0f ? 1.0f : -1.0f;
-    public bool IsFacingRight => FacingDir > 0.0f;
+    /// <summary>
+    /// Stateの変更
+    /// </summary>
+    public void ChangeState(PlayerState state)
+    {
+        m_StateMachine.ChangeState(state);
+    }
 
-    //KOしているか(HPはサーバーから同期されるので全クライアントで判定できる)
-    public bool IsKO => HP <= 0;
+    #endregion
 
-    //ガード構え中、またはガード喰らい中か
-    private bool IsGuarding => CurrentState == GuardState || CurrentState == GuardHitState;
 
-    //左右移動出来ない状態か
-    private bool IsHorizontalMoveLocked =>
-        CurrentState == GuardState ||
-        CurrentState == GuardHitState ||
-        CurrentState == CrouchState ||
-        CurrentState == NormalAttackState ||
-        CurrentState == LowAttackState ||
-        CurrentState == UpAttackState ||
-        CurrentState == ForwardAttackState ||
-        CurrentState == HitState;
-
-    //--- ネットワーク同期 ---
+    #region ネットワーク同期
 
     /// <summary>
     /// ネットワーク同期する向き
@@ -168,56 +157,11 @@ public class Player : NetworkBehaviour
     [Networked]
     public int HP { get; set; }
 
-    #endregion
-
-
-    #region ジャンプ
-
-    //定数
-    private const int MaxJumpCount = 2;  //地上ジャンプ含む総ジャンプ回数
-
-    //フィールド
-    private int m_JumpCount;
-    private bool m_IsPrevJumpInput;
-
-    private bool m_IsJumpPressed;
-
-
-    //プロパティ
-    public bool IsJumpPressed => m_IsJumpPressed;
-
-    //ジャンプ回数が残っているか
-    public bool IsCanJump => m_Controller.isGrounded || m_JumpCount < MaxJumpCount;
-
-
-    #endregion
-
-
-    #region 通常攻撃
-
-    private bool m_IsPrevNormalAttackInput;
-    private bool m_IsNormalAttackPressed;
-
-
-    public bool IsNormalAttackPressed => m_IsNormalAttackPressed;
-
-    public int NormalComboLength => 1 + m_CharacterData.normalCombo.Length;
-
-    public AttackData GetNormalComboData(int index)
-        => index == 0 ? NormalAttackData : m_CharacterData.normalCombo[index - 1];
-  
-    #endregion
-
-
-    #region ガード(ネットワーク同期)
-
     /// <summary>
     /// ガードクラッシュ中か
     /// </summary>
     [Networked]
     public NetworkBool IsGuardBroken { get; set; }
-
-    public bool IsCanGuard => !IsGuardBroken;
 
     /// <summary>
     /// ネットワーク同期するガードゲージ
@@ -234,6 +178,78 @@ public class Player : NetworkBehaviour
     #endregion
 
 
+    #region 公開プロパティ
+
+    //--- キャラクターデータ ---
+    public CharacterData Data => m_CharacterData;
+    public int MaxHP => m_CharacterData.maxHP;
+    public float MaxGuardGauge => m_CharacterData.maxGuardGauge;
+
+    public AttackData NormalAttackData => m_CharacterData.GetAttack(AttackSlot.NormalAttack);
+    public AttackData LowAttackData => m_CharacterData.GetAttack(AttackSlot.LowAttack);
+    public AttackData UpAttackData => m_CharacterData.GetAttack(AttackSlot.UpAttack);
+    public AttackData ForwardAttackData => m_CharacterData.GetAttack(AttackSlot.ForwardAttack);
+    public AttackData RushMoveData => m_CharacterData.GetAttack(AttackSlot.RushMove);
+    public AttackData GeigekiData => m_CharacterData.GetAttack(AttackSlot.Geigeki);
+    public AttackData AirMoveData => m_CharacterData.GetAttack(AttackSlot.AirMove);
+    public AttackData DownMoveData => m_CharacterData.GetAttack(AttackSlot.DownMove);
+
+    //--- 状態参照 ---
+    public InputState Input => m_Input;
+    public bool IsGrounded => m_Controller.isGrounded;
+
+    //向き(右= +1、左= -1)
+    public float FacingDir => this.transform.forward.x >= 0.0f ? 1.0f : -1.0f;
+    public bool IsFacingRight => FacingDir > 0.0f;
+
+    //相手から離れる方向に入力しているか(右向きなら左入力、左向きなら右入力が後退)
+    public bool IsMovingBackward => m_HorizontalSign * FacingDir < 0.0f;
+
+    //KOしているか(HPはサーバーから同期されるので全クライアントで判定できる)
+    public bool IsKO => HP <= 0;
+
+    public bool IsCanGuard => !IsGuardBroken;
+
+    //--- 入力の立ち上がり ---
+    public bool IsJumpPressed => m_IsJumpPressed;
+    public bool IsNormalAttackPressed => m_IsNormalAttackPressed;
+
+    //--- ジャンプ ---
+    //1段ジャンプのみなので、接地していればジャンプ可能
+    public bool IsCanJump => m_Controller.isGrounded;
+
+    //ステップ中か
+    public bool IsStepping => CurrentState == StepState;
+
+    #endregion
+
+
+    #region State判定ヘルパー
+
+    //ガード構え中、またはガード喰らい中か
+    private bool IsGuarding => CurrentState == GuardState || CurrentState == GuardHitState;
+
+    //踏み込み・移動ロックの対象になる攻撃State
+    private bool IsAttackState =>
+        CurrentState == NormalAttackState ||
+        CurrentState == LowAttackState ||
+        CurrentState == ForwardAttackState;
+
+    //左右移動出来ない状態か(攻撃は地上のときだけロック。空中攻撃では空中制御を残す)
+    private bool IsHorizontalMoveLocked =>
+        CurrentState == GuardState ||
+        CurrentState == GuardHitState ||
+        CurrentState == CrouchState ||
+        CurrentState == HitState ||
+        CurrentState == StepState ||
+        (IsAttackState && m_Controller.isGrounded);
+
+    //攻撃中に前入力で踏み込めるか(地上攻撃のみ)
+    private bool IsAttackStepState => IsAttackState && m_Controller.isGrounded;
+
+    #endregion
+
+
     #region Unity / Fusion コールバック
 
     private void Awake()
@@ -246,12 +262,10 @@ public class Player : NetworkBehaviour
         m_Controller = GetComponent<CharacterController>();
         m_Input = new InputState();
         m_StateMachine = new PlayerStateMachine();
-
         m_PlayerAnim = new PlayerAnimator(m_Anim);
 
         CreateStates();
     }
-
 
     public override void Spawned()
     {
@@ -303,10 +317,10 @@ public class Player : NetworkBehaviour
         JumpState = new PlayerJumpState(this);
         NormalAttackState = new PlayerNormalAttackState(this);
         LowAttackState = new PlayerLowAttackState(this);
-        UpAttackState = new PlayerUpAttackState(this);
         ForwardAttackState = new PlayerForwardAttackState(this);
         HitState = new PlayerHitState(this);
         GuardHitState = new PlayerGuardHitState(this);
+        StepState = new PlayerStepState(this);
     }
 
     /// <summary>
@@ -324,6 +338,20 @@ public class Player : NetworkBehaviour
         else
         {
             cam.RemoveTarget(this.transform);
+        }
+    }
+
+    /// <summary>
+    /// 対戦相手を登録
+    /// </summary>
+    public void SetOpponent(Player opponent)
+    {
+        m_Opponent = opponent;
+
+        //CharacterController同士は衝突させない(頭に乗れなくする。重なりはResolveOverlapで解消)
+        if (m_Opponent != null)
+        {
+            Physics.IgnoreCollision(m_Controller, m_Opponent.m_Controller);
         }
     }
 
@@ -347,6 +375,7 @@ public class Player : NetworkBehaviour
         }
 
         UpdateInput(data);
+        UpdateStepInput(data.horizontal);
         m_StateMachine.Update();
         UpdateMovement(data);
     }
@@ -369,17 +398,16 @@ public class Player : NetworkBehaviour
     /// </summary>
     private void UpdateInput(NetworkManager.PlayerInputData data)
     {
-
         //ジャンプ入力の立ち上がりを検出
         m_IsJumpPressed = data.isJump && !m_IsPrevJumpInput;
         m_IsPrevJumpInput = data.isJump;
 
-        //通常攻撃入力の立ち上がりを検出(コンボ用)
-
+        //通常攻撃入力の立ち上がりを検出
         m_IsNormalAttackPressed = data.isNormalAttack && !m_IsPrevNormalAttackInput;
         m_IsPrevNormalAttackInput = data.isNormalAttack;
 
-        Direction direction = ConvertDirection(data.horizontal, data.vertical);
+        m_HorizontalSign = ToSign(data.horizontal);
+        Direction direction = ConvertDirection(m_HorizontalSign, ToSign(data.vertical));
 
         //ガードクラッシュ中はガード入力を無効化
         bool isGuard = data.isGuard && IsCanGuard;
@@ -394,13 +422,58 @@ public class Player : NetworkBehaviour
     }
 
     /// <summary>
-    /// NetworkInputをDirectionへ変換する
+    /// 同じ方向への2回入力を検出してステップを開始する
     /// </summary>
-    private static Direction ConvertDirection(float horizontal, float vertical)
+    private void UpdateStepInput(float horizontal)
     {
-        int h = horizontal > 0.0f ? 1 : (horizontal < 0.0f ? -1 : 0);
-        int v = vertical > 0.0f ? 1 : (vertical < 0.0f ? -1 : 0);
+        int dir = ToSign(horizontal, StepInputThreshold);
 
+        //受付時間が過ぎたら1回目の入力を忘れる
+        m_StepTapTimer -= Runner.DeltaTime;
+        if (m_StepTapTimer <= 0.0f)
+        {
+            m_StepTapDir = 0;
+        }
+
+        //ニュートラルから倒した瞬間だけをタップとして扱う
+        bool isTap = dir != 0 && dir != m_PrevHorizontalDir;
+        m_PrevHorizontalDir = dir;
+
+        if (!isTap) return;
+
+        //受付時間内に同じ方向をもう一度倒した
+        if (m_StepTapDir == dir && IsCanStartStep())
+        {
+            StepState.Setup(dir, m_StepDuration);
+            ChangeState(StepState);
+            return;
+        }
+
+        //1回目のタップとして記録
+        m_StepTapDir = dir;
+        m_StepTapTimer = StepInputWindow;
+    }
+
+    private bool IsCanStartStep()
+    {
+        return m_Controller.isGrounded && (CurrentState == IdleState || CurrentState == WalkState);
+    }
+
+    /// <summary>
+    /// 値を -1 / 0 / 1 に変換する(threshold以下は0)
+    /// </summary>
+    private static int ToSign(float value, float threshold = 0.0f)
+    {
+        if (value > threshold) return 1;
+        if (value < -threshold) return -1;
+        return 0;
+    }
+
+    /// <summary>
+    /// 左右・上下の符号(-1,0,1)をDirectionへ変換する
+    /// </summary>
+    private static Direction ConvertDirection(int h, int v)
+    {
         switch (h, v)
         {
             case (-1, 1): return Direction.UpLeft;
@@ -429,20 +502,9 @@ public class Player : NetworkBehaviour
         if (m_Controller.isGrounded && m_Move.y < 0.0f)
         {
             m_Move.y = GroundedStickVelocity;
-            m_JumpCount = 0;
         }
 
-        //左右移動(行動制限中は入力分を停止)
-        float inputX = IsHorizontalMoveLocked ? 0.0f : data.horizontal * m_CharacterData.speed;
-
-        //相手の頭に乗っている場合は、行動制限中でも左右にずり落とす
-        float slideX = m_IsOnOpponentHead ? m_SlideOffDir * m_SlideOffSpeed : 0.0f;
-
-        //Moveの最中にOnControllerColliderHitで再度セットされるので、先にリセットする
-        m_IsOnOpponentHead = false;
-
-        //入力 + ノックバック + ずり落ちを合成
-        m_Move.x = inputX + m_KnockbackVelocityX + slideX;
+        m_Move.x = CalcHorizontalVelocity(data.horizontal);
 
         //ノックバックを0へ向けて直線的に減衰
         m_KnockbackVelocityX = Mathf.MoveTowards(m_KnockbackVelocityX, 0.0f, m_KnockbackDecay * Runner.DeltaTime);
@@ -452,19 +514,86 @@ public class Player : NetworkBehaviour
         m_Move.y += gravity * Runner.DeltaTime;
 
         m_Controller.Move(m_Move * Runner.DeltaTime);
+        ResolveOverlap();
     }
 
     /// <summary>
-    /// ジャンプ(回数を消費する)。できなければfalse
+    /// 入力 + ノックバック + 踏み込み + ステップを合成した左右速度を返す
+    /// </summary>
+    private float CalcHorizontalVelocity(float inputHorizontal)
+    {
+        //左右移動(行動制限中は入力分を停止)
+        float inputX = IsHorizontalMoveLocked ? 0.0f : inputHorizontal * m_CharacterData.speed;
+
+        //攻撃中は、向いている方向へ入力した時だけ少し踏み込む
+        float stepX = GetAttackStepVelocity(inputHorizontal);
+
+        float dashX = CurrentState == StepState ? StepState.Dir * m_StepSpeed : 0.0f;
+
+        return inputX + m_KnockbackVelocityX + stepX + dashX;
+    }
+
+    /// <summary>
+    /// 攻撃中の踏み込み速度を返す
+    /// </summary>
+    private float GetAttackStepVelocity(float inputHorizontal)
+    {
+        if (!IsAttackStepState) return 0.0f;
+
+        //向いている方向へ入力していない場合は踏み込まない
+        if (inputHorizontal * FacingDir <= 0.0f) return 0.0f;
+
+        //出始めの区間を過ぎたら止める
+        float t = GetAnimationNormalizedTime(GetCurrentAttackAnimation());
+        if (t >= AttackStepEndTime) return 0.0f;
+
+        return FacingDir * m_AttackStepSpeed;
+    }
+
+    /// <summary>
+    /// 今の攻撃Stateに対応するAnimationStateを返す
+    /// </summary>
+    private AnimationState GetCurrentAttackAnimation()
+    {
+        if (CurrentState == LowAttackState) return AnimationState.LowAttack;
+        if (CurrentState == ForwardAttackState) return AnimationState.ForwardAttack;
+        return AnimationState.NormalAttack;
+    }
+
+    /// <summary>
+    /// 相手と重なっていたら、横方向に押し出す
+    /// </summary>
+    private void ResolveOverlap()
+    {
+        if (m_Opponent == null) return;
+
+        Vector3 pos = this.transform.position;
+        Vector3 opos = m_Opponent.transform.position;
+
+        //縦に重なっていなければ何もしない
+        if (Mathf.Abs(pos.y - opos.y) >= m_Controller.height) return;
+
+        float dx = pos.x - opos.x;
+        float minDist = m_Controller.radius + m_Opponent.m_Controller.radius;
+        float overlap = minDist - Mathf.Abs(dx);
+        if (overlap <= 0.0f) return;
+
+        //ほぼ真上・真下で重なった時は、来た側へ逃がす
+        float dir = Mathf.Abs(dx) > OverlapCenterThreshold ? Mathf.Sign(dx) : -FacingDir;
+
+        //一気にワープさせないよう、速度を制限して押し出す
+        float push = Mathf.Min(overlap, PushOutSpeed * Runner.DeltaTime);
+        m_Controller.Move(new Vector3(dir * push, 0.0f, 0.0f));
+    }
+
+    /// <summary>
+    /// ジャンプ。できなければfalse
     /// </summary>
     public bool Jump()
     {
         if (!IsCanJump) return false;
 
-        //地上から飛ぶ場合は1回目、空中から飛ぶ場合は回数を引き継いで加算
-        m_JumpCount = Mathf.Max(m_JumpCount, m_Controller.isGrounded ? 0 : 1) + 1;
-
-        //ジャンプ速度を設定
+        //ジャンプ速度を設定(jumpPowerは実質ジャンプの高さ)
         m_Move.y = Mathf.Sqrt(m_CharacterData.jumpPower * -2.0f * m_Gravity);
         return true;
     }
@@ -500,55 +629,15 @@ public class Player : NetworkBehaviour
         m_KnockbackVelocityX = dir * power;
     }
 
-    private void OnControllerColliderHit(ControllerColliderHit hit)
-    {
-        //移動を行っているStateAuthority側だけで判定
-        if (!Object.HasStateAuthority) return;
-
-        //上から乗っている接触だけを対象にする
-        if (hit.normal.y < m_StandOnNormalY) return;
-
-        //相手プレイヤーか
-        Player other = hit.collider.GetComponentInParent<Player>();
-        if (other == null || other == this) return;
-
-        float dx = this.transform.position.x - other.transform.position.x;
-
-        //相手から離れる方向。ほぼ真上に乗った場合は来た側へ
-        //(相手の向こう側へ抜けさせたい場合は符号を反転させる)
-        float dir = Mathf.Abs(dx) > HeadOverlapThreshold
-            ? (dx > 0.0f ? 1.0f : -1.0f)
-            : -FacingDir;
-
-        m_IsOnOpponentHead = true;
-        m_SlideOffDir = dir;
-    }
-
-    #endregion
-
-
-    #region State / 対戦相手
-
-    /// <summary>
-    /// Stateの変更
-    /// </summary>
-    public void ChangeState(PlayerState state)
-    {
-        m_StateMachine.ChangeState(state);
-    }
-
-    /// <summary>
-    /// 対戦相手を登録
-    /// </summary>
-    public void SetOpponent(Player opponent)
-    {
-        m_Opponent = opponent;
-    }
-
     #endregion
 
 
     #region ダメージ
+
+    /// <summary>
+    /// 攻撃を受けられる状態か(StateAuthority側かつKOしていない)
+    /// </summary>
+    private bool CanTakeHit => Object.HasStateAuthority && !IsKO;
 
     /// <summary>
     /// ダメージを受ける(StateAuthority側のみ実行)
@@ -558,10 +647,7 @@ public class Player : NetworkBehaviour
     /// <param name="guardStunTicks">ガード硬直(Tick数)</param>
     public void TakeDamage(int damage, int hitStunTicks, int guardStunTicks, float attackerX, float knockback, float guardKnockback, float guardDamage)
     {
-        if (!Object.HasStateAuthority) return;
-
-        //KO済みなら以降の攻撃は無視
-        if (IsKO) return;
+        if (!CanTakeHit) return;
 
         if (IsGuarding)
         {
@@ -574,14 +660,11 @@ public class Player : NetworkBehaviour
     }
 
     /// <summary>
-    /// 投げのダメージ適用
+    /// 投げのダメージ適用(ガード不可)
     /// </summary>
     public void TakeThrowDamage(int damage, int hitStunTicks, float attackerX, float knockback)
     {
-        if (!Object.HasStateAuthority) return;
-
-        //KO済みなら以降の攻撃は無視
-        if (IsKO) return;
+        if (!CanTakeHit) return;
 
         TakeUnguardedHit(damage, hitStunTicks, attackerX, knockback);
     }
@@ -655,28 +738,24 @@ public class Player : NetworkBehaviour
     #endregion
 
 
-    #region 攻撃・掴み判定
+    #region 攻撃判定
 
     /// <summary>
     /// 攻撃判定を行い、当たったらtrueを返す
     /// </summary>
     public bool CheckAttackHit(AttackData data)
     {
-        if (!Object.HasStateAuthority)
-            return false;
+        if (!Object.HasStateAuthority) return false;
+        if (data == null || m_SwordHitBox == null) return false;
 
-        if (data == null || m_SwordHitBox == null)
-            return false;
-
-        // 剣のBoxColliderからワールド座標を取得
+        //剣のBoxColliderからワールド座標を取得
         m_SwordHitBox.GetWorldBox(
             out Vector3 center,
             out Vector3 halfExtents,
             out Quaternion rotation
         );
 
-
-        // 剣の形状でHurtBoxを検索
+        //剣の形状でHurtBoxを検索
         Physics.SyncTransforms();
 
         int count = Physics.OverlapBoxNonAlloc(
@@ -690,8 +769,7 @@ public class Player : NetworkBehaviour
 
         for (int i = 0; i < count; i++)
         {
-            if (!TryGetTarget(i, out Player target))
-                continue;
+            if (!TryGetTarget(i, out Player target)) continue;
 
             target.TakeDamage(
                 data.damage,
@@ -808,15 +886,10 @@ public class Player : NetworkBehaviour
     public float GetAnimationNormalizedTime(AnimationState state)
         => m_PlayerAnim.GetNormalizedTime(state);
 
-
     //各攻撃アニメーションの終了判定
     public bool IsNormalAttackFinished() => m_PlayerAnim.IsFinished(AnimationState.NormalAttack);
-    public bool IsNormalAttack2Finished() => m_PlayerAnim.IsFinished(AnimationState.NormalAttack2);
-    public bool IsNormalAttack3Finished() => m_PlayerAnim.IsFinished(AnimationState.NormalAttack3);
     public bool IsLowAttackFinished() => m_PlayerAnim.IsFinished(AnimationState.LowAttack);
-    public bool IsUpAttackFinished() => m_PlayerAnim.IsFinished(AnimationState.UpAttack);
     public bool IsForwardAttackFinished() => m_PlayerAnim.IsFinished(AnimationState.ForwardAttack);
-
 
     #endregion
 }

@@ -147,15 +147,6 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
                     ""initialStateCheck"": false
                 },
                 {
-                    ""name"": ""UpAttack"",
-                    ""type"": ""Button"",
-                    ""id"": ""709313bb-f8f3-4264-bacb-4ed51d771168"",
-                    ""expectedControlType"": """",
-                    ""processors"": """",
-                    ""interactions"": """",
-                    ""initialStateCheck"": false
-                },
-                {
                     ""name"": ""ForwardAttack"",
                     ""type"": ""Button"",
                     ""id"": ""bffe00a8-6dce-4423-8c64-09b60c331f8a"",
@@ -405,28 +396,6 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""groups"": "";Keyboard&Mouse"",
                     ""action"": ""LowAttack"",
-                    ""isComposite"": false,
-                    ""isPartOfComposite"": false
-                },
-                {
-                    ""name"": """",
-                    ""id"": ""6c0855b5-61f0-417e-bbaa-3d91db04e3fc"",
-                    ""path"": ""<Gamepad>/buttonNorth"",
-                    ""interactions"": """",
-                    ""processors"": """",
-                    ""groups"": "";Gamepad"",
-                    ""action"": ""UpAttack"",
-                    ""isComposite"": false,
-                    ""isPartOfComposite"": false
-                },
-                {
-                    ""name"": """",
-                    ""id"": ""075f3fbb-775c-43c4-9386-8756077340a4"",
-                    ""path"": ""<Keyboard>/#(U)"",
-                    ""interactions"": """",
-                    ""processors"": """",
-                    ""groups"": "";Keyboard&Mouse"",
-                    ""action"": ""UpAttack"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 },
@@ -1042,7 +1011,6 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
         m_Player_Crouch = m_Player.FindAction("Crouch", throwIfNotFound: true);
         m_Player_NormalAttack = m_Player.FindAction("NormalAttack", throwIfNotFound: true);
         m_Player_LowAttack = m_Player.FindAction("LowAttack", throwIfNotFound: true);
-        m_Player_UpAttack = m_Player.FindAction("UpAttack", throwIfNotFound: true);
         m_Player_ForwardAttack = m_Player.FindAction("ForwardAttack", throwIfNotFound: true);
         // UI
         m_UI = asset.FindActionMap("UI", throwIfNotFound: true);
@@ -1143,7 +1111,6 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
     private readonly InputAction m_Player_Crouch;
     private readonly InputAction m_Player_NormalAttack;
     private readonly InputAction m_Player_LowAttack;
-    private readonly InputAction m_Player_UpAttack;
     private readonly InputAction m_Player_ForwardAttack;
     /// <summary>
     /// Provides access to input actions defined in input action map "Player".
@@ -1180,10 +1147,6 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
         /// Provides access to the underlying input action "Player/LowAttack".
         /// </summary>
         public InputAction @LowAttack => m_Wrapper.m_Player_LowAttack;
-        /// <summary>
-        /// Provides access to the underlying input action "Player/UpAttack".
-        /// </summary>
-        public InputAction @UpAttack => m_Wrapper.m_Player_UpAttack;
         /// <summary>
         /// Provides access to the underlying input action "Player/ForwardAttack".
         /// </summary>
@@ -1232,9 +1195,6 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
             @LowAttack.started += instance.OnLowAttack;
             @LowAttack.performed += instance.OnLowAttack;
             @LowAttack.canceled += instance.OnLowAttack;
-            @UpAttack.started += instance.OnUpAttack;
-            @UpAttack.performed += instance.OnUpAttack;
-            @UpAttack.canceled += instance.OnUpAttack;
             @ForwardAttack.started += instance.OnForwardAttack;
             @ForwardAttack.performed += instance.OnForwardAttack;
             @ForwardAttack.canceled += instance.OnForwardAttack;
@@ -1267,9 +1227,6 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
             @LowAttack.started -= instance.OnLowAttack;
             @LowAttack.performed -= instance.OnLowAttack;
             @LowAttack.canceled -= instance.OnLowAttack;
-            @UpAttack.started -= instance.OnUpAttack;
-            @UpAttack.performed -= instance.OnUpAttack;
-            @UpAttack.canceled -= instance.OnUpAttack;
             @ForwardAttack.started -= instance.OnForwardAttack;
             @ForwardAttack.performed -= instance.OnForwardAttack;
             @ForwardAttack.canceled -= instance.OnForwardAttack;
@@ -1615,13 +1572,6 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
         /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
         /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
         void OnLowAttack(InputAction.CallbackContext context);
-        /// <summary>
-        /// Method invoked when associated input action "UpAttack" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
-        /// </summary>
-        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
-        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
-        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
-        void OnUpAttack(InputAction.CallbackContext context);
         /// <summary>
         /// Method invoked when associated input action "ForwardAttack" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
         /// </summary>

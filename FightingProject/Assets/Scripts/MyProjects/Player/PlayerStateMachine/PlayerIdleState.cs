@@ -24,7 +24,6 @@ public class PlayerIdleState : PlayerState
             IsTryChangeState(input.Direction.IsDown(), m_Player.CrouchState) ||  //しゃがみ
             IsTryChangeState(input.IsNormalAttack,m_Player.NormalAttackState) ||
             IsTryChangeState(input.IsLowAttack,m_Player.LowAttackState) ||
-            IsTryChangeState(input.IsUpAttack,m_Player.UpAttackState) ||
             IsTryChangeState(input.IsForwardAttack,m_Player.ForwardAttackState) ||
             IsTryChangeState(input.IsGuard, m_Player.GuardState) ||
             IsTryChangeState(input.IsJump, m_Player.JumpState))

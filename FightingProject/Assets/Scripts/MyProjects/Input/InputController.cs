@@ -55,7 +55,6 @@ public class InputController : MonoBehaviour
         m_IsJump |= player.Jump.WasPressedThisFrame();
         m_IsNormalAttack |= player.NormalAttack.WasPressedThisFrame();
         m_IsLowAttack |= player.LowAttack.WasPressedThisFrame();
-        m_IsUpAttack |= player.UpAttack.WasPressedThisFrame();
         m_IsForwardAttack |= player.ForwardAttack.WasPressedThisFrame();
 
         bool isGuard = m_Input.Player.Guard.IsPressed();

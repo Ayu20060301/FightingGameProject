@@ -61,19 +61,7 @@ public class CharacterData : ScriptableObject
     [SerializeField]
     private AttackData m_ForwardAttack;
 
-    [Header("通常攻撃コンボ(2段目以降)")]
-    public AttackData[] normalCombo = new AttackData[0];
 
-
-    [Header("コマンド技")]
-    [SerializeField]
-    private AttackData m_RushMove;
-    [SerializeField]
-    private AttackData m_Geigeki;
-    [SerializeField]
-    private AttackData m_AirMove;
-    [SerializeField]
-    private AttackData m_DownMove;
 
     /// <summary>
     /// スロットから攻撃データを取得
@@ -86,10 +74,6 @@ public class CharacterData : ScriptableObject
             case AttackSlot.LowAttack: return m_LowAttack;
             case AttackSlot.UpAttack: return m_UpAttack;
             case AttackSlot.ForwardAttack: return m_ForwardAttack;
-            case AttackSlot.RushMove: return m_RushMove;
-            case AttackSlot.Geigeki: return m_Geigeki;
-            case AttackSlot.AirMove: return m_AirMove;
-            case AttackSlot.DownMove: return m_DownMove;
             default: return null;
         }
     }

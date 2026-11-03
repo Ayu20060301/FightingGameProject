@@ -9,14 +9,11 @@ public enum AnimationState
     Guard,      //ガード
     Crouch,     //しゃがみ
     Jump,       //ジャンプ
-    Land,       //着地
-
     //攻撃
 
-    //=====コンボ攻撃=====
+    
     NormalAttack,
-    NormalAttack2,
-    NormalAttack3,
+  
 
     //====================
 
@@ -24,13 +21,16 @@ public enum AnimationState
     UpAttack,       //上攻撃
     ForwardAttack,  //前攻撃
 
-    //コマンド攻撃
-
+   
 
     //ダメージを受けた際の各アニメーション
     Hit,            //立ち喰らい
     GuardHit,       //立ちガード喰らい
 
+
+    //ステップ
+    Step,
+    BackStep,
 }
 
 public class PlayerAnimator
@@ -42,6 +42,8 @@ public class PlayerAnimator
     private static readonly int SpeedParam = Animator.StringToHash("Speed");
     private static readonly int IsGuardParam = Animator.StringToHash("IsGuard");
 
+    private static readonly int IsCrouchParam = Animator.StringToHash("IsCrouch");
+
     private static Dictionary<AnimationState, string> AnimationNames = new Dictionary<AnimationState, string>
     {
         { AnimationState.Idle,          "Idle"},
@@ -50,15 +52,13 @@ public class PlayerAnimator
         { AnimationState.Guard,         "Guard"},
         { AnimationState.Crouch,        "Crouch"},
         { AnimationState.Jump,          "Jump"},
-        { AnimationState.Land,          "Land"},
         { AnimationState.NormalAttack,  "NormalAttack"},
-        { AnimationState.NormalAttack2,  "NormalAttack2"},
-        { AnimationState.NormalAttack3,  "NormalAttack3"},
         { AnimationState.LowAttack,     "LowAttack"},
-        { AnimationState.UpAttack,      "UpAttack"},
         { AnimationState.ForwardAttack, "ForwardAttack"},
         { AnimationState.Hit,           "Hit"},
         { AnimationState.GuardHit,      "GuardHit"},
+        { AnimationState.Step,          "Step"},
+        { AnimationState.BackStep,      "BackStep"},
     };
 
     private readonly Animator m_Anim;
@@ -75,6 +75,8 @@ public class PlayerAnimator
     public void Play(AnimationState state)
     {
         if (m_Anim == null) return;
+
+        m_Anim.speed = 1.0f;
 
         ResetPatameters();
         ApplyParameters(state);
@@ -157,6 +159,7 @@ public class PlayerAnimator
     {
         m_Anim.SetFloat(SpeedParam, 1.0f);
         m_Anim.SetBool(IsGuardParam, false);
+        m_Anim.SetBool(IsCrouchParam, false);
     }
 
 
@@ -170,6 +173,9 @@ public class PlayerAnimator
                 break;
             case AnimationState.Guard:
                 m_Anim.SetBool(IsGuardParam,true);
+                break;
+            case AnimationState.Crouch:
+                m_Anim.SetBool(IsCrouchParam, true);
                 break;
         }
     }

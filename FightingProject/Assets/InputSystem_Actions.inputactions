@@ -61,15 +61,6 @@
                     "initialStateCheck": false
                 },
                 {
-                    "name": "UpAttack",
-                    "type": "Button",
-                    "id": "709313bb-f8f3-4264-bacb-4ed51d771168",
-                    "expectedControlType": "",
-                    "processors": "",
-                    "interactions": "",
-                    "initialStateCheck": false
-                },
-                {
                     "name": "ForwardAttack",
                     "type": "Button",
                     "id": "bffe00a8-6dce-4423-8c64-09b60c331f8a",
@@ -319,28 +310,6 @@
                     "processors": "",
                     "groups": ";Keyboard&Mouse",
                     "action": "LowAttack",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                },
-                {
-                    "name": "",
-                    "id": "6c0855b5-61f0-417e-bbaa-3d91db04e3fc",
-                    "path": "<Gamepad>/buttonNorth",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": ";Gamepad",
-                    "action": "UpAttack",
-                    "isComposite": false,
-                    "isPartOfComposite": false
-                },
-                {
-                    "name": "",
-                    "id": "075f3fbb-775c-43c4-9386-8756077340a4",
-                    "path": "<Keyboard>/#(U)",
-                    "interactions": "",
-                    "processors": "",
-                    "groups": ";Keyboard&Mouse",
-                    "action": "UpAttack",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },

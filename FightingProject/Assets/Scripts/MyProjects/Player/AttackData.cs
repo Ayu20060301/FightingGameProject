@@ -1,4 +1,3 @@
-using Unity.VisualScripting;
 using UnityEngine;
 
 [System.Serializable]
@@ -23,10 +22,6 @@ public class AttackData
     [Header("ガードゲージ")]
     public float guardDamage = 10.0f;
 
-    [Header("コンボ受付(Tick)")]
-    public int comboStartTicks = 12;   //攻撃開始から何Tick目以降で次段へ進めるか
-    public int comboEndTicks = 30;     //何Tick目まで受け付けるか(0以下なら期限なし)
-
     //攻撃判定が有効か
     public bool IsActive(int tick)
     {
@@ -38,12 +33,5 @@ public class AttackData
     public bool IsFinished(int tick)
     {
         return tick >= startupTicks + activeTicks;
-    }
-
-    //次の段へ進める時間帯か
-    public bool IsComboWindow(int tick)
-    {
-        if (tick < comboStartTicks) return false;
-        return comboEndTicks <= 0 || tick < comboEndTicks;
     }
 }
