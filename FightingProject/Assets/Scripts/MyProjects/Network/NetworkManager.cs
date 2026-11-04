@@ -21,7 +21,6 @@ public class NetworkManager : MonoBehaviour, INetworkRunnerCallbacks
 
         public NetworkBool isNormalAttack;
         public NetworkBool isLowAttack;
-        public NetworkBool isUpAttack;
         public NetworkBool isForwardAttack;
 
     }
@@ -273,7 +272,7 @@ public class NetworkManager : MonoBehaviour, INetworkRunnerCallbacks
         data.isNormalAttack = state.IsNormalAttack;
         data.isLowAttack = state.IsLowAttack;
 
-        data.isUpAttack = state.IsUpAttack;
+      
         data.isForwardAttack = state.IsForwardAttack;
 
         //Fusionへ入力を渡す

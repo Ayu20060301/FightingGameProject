@@ -8,14 +8,11 @@ public enum AttackSlot
    //通常技
    NormalAttack,  //通常攻撃(Xボタン)
    LowAttack,　　 //下攻撃(Aボタン)
-   UpAttack,     //上攻撃(Yボタン)
    ForwardAttack, //前攻撃(Bボタン)
 
-   //コマンド技
-   RushMove,    //突進技 
-   Geigeki,    //迎撃技
-   AirMove,  //対空技
-   DownMove,  //降下技
+   AirAttack,    //空中攻撃
+
+   CrouchAttack, //しゃがみ攻撃
 }
 
 /// <summary>
@@ -51,17 +48,17 @@ public class CharacterData : ScriptableObject
     [Range(0.0f, 1.0f)]
     public float guardUnlockRate = 0.3f;
 
-    [Header("通常技")]
+    [Header("通常攻撃")]
     [SerializeField]
     private AttackData m_NormalAttack;
     [SerializeField]
     private AttackData m_LowAttack;
     [SerializeField]
-    private AttackData m_UpAttack;
-    [SerializeField]
     private AttackData m_ForwardAttack;
-
-
+    [SerializeField]
+    private AttackData m_AirAttack;
+    [SerializeField]
+    private AttackData m_CrouchAttack;
 
     /// <summary>
     /// スロットから攻撃データを取得
@@ -72,8 +69,8 @@ public class CharacterData : ScriptableObject
         {
             case AttackSlot.NormalAttack: return m_NormalAttack;
             case AttackSlot.LowAttack: return m_LowAttack;
-            case AttackSlot.UpAttack: return m_UpAttack;
             case AttackSlot.ForwardAttack: return m_ForwardAttack;
+            case AttackSlot.AirAttack:  return m_AirAttack;
             default: return null;
         }
     }

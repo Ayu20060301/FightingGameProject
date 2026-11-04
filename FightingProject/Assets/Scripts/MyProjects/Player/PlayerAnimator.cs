@@ -9,19 +9,18 @@ public enum AnimationState
     Guard,      //ガード
     Crouch,     //しゃがみ
     Jump,       //ジャンプ
+
     //攻撃
 
-    
-    NormalAttack,
+    NormalAttack,  //通常攻撃
   
-
-    //====================
-
     LowAttack,      //下攻撃
-    UpAttack,       //上攻撃
+    
     ForwardAttack,  //前攻撃
 
-   
+    AirAttack,     //空中攻撃
+    
+    CrouchAttack, //しゃがみ攻撃
 
     //ダメージを受けた際の各アニメーション
     Hit,            //立ち喰らい
@@ -55,6 +54,8 @@ public class PlayerAnimator
         { AnimationState.NormalAttack,  "NormalAttack"},
         { AnimationState.LowAttack,     "LowAttack"},
         { AnimationState.ForwardAttack, "ForwardAttack"},
+        { AnimationState.AirAttack,     "AirAttack"},
+        { AnimationState.CrouchAttack,  "CrouchAttack"},
         { AnimationState.Hit,           "Hit"},
         { AnimationState.GuardHit,      "GuardHit"},
         { AnimationState.Step,          "Step"},

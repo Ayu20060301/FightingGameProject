@@ -154,6 +154,15 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""AirAttack"",
+                    ""type"": ""Button"",
+                    ""id"": ""aa55aa72-4686-450a-8cd4-2ecadcee434d"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
                 }
             ],
             ""bindings"": [
@@ -418,6 +427,17 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""groups"": "";Keyboard&Mouse"",
                     ""action"": ""ForwardAttack"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""04715b53-8181-415c-804c-573aaefa5db8"",
+                    ""path"": ""<Gamepad>/buttonSouth"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": "";Gamepad"",
+                    ""action"": ""AirAttack"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 }
@@ -1012,6 +1032,7 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
         m_Player_NormalAttack = m_Player.FindAction("NormalAttack", throwIfNotFound: true);
         m_Player_LowAttack = m_Player.FindAction("LowAttack", throwIfNotFound: true);
         m_Player_ForwardAttack = m_Player.FindAction("ForwardAttack", throwIfNotFound: true);
+        m_Player_AirAttack = m_Player.FindAction("AirAttack", throwIfNotFound: true);
         // UI
         m_UI = asset.FindActionMap("UI", throwIfNotFound: true);
         m_UI_Navigate = m_UI.FindAction("Navigate", throwIfNotFound: true);
@@ -1112,6 +1133,7 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
     private readonly InputAction m_Player_NormalAttack;
     private readonly InputAction m_Player_LowAttack;
     private readonly InputAction m_Player_ForwardAttack;
+    private readonly InputAction m_Player_AirAttack;
     /// <summary>
     /// Provides access to input actions defined in input action map "Player".
     /// </summary>
@@ -1151,6 +1173,10 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
         /// Provides access to the underlying input action "Player/ForwardAttack".
         /// </summary>
         public InputAction @ForwardAttack => m_Wrapper.m_Player_ForwardAttack;
+        /// <summary>
+        /// Provides access to the underlying input action "Player/AirAttack".
+        /// </summary>
+        public InputAction @AirAttack => m_Wrapper.m_Player_AirAttack;
         /// <summary>
         /// Provides access to the underlying input action map instance.
         /// </summary>
@@ -1198,6 +1224,9 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
             @ForwardAttack.started += instance.OnForwardAttack;
             @ForwardAttack.performed += instance.OnForwardAttack;
             @ForwardAttack.canceled += instance.OnForwardAttack;
+            @AirAttack.started += instance.OnAirAttack;
+            @AirAttack.performed += instance.OnAirAttack;
+            @AirAttack.canceled += instance.OnAirAttack;
         }
 
         /// <summary>
@@ -1230,6 +1259,9 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
             @ForwardAttack.started -= instance.OnForwardAttack;
             @ForwardAttack.performed -= instance.OnForwardAttack;
             @ForwardAttack.canceled -= instance.OnForwardAttack;
+            @AirAttack.started -= instance.OnAirAttack;
+            @AirAttack.performed -= instance.OnAirAttack;
+            @AirAttack.canceled -= instance.OnAirAttack;
         }
 
         /// <summary>
@@ -1579,6 +1611,13 @@ public partial class @InputSystem_Actions: IInputActionCollection2, IDisposable
         /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
         /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
         void OnForwardAttack(InputAction.CallbackContext context);
+        /// <summary>
+        /// Method invoked when associated input action "AirAttack" is either <see cref="UnityEngine.InputSystem.InputAction.started" />, <see cref="UnityEngine.InputSystem.InputAction.performed" /> or <see cref="UnityEngine.InputSystem.InputAction.canceled" />.
+        /// </summary>
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.started" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.performed" />
+        /// <seealso cref="UnityEngine.InputSystem.InputAction.canceled" />
+        void OnAirAttack(InputAction.CallbackContext context);
     }
     /// <summary>
     /// Interface to implement callback methods for all input action callbacks associated with input actions defined by "UI" which allows adding and removing callbacks.

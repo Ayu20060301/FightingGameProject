@@ -27,17 +27,10 @@ public class PlayerJumpState : PlayerState
 
     public override void Update()
     {
-
-        //空中で攻撃入力したら攻撃へ
-        if(m_Player.Input.IsNormalAttack)
-        {
-            m_Player.ChangeState(m_Player.NormalAttackState);
-            return;
-        }
-
+        //下入力
         if(m_Player.Input.IsLowAttack)
         {
-            m_Player.ChangeState(m_Player.LowAttackState);
+            m_Player.ChangeState(m_Player.AirAttackState);
             return;
         }
 

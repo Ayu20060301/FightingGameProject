@@ -15,7 +15,7 @@ MonoBehaviour:
   characterName: Samurai
   maxHP: 100
   speed: 2.5
-  jumpPower: 2.5
+  jumpPower: 2
   maxGuardGauge: 100
   guardRecoverPerSecond: 15
   guardRecoverDelay: 1

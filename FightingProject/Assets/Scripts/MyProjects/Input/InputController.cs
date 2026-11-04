@@ -63,7 +63,6 @@ public class InputController : MonoBehaviour
             GetDirection(),
             m_IsNormalAttack,
             m_IsLowAttack,
-            m_IsUpAttack,
             m_IsForwardAttack,
             m_IsJump,
             isGuard);

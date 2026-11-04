@@ -28,8 +28,6 @@ public enum AttackButton
 {
     NormalAttack, //通常攻撃(Bボタン入力)
     LowAttack, //下攻撃(Aボタン)
-    UpAttack, //上攻撃(Yボタン入力)
-
     ForwardAttack, //前攻撃(Xボタン入力)
 }
 
@@ -53,7 +51,7 @@ public class InputState
     /// </summary>
     public bool IsGuard { get; private set; }
 
-    public bool ISCrouch { get; private set; }
+    public bool IsCrouch { get; private set; }
 
 
     /// <summary>
@@ -67,11 +65,6 @@ public class InputState
     public bool IsLowAttack { get; private set; }
 
     /// <summary>
-    /// 上攻撃
-    /// </summary>
-    public bool IsUpAttack { get; private set; }
-
-    /// <summary>
     /// 前攻撃
     /// </summary>
     public bool IsForwardAttack { get; private set; }
@@ -83,7 +76,6 @@ public class InputState
         Direction direction,
         bool isNormalAttack,
         bool isLowAttack,
-        bool isUpAttack,
         bool isForwardAttack,
         bool isJump,
         bool isGuard)
@@ -91,7 +83,6 @@ public class InputState
         Direction = direction;
         IsNormalAttack = isNormalAttack;
         IsLowAttack = isLowAttack;
-        IsUpAttack = isUpAttack;
         IsForwardAttack = isForwardAttack;
         IsJump = isJump;
         IsGuard = isGuard;
@@ -104,7 +95,6 @@ public class InputState
     {
         IsNormalAttack = false;
         IsLowAttack = false;
-        IsUpAttack = false;
         IsForwardAttack = false;
     }
 

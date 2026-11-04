@@ -126,6 +126,8 @@ public class Player : NetworkBehaviour
     public PlayerNormalAttackState NormalAttackState { get; private set; }
     public PlayerLowAttackState LowAttackState { get; private set; }
     public PlayerForwardAttackState ForwardAttackState { get; private set; }
+    public PlayerAirAttackState AirAttackState { get; private set; }
+    public PlayerCrouchAttackState CrouchAttackState { get; private set; }
     public PlayerHitState HitState { get; private set; }
     public PlayerGuardHitState GuardHitState { get; private set; }
     public PlayerStepState StepState { get; private set; }
@@ -187,12 +189,9 @@ public class Player : NetworkBehaviour
 
     public AttackData NormalAttackData => m_CharacterData.GetAttack(AttackSlot.NormalAttack);
     public AttackData LowAttackData => m_CharacterData.GetAttack(AttackSlot.LowAttack);
-    public AttackData UpAttackData => m_CharacterData.GetAttack(AttackSlot.UpAttack);
     public AttackData ForwardAttackData => m_CharacterData.GetAttack(AttackSlot.ForwardAttack);
-    public AttackData RushMoveData => m_CharacterData.GetAttack(AttackSlot.RushMove);
-    public AttackData GeigekiData => m_CharacterData.GetAttack(AttackSlot.Geigeki);
-    public AttackData AirMoveData => m_CharacterData.GetAttack(AttackSlot.AirMove);
-    public AttackData DownMoveData => m_CharacterData.GetAttack(AttackSlot.DownMove);
+    public AttackData AirAttackData => m_CharacterData.GetAttack(AttackSlot.AirAttack);
+    public AttackData CrouchAttackData => m_CharacterData.GetAttack(AttackSlot.CrouchAttack);
 
     //--- 状態参照 ---
     public InputState Input => m_Input;
@@ -233,7 +232,9 @@ public class Player : NetworkBehaviour
     private bool IsAttackState =>
         CurrentState == NormalAttackState ||
         CurrentState == LowAttackState ||
-        CurrentState == ForwardAttackState;
+        CurrentState == ForwardAttackState ||
+        CurrentState == AirAttackState ||
+        CurrentState == CrouchAttackState;
 
     //左右移動出来ない状態か(攻撃は地上のときだけロック。空中攻撃では空中制御を残す)
     private bool IsHorizontalMoveLocked =>
@@ -318,6 +319,8 @@ public class Player : NetworkBehaviour
         NormalAttackState = new PlayerNormalAttackState(this);
         LowAttackState = new PlayerLowAttackState(this);
         ForwardAttackState = new PlayerForwardAttackState(this);
+        AirAttackState = new PlayerAirAttackState(this);
+        CrouchAttackState = new PlayerCrouchAttackState(this);
         HitState = new PlayerHitState(this);
         GuardHitState = new PlayerGuardHitState(this);
         StepState = new PlayerStepState(this);
@@ -415,7 +418,6 @@ public class Player : NetworkBehaviour
         m_Input.SetInput(direction,
                          data.isNormalAttack,
                          data.isLowAttack,
-                         data.isUpAttack,
                          data.isForwardAttack,
                          data.isJump,
                          isGuard);
@@ -890,6 +892,7 @@ public class Player : NetworkBehaviour
     public bool IsNormalAttackFinished() => m_PlayerAnim.IsFinished(AnimationState.NormalAttack);
     public bool IsLowAttackFinished() => m_PlayerAnim.IsFinished(AnimationState.LowAttack);
     public bool IsForwardAttackFinished() => m_PlayerAnim.IsFinished(AnimationState.ForwardAttack);
-
+    public bool IsAirAttackFinished() => m_PlayerAnim.IsFinished(AnimationState.AirAttack);
+    public bool IsCrouchAttackFinished() => m_PlayerAnim.IsFinished(AnimationState.CrouchAttack); 
     #endregion
 }
