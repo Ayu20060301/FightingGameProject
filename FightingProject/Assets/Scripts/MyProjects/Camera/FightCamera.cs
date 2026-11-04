@@ -22,7 +22,7 @@ public class FightCamera : MonoBehaviour
     public void RemoveTarget(Transform target)
     {
         if ((m_Group == null || target == null)) return;
-        if (m_Group.FindMember(target) >= 0) return;
+        if (m_Group.FindMember(target) < 0) return;
         m_Group.RemoveMember(target);
     }
 }

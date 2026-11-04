@@ -21,16 +21,15 @@ public class PlayerCrouchState : PlayerState
         InputState input = m_Player.Input;
 
 
-        if(m_Player.Input.IsLowAttack)
+        if (m_Player.IsNormalAttackPressed)
         {
-            m_Player.ChangeState(m_Player.CrouchAttackState);   
+            m_Player.ChangeState(m_Player.CrouchAttackState);
+            return;
         }
 
-        if (IsTryChangeState(input.IsGuard, m_Player.GuardState) ||  //ガード
-            IsTryChangeState(!input.Direction.IsDown(), m_Player.IdleState))     //しゃがみ入力がなくなった
+        if (IsTryChangeState(!input.Direction.IsDown(), m_Player.IdleState))     //しゃがみ入力がなくなった
         {
             return;
         }
     }
-
 }

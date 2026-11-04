@@ -46,10 +46,10 @@ public class InputState
     /// </summary>
     public bool IsJump { get; private set; }
 
+   
     /// <summary>
-    /// ガード入力
+    /// しゃがみ入力
     /// </summary>
-    public bool IsGuard { get; private set; }
 
     public bool IsCrouch { get; private set; }
 
@@ -77,15 +77,14 @@ public class InputState
         bool isNormalAttack,
         bool isLowAttack,
         bool isForwardAttack,
-        bool isJump,
-        bool isGuard)
+        bool isJump
+        )
     {
         Direction = direction;
         IsNormalAttack = isNormalAttack;
         IsLowAttack = isLowAttack;
         IsForwardAttack = isForwardAttack;
         IsJump = isJump;
-        IsGuard = isGuard;
     }
 
     /// <summary>

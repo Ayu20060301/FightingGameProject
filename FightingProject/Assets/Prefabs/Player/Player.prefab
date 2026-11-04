@@ -430,19 +430,14 @@ MonoBehaviour:
   m_Gravity: -30
   m_Anim: {fileID: 4465886803681634318}
   m_KnockbackDecay: 20
-  m_SlideOffSpeed: 3
-  m_StandOnNormalY: 0.5
   m_HurtMask:
     serializedVersion: 2
     m_Bits: 8
   m_SwordHitBox: {fileID: 7330631417924569282}
   m_AttackStepSpeed: 2
-  m_StepSpeed: 6
-  m_StepDuration: 0.25
+  m_StepSpeed: 5
+  m_StepDuration: 0.5
   _HP: 0
-  _IsGuardBroken:
-    _value: 0
-  _GuardGauge: 0
 --- !u!1 &1514496424575826653
 GameObject:
   m_ObjectHideFlags: 0

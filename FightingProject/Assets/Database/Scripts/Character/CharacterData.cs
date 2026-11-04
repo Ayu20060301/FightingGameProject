@@ -30,23 +30,6 @@ public class CharacterData : ScriptableObject
     public float speed = 2.0f;
     public float jumpPower = 3.0f;
 
-    [Header("ガード")]
-    public float maxGuardGauge = 100.0f;
-
-    //回復速度
-    public float guardRecoverPerSecond = 15.0f;
-
-    //削られてからの回復開始までの待ち時間
-    public float guardRecoverDelay = 1.0f;
-
-    //クラッシュの硬直(Tick数)
-    public int guardBreakStunTicks = 90;
-
-    //ガード構え中に減る速さ(1秒あたり)
-    public float guardDrainPerSecond = 5.0f;
-
-    [Range(0.0f, 1.0f)]
-    public float guardUnlockRate = 0.3f;
 
     [Header("通常攻撃")]
     [SerializeField]

@@ -1,0 +1,53 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c2d658f680a9b53479acee04049db056, type: 3}
+  m_Name: CharacterData
+  m_EditorClassIdentifier: Assembly-CSharp::CharacterData
+  characterName: Samurai
+  maxHP: 100
+  speed: 2.5
+  jumpPower: 1.8
+  m_NormalAttack:
+    label: 
+    damage: 5
+    hitStunTicks: 18
+    startupTicks: 6
+    activeTicks: 4
+    knockback: 3
+  m_LowAttack:
+    label: 
+    damage: 4
+    hitStunTicks: 16
+    startupTicks: 5
+    activeTicks: 3
+    knockback: 2.5
+  m_ForwardAttack:
+    label: 
+    damage: 8
+    hitStunTicks: 22
+    startupTicks: 12
+    activeTicks: 5
+    knockback: 5
+  m_AirAttack:
+    label: 
+    damage: 6
+    hitStunTicks: 20
+    startupTicks: 7
+    activeTicks: 8
+    knockback: 3.5
+  m_CrouchAttack:
+    label: 
+    damage: 4
+    hitStunTicks: 22
+    startupTicks: 6
+    activeTicks: 3
+    knockback: 3.5

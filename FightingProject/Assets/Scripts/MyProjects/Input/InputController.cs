@@ -15,10 +15,9 @@ public class InputController : MonoBehaviour
     //押下を保持するフラグ
     private bool m_IsJump;
 
-    //New
+    
     private bool m_IsNormalAttack;
     public bool m_IsLowAttack;
-    public bool m_IsUpAttack;
     private bool m_IsForwardAttack;
 
     private void Awake()
@@ -57,15 +56,13 @@ public class InputController : MonoBehaviour
         m_IsLowAttack |= player.LowAttack.WasPressedThisFrame();
         m_IsForwardAttack |= player.ForwardAttack.WasPressedThisFrame();
 
-        bool isGuard = m_Input.Player.Guard.IsPressed();
-
         State.SetInput(
             GetDirection(),
             m_IsNormalAttack,
             m_IsLowAttack,
             m_IsForwardAttack,
-            m_IsJump,
-            isGuard);
+            m_IsJump
+            );
     }
 
 
@@ -77,7 +74,6 @@ public class InputController : MonoBehaviour
         //InputController側の保持フラグをリセット
         m_IsNormalAttack = false;
         m_IsLowAttack = false;
-        m_IsUpAttack = false;
         m_IsForwardAttack = false;
         m_IsJump = false;
 

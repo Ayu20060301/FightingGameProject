@@ -120,7 +120,6 @@ public class Player : NetworkBehaviour
 
     public PlayerIdleState IdleState { get; private set; }
     public PlayerWalkState WalkState { get; private set; }
-    public PlayerGuardState GuardState { get; private set; }
     public PlayerCrouchState CrouchState { get; private set; }
     public PlayerJumpState JumpState { get; private set; }
     public PlayerNormalAttackState NormalAttackState { get; private set; }
@@ -129,7 +128,6 @@ public class Player : NetworkBehaviour
     public PlayerAirAttackState AirAttackState { get; private set; }
     public PlayerCrouchAttackState CrouchAttackState { get; private set; }
     public PlayerHitState HitState { get; private set; }
-    public PlayerGuardHitState GuardHitState { get; private set; }
     public PlayerStepState StepState { get; private set; }
 
     public PlayerState CurrentState => m_StateMachine.CurrentState;
@@ -159,23 +157,6 @@ public class Player : NetworkBehaviour
     [Networked]
     public int HP { get; set; }
 
-    /// <summary>
-    /// ガードクラッシュ中か
-    /// </summary>
-    [Networked]
-    public NetworkBool IsGuardBroken { get; set; }
-
-    /// <summary>
-    /// ネットワーク同期するガードゲージ
-    /// </summary>
-    [Networked]
-    public float GuardGauge { get; set; }
-
-    /// <summary>
-    /// 回復までの待ち時間
-    /// </summary>
-    [Networked]
-    private TickTimer GuardRecoverTimer { get; set; }
 
     #endregion
 
@@ -185,7 +166,6 @@ public class Player : NetworkBehaviour
     //--- キャラクターデータ ---
     public CharacterData Data => m_CharacterData;
     public int MaxHP => m_CharacterData.maxHP;
-    public float MaxGuardGauge => m_CharacterData.maxGuardGauge;
 
     public AttackData NormalAttackData => m_CharacterData.GetAttack(AttackSlot.NormalAttack);
     public AttackData LowAttackData => m_CharacterData.GetAttack(AttackSlot.LowAttack);
@@ -207,8 +187,6 @@ public class Player : NetworkBehaviour
     //KOしているか(HPはサーバーから同期されるので全クライアントで判定できる)
     public bool IsKO => HP <= 0;
 
-    public bool IsCanGuard => !IsGuardBroken;
-
     //--- 入力の立ち上がり ---
     public bool IsJumpPressed => m_IsJumpPressed;
     public bool IsNormalAttackPressed => m_IsNormalAttackPressed;
@@ -225,8 +203,6 @@ public class Player : NetworkBehaviour
 
     #region State判定ヘルパー
 
-    //ガード構え中、またはガード喰らい中か
-    private bool IsGuarding => CurrentState == GuardState || CurrentState == GuardHitState;
 
     //踏み込み・移動ロックの対象になる攻撃State
     private bool IsAttackState =>
@@ -238,8 +214,6 @@ public class Player : NetworkBehaviour
 
     //左右移動出来ない状態か(攻撃は地上のときだけロック。空中攻撃では空中制御を残す)
     private bool IsHorizontalMoveLocked =>
-        CurrentState == GuardState ||
-        CurrentState == GuardHitState ||
         CurrentState == CrouchState ||
         CurrentState == HitState ||
         CurrentState == StepState ||
@@ -276,7 +250,6 @@ public class Player : NetworkBehaviour
         if (!Object.HasStateAuthority) return;
 
         HP = MaxHP;
-        GuardGauge = MaxGuardGauge;
         FacingYaw = this.transform.eulerAngles.y;
 
         //最初はIdle
@@ -293,7 +266,6 @@ public class Player : NetworkBehaviour
         if (Object.HasStateAuthority)
         {
             UpdateFacing();
-            UpdateGuardGauge();
             UpdateAuthority();
         }
 
@@ -313,7 +285,6 @@ public class Player : NetworkBehaviour
     {
         IdleState = new PlayerIdleState(this);
         WalkState = new PlayerWalkState(this);
-        GuardState = new PlayerGuardState(this);
         CrouchState = new PlayerCrouchState(this);
         JumpState = new PlayerJumpState(this);
         NormalAttackState = new PlayerNormalAttackState(this);
@@ -322,7 +293,6 @@ public class Player : NetworkBehaviour
         AirAttackState = new PlayerAirAttackState(this);
         CrouchAttackState = new PlayerCrouchAttackState(this);
         HitState = new PlayerHitState(this);
-        GuardHitState = new PlayerGuardHitState(this);
         StepState = new PlayerStepState(this);
     }
 
@@ -412,15 +382,13 @@ public class Player : NetworkBehaviour
         m_HorizontalSign = ToSign(data.horizontal);
         Direction direction = ConvertDirection(m_HorizontalSign, ToSign(data.vertical));
 
-        //ガードクラッシュ中はガード入力を無効化
-        bool isGuard = data.isGuard && IsCanGuard;
 
         m_Input.SetInput(direction,
                          data.isNormalAttack,
                          data.isLowAttack,
                          data.isForwardAttack,
-                         data.isJump,
-                         isGuard);
+                         data.isJump
+                         );
     }
 
     /// <summary>
@@ -559,6 +527,8 @@ public class Player : NetworkBehaviour
     {
         if (CurrentState == LowAttackState) return AnimationState.LowAttack;
         if (CurrentState == ForwardAttackState) return AnimationState.ForwardAttack;
+        if (CurrentState == AirAttackState) return AnimationState.AirAttack;
+        if (CurrentState == CrouchAttackState) return AnimationState.CrouchAttack;
         return AnimationState.NormalAttack;
     }
 
@@ -647,78 +617,24 @@ public class Player : NetworkBehaviour
     /// <param name="damage">ダメージ量</param>
     /// <param name="hitStunTicks">喰らい硬直(Tick数)</param>
     /// <param name="guardStunTicks">ガード硬直(Tick数)</param>
-    public void TakeDamage(int damage, int hitStunTicks, int guardStunTicks, float attackerX, float knockback, float guardKnockback, float guardDamage)
+    public void TakeDamage(int damage, int hitStunTicks, float attackerX, float knockback)
     {
         if (!CanTakeHit) return;
 
-        if (IsGuarding)
-        {
-            TakeGuardedHit(guardStunTicks, attackerX, knockback, guardKnockback, guardDamage);
-        }
-        else
-        {
-            TakeUnguardedHit(damage, hitStunTicks, attackerX, knockback);
-        }
-    }
-
-    /// <summary>
-    /// 投げのダメージ適用(ガード不可)
-    /// </summary>
-    public void TakeThrowDamage(int damage, int hitStunTicks, float attackerX, float knockback)
-    {
-        if (!CanTakeHit) return;
-
-        TakeUnguardedHit(damage, hitStunTicks, attackerX, knockback);
-    }
-
-    /// <summary>
-    /// ガード成立時の処理
-    /// </summary>
-    private void TakeGuardedHit(int guardStunTicks, float attackerX, float knockback, float guardKnockback, float guardDamage)
-    {
-        GuardGauge -= guardDamage;
-        ResetGuardRecoverTimer();
-
-        //ゲージが尽きたらガードクラッシュ
-        if (GuardGauge <= 0.0f)
-        {
-            ApplyKnockback(attackerX, knockback);
-            BreakGuard();
-            return;
-        }
-
-        //通常のガード成立
-        ApplyKnockback(attackerX, guardKnockback);
-
-        GuardHitState.Setup(guardStunTicks);
-
-        if (CurrentState == GuardHitState)
-        {
-            GuardHitState.Restart();
-        }
-        else
-        {
-            ChangeState(GuardHitState);
-        }
-    }
-
-    /// <summary>
-    /// ガードされなかった場合(通常の喰らい・投げ)の処理
-    /// </summary>
-    private void TakeUnguardedHit(int damage, int hitStunTicks, float attackerX, float knockback)
-    {
         HP = Mathf.Max(0, HP - damage);
         ApplyKnockback(attackerX, knockback);
 
         //HPが0になったらKO
-        if (IsKO)
+        if(IsKO)
         {
             //ChangeState(KOState);
             return;
         }
 
         EnterHitState(hitStunTicks);
+
     }
+
 
     /// <summary>
     /// 喰らい状態へ遷移する(喰らい中なら硬直とアニメーションをやり直す)
@@ -776,11 +692,8 @@ public class Player : NetworkBehaviour
             target.TakeDamage(
                 data.damage,
                 data.hitStunTicks,
-                data.guardStunTicks,
                 this.transform.position.x,
-                data.knockback,
-                data.guardKnockback,
-                data.guardDamage
+                data.knockback
             );
 
             return true;
@@ -804,69 +717,6 @@ public class Player : NetworkBehaviour
 
         target = hurtBox.Owner;
         return true;
-    }
-
-    #endregion
-
-
-    #region ガード処理
-
-    /// <summary>
-    /// ガードゲージの消費・自然回復
-    /// </summary>
-    private void UpdateGuardGauge()
-    {
-        //ガード構え中は継続的に減少
-        if (CurrentState == GuardState)
-        {
-            GuardGauge = Mathf.Max(0.0f, GuardGauge - m_CharacterData.guardDrainPerSecond * Runner.DeltaTime);
-
-            //構えている間は、回復開始までの待ち時間を更新し続ける
-            ResetGuardRecoverTimer();
-
-            if (GuardGauge <= 0.0f)
-            {
-                BreakGuard();
-            }
-
-            return;
-        }
-
-        //ガード喰らい中は回復も減少もしない
-        if (CurrentState == GuardHitState) return;
-
-        //待ち時間中は回復しない
-        if (!GuardRecoverTimer.ExpiredOrNotRunning(Runner)) return;
-
-        GuardGauge = Mathf.Min(MaxGuardGauge, GuardGauge + m_CharacterData.guardRecoverPerSecond * Runner.DeltaTime);
-
-        //一定量まで回復したらガード可能に戻す
-        if (IsGuardBroken && GuardGauge >= MaxGuardGauge * m_CharacterData.guardUnlockRate)
-        {
-            IsGuardBroken = false;
-        }
-    }
-
-    /// <summary>
-    /// ガードクラッシュ
-    /// </summary>
-    private void BreakGuard()
-    {
-        GuardGauge = 0.0f;
-        IsGuardBroken = true;
-
-        //回復開始までの待ち時間
-        ResetGuardRecoverTimer();
-
-        EnterHitState(m_CharacterData.guardBreakStunTicks);
-    }
-
-    /// <summary>
-    /// ガードゲージ回復までの待ち時間を開始し直す
-    /// </summary>
-    private void ResetGuardRecoverTimer()
-    {
-        GuardRecoverTimer = TickTimer.CreateFromSeconds(Runner, m_CharacterData.guardRecoverDelay);
     }
 
     #endregion

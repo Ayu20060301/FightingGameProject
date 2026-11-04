@@ -267,8 +267,6 @@ public class NetworkManager : MonoBehaviour, INetworkRunnerCallbacks
 
         //ボタン入力
         data.isJump = state.IsJump;
-        data.isGuard = state.IsGuard;
-
         data.isNormalAttack = state.IsNormalAttack;
         data.isLowAttack = state.IsLowAttack;
 
