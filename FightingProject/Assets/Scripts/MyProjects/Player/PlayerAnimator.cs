@@ -6,14 +6,13 @@ public enum AnimationState
     Idle,
     Walk,       //歩行
     BackWalk,   //バック移動
-    Guard,      //ガード
     Crouch,     //しゃがみ
     Jump,       //ジャンプ
 
     //攻撃
 
     NormalAttack,  //通常攻撃
-  
+
     LowAttack,      //下攻撃
     
     ForwardAttack,  //前攻撃
@@ -24,12 +23,13 @@ public enum AnimationState
 
     //ダメージを受けた際の各アニメーション
     Hit,            //立ち喰らい
-    GuardHit,       //立ちガード喰らい
-
+  
 
     //ステップ
     Step,
     BackStep,
+
+    Death, //死亡
 }
 
 public class PlayerAnimator
@@ -39,8 +39,7 @@ public class PlayerAnimator
 
     //Animatorパラメーター
     private static readonly int SpeedParam = Animator.StringToHash("Speed");
-    private static readonly int IsGuardParam = Animator.StringToHash("IsGuard");
-
+ 
     private static readonly int IsCrouchParam = Animator.StringToHash("IsCrouch");
 
     private static Dictionary<AnimationState, string> AnimationNames = new Dictionary<AnimationState, string>
@@ -48,18 +47,17 @@ public class PlayerAnimator
         { AnimationState.Idle,          "Idle"},
         { AnimationState.Walk,          "Walk"},
         { AnimationState.BackWalk,      "BackWalk"},
-        { AnimationState.Guard,         "Guard"},
         { AnimationState.Crouch,        "Crouch"},
         { AnimationState.Jump,          "Jump"},
-        { AnimationState.NormalAttack,  "NormalAttack"},
+        { AnimationState.NormalAttack, "NormalAttack"},
         { AnimationState.LowAttack,     "LowAttack"},
         { AnimationState.ForwardAttack, "ForwardAttack"},
         { AnimationState.AirAttack,     "AirAttack"},
         { AnimationState.CrouchAttack,  "CrouchAttack"},
         { AnimationState.Hit,           "Hit"},
-        { AnimationState.GuardHit,      "GuardHit"},
         { AnimationState.Step,          "Step"},
         { AnimationState.BackStep,      "BackStep"},
+        { AnimationState.Death,         "Death"},
     };
 
     private readonly Animator m_Anim;
@@ -159,7 +157,6 @@ public class PlayerAnimator
     private void ResetPatameters()
     {
         m_Anim.SetFloat(SpeedParam, 1.0f);
-        m_Anim.SetBool(IsGuardParam, false);
         m_Anim.SetBool(IsCrouchParam, false);
     }
 
@@ -171,9 +168,6 @@ public class PlayerAnimator
             case AnimationState.Walk:
             case AnimationState.BackWalk:
                 m_Anim.SetFloat(SpeedParam, 2.0f);
-                break;
-            case AnimationState.Guard:
-                m_Anim.SetBool(IsGuardParam,true);
                 break;
             case AnimationState.Crouch:
                 m_Anim.SetBool(IsCrouchParam, true);
