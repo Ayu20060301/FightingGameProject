@@ -27,6 +27,12 @@ public class PlayerJumpState : PlayerState
 
     public override void Update()
     {
+
+        if(m_Player.Input.IsNormalAttack || m_Player.Input.IsForwardAttack)
+        {
+            m_Player.ChangeState(m_Player.NormalAttackState);
+        }
+
         //下入力
         if(m_Player.Input.IsLowAttack)
         {

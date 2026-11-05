@@ -129,7 +129,7 @@ public class Player : NetworkBehaviour
     public PlayerCrouchAttackState CrouchAttackState { get; private set; }
     public PlayerHitState HitState { get; private set; }
     public PlayerStepState StepState { get; private set; }
-
+    public PlayerKOState KOState { get; private set; }
     public PlayerState CurrentState => m_StateMachine.CurrentState;
 
     /// <summary>
@@ -217,6 +217,7 @@ public class Player : NetworkBehaviour
         CurrentState == CrouchState ||
         CurrentState == HitState ||
         CurrentState == StepState ||
+        CurrentState == KOState ||
         (IsAttackState && m_Controller.isGrounded);
 
     //攻撃中に前入力で踏み込めるか(地上攻撃のみ)
@@ -224,6 +225,24 @@ public class Player : NetworkBehaviour
 
     #endregion
 
+    #region 武器
+
+    [Header("武器ドロップ")]
+    [SerializeField]
+    private Transform m_WeaponRoot;
+    [SerializeField]
+    private Collider m_WeaponPhysicsCollider;
+    [SerializeField]
+    private float m_DropForce = 2.0f;
+    [SerializeField]
+    private float m_DropTorque = 6.0f;
+
+    private Transform m_WeaponParent;
+    private Vector3 m_WeaponLocalPos;
+    private Quaternion m_WeaponLocalRot;
+    private Rigidbody m_WeaponBody;
+
+    #endregion
 
     #region Unity / Fusion コールバック
 
@@ -232,6 +251,14 @@ public class Player : NetworkBehaviour
         if (m_CharacterData == null)
         {
             Debug.LogError($"[Player] CharacterDataが未設定です : {name}", this);
+        }
+
+        if(m_WeaponRoot != null)
+        {
+            m_WeaponParent = m_WeaponRoot.parent;
+            m_WeaponLocalPos = m_WeaponRoot.localPosition;
+            m_WeaponLocalRot = m_WeaponRoot.localRotation;
+            m_WeaponBody = m_WeaponRoot.GetComponent<Rigidbody>();
         }
 
         m_Controller = GetComponent<CharacterController>();
@@ -294,6 +321,7 @@ public class Player : NetworkBehaviour
         CrouchAttackState = new PlayerCrouchAttackState(this);
         HitState = new PlayerHitState(this);
         StepState = new PlayerStepState(this);
+        KOState = new PlayerKOState(this);
     }
 
     /// <summary>
@@ -650,7 +678,7 @@ public class Player : NetworkBehaviour
         //HPが0になったらKO
         if(IsKO)
         {
-            //ChangeState(KOState);
+            ChangeState(KOState);
             return;
         }
 
@@ -745,6 +773,7 @@ public class Player : NetworkBehaviour
     #endregion
 
 
+
     #region アニメーション
 
     /// <summary>
@@ -766,6 +795,52 @@ public class Player : NetworkBehaviour
     public bool IsLowAttackFinished() => m_PlayerAnim.IsFinished(AnimationState.LowAttack);
     public bool IsForwardAttackFinished() => m_PlayerAnim.IsFinished(AnimationState.ForwardAttack);
     public bool IsAirAttackFinished() => m_PlayerAnim.IsFinished(AnimationState.AirAttack);
-    public bool IsCrouchAttackFinished() => m_PlayerAnim.IsFinished(AnimationState.CrouchAttack); 
+    public bool IsCrouchAttackFinished() => m_PlayerAnim.IsFinished(AnimationState.CrouchAttack);
+    #endregion
+
+    #region 武器を外す処理
+
+    /// <summary>
+    /// 武器を手から外して落とす
+    /// </summary>
+    [Rpc(RpcSources.StateAuthority,RpcTargets.All)]
+    public void RPC_DropWeapon()
+    {
+        if (m_WeaponRoot == null || m_WeaponBody == null) return;
+
+        m_WeaponRoot.SetParent(null);
+
+        if(m_WeaponPhysicsCollider != null)
+        {
+            m_WeaponPhysicsCollider.enabled = true;
+            m_WeaponPhysicsCollider.isTrigger = false;
+        }
+
+        m_WeaponBody.isKinematic = false;
+        
+
+        //やられた方向へ少し跳ねさせて回転を加える
+        Vector3 force = new Vector3(-FacingDir * m_DropForce, m_DropForce, 0.0f);
+        m_WeaponBody.AddForce(force, ForceMode.Impulse);
+        m_WeaponBody.AddTorque(Random.insideUnitSphere * m_DropTorque, ForceMode.Impulse);
+    }
+
+    public void ResetWeapon()
+    {
+        if (m_WeaponRoot == null || m_WeaponBody == null) return;
+
+        m_WeaponBody.isKinematic = true;
+
+        if (m_WeaponPhysicsCollider != null)
+        {
+            m_WeaponPhysicsCollider.enabled = false;
+        }
+
+        m_WeaponRoot.SetParent(m_WeaponRoot);
+        m_WeaponRoot.localPosition = m_WeaponLocalPos;
+        m_WeaponRoot.localRotation = m_WeaponLocalRot;
+
+    }
+
     #endregion
 }

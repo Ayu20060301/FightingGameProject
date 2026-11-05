@@ -11,15 +11,24 @@ public class RoundManager : NetworkBehaviour
         RoundEnd,
     }
 
+    [Header("KOスローモーション")]
+    [SerializeField]
+    private float m_SlowTimeScale = 0.25f;  //減速後の速度
+    [SerializeField]
+    private float m_SlowSeconds = 1.0f;  //スローにする時間
+
+    [Networked]
+    public TickTimer SlowMotionTimer { get; private set; }
+
     [Header("制限時間(秒)")]
     [SerializeField]
     private float m_RoundSeconds = 99.0f;
 
     [Networked]
-    public RoundPhase Phase { get; set; }
+    public RoundPhase Phase { get; private set; }
 
     [Networked]
-    public TickTimer RoundTimer { get; set; }
+    public TickTimer RoundTimer { get; private set; }
 
     private const int RequiredPlayers = 2;
 
@@ -73,7 +82,7 @@ public class RoundManager : NetworkBehaviour
         {
             if (p.IsKO)
             {
-                EndRound();
+                EndRound(true);
                 return;
             }
         }
@@ -82,14 +91,34 @@ public class RoundManager : NetworkBehaviour
         //時間切れ
         if (RoundTimer.Expired(Runner))
         {
-            EndRound();
+            EndRound(false);
         }
     }
 
 
-    private void EndRound()
+    private void EndRound(bool isKO)
     {
         m_FrozenTime = RoundTimer.RemainingTime(Runner) ?? 0.0f;
         Phase = RoundPhase.RoundEnd;
+
+        //KOの時だけスローモーション開始
+        if(isKO)
+        {
+            SlowMotionTimer = TickTimer.CreateFromSeconds(Runner, m_SlowSeconds);
+        }
     }
+
+    public override void Render()
+    {
+        bool isSlow = SlowMotionTimer.IsRunning && !SlowMotionTimer.Expired(Runner);
+        Time.timeScale = isSlow ? m_SlowTimeScale : 1.0f;
+    }
+
+
+    public override void Despawned(NetworkRunner runner, bool hasState)
+    {
+        //シーン離脱時にスローが残らないよう残す
+        Time.timeScale = 1.0f;
+    }
+
 }

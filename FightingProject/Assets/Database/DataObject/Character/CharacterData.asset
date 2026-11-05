@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: CharacterData
   m_EditorClassIdentifier: Assembly-CSharp::CharacterData
   characterName: Samurai
-  maxHP: 100
+  maxHP: 20
   speed: 2.5
   jumpPower: 1.5
   m_NormalAttack:
