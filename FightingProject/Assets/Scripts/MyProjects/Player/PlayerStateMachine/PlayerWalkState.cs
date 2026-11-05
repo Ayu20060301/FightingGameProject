@@ -15,7 +15,7 @@ public class PlayerWalkState : PlayerState
     public override void Enter()
     {
         m_CurrentAnim = GetWalkAnimation();
-        m_Player.RPC_PlayAnimation(AnimationState.Walk);
+        m_Player.RPC_PlayAnimation(m_CurrentAnim);
     }
 
 

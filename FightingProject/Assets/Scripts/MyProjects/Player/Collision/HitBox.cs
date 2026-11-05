@@ -1,7 +1,7 @@
 using UnityEngine;
 
 [RequireComponent(typeof(BoxCollider))]
-public class SwordHitBox : MonoBehaviour
+public class HitBox : MonoBehaviour
 {
     private BoxCollider m_BoxCollider;
 

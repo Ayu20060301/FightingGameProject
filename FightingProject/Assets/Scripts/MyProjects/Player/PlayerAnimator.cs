@@ -170,7 +170,7 @@ public class PlayerAnimator
         {
             case AnimationState.Walk:
             case AnimationState.BackWalk:
-                m_Anim.SetFloat(SpeedParam, 1.0f);
+                m_Anim.SetFloat(SpeedParam, 2.0f);
                 break;
             case AnimationState.Guard:
                 m_Anim.SetBool(IsGuardParam,true);

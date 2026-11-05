@@ -65,7 +65,7 @@ public class Player : NetworkBehaviour
 
     [Header("武器攻撃判定")]
     [SerializeField]
-    private SwordHitBox m_SwordHitBox;
+    private HitBox m_SwordHitBox;
 
     [Header("攻撃中の踏み込み")]
     [SerializeField]
@@ -339,7 +339,10 @@ public class Player : NetworkBehaviour
     private void UpdateAuthority()
     {
         //入力が取得できた場合のみゲーム処理を実行
-        if (!GetInput(out NetworkManager.PlayerInputData data)) return;
+        if (!GetInput(out NetworkManager.PlayerInputData data))
+        {
+            data = default;
+        }
 
         //試合中以外は入力を無効化
         if (!IsFightPhase())
@@ -349,7 +352,11 @@ public class Player : NetworkBehaviour
 
         UpdateInput(data);
         UpdateStepInput(data.horizontal);
+
+        //ステートの更新
         m_StateMachine.Update();
+
+        //移動の更新
         UpdateMovement(data);
     }
 
@@ -400,6 +407,7 @@ public class Player : NetworkBehaviour
 
         //受付時間が過ぎたら1回目の入力を忘れる
         m_StepTapTimer -= Runner.DeltaTime;
+
         if (m_StepTapTimer <= 0.0f)
         {
             m_StepTapDir = 0;
@@ -407,13 +415,28 @@ public class Player : NetworkBehaviour
 
         //ニュートラルから倒した瞬間だけをタップとして扱う
         bool isTap = dir != 0 && dir != m_PrevHorizontalDir;
+        
         m_PrevHorizontalDir = dir;
+
+
+        //ステップ可能な状態以外では入力履歴を破棄
+        if(!IsCanStartStep())
+        {
+            m_StepTapDir = 0;
+            m_StepTapTimer = 0.0f;
+            return;
+        }
 
         if (!isTap) return;
 
-        //受付時間内に同じ方向をもう一度倒した
-        if (m_StepTapDir == dir && IsCanStartStep())
+      
+        //2回目の同方向入力
+        if(m_StepTapDir == dir)
         {
+            //入力履歴をリセット
+            m_StepTapDir = 0;
+            m_StepTapTimer = 0.0f;
+
             StepState.Setup(dir, m_StepDuration);
             ChangeState(StepState);
             return;
