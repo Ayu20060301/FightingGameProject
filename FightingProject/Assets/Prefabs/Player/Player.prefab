@@ -427,7 +427,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Player
   m_CharacterData: {fileID: 11400000, guid: 3c6fbf9858a88324c9cdc10c011a6578, type: 2}
-  m_Gravity: -30
+  m_Gravity: -15
   m_Anim: {fileID: 4465886803681634318}
   m_KnockbackDecay: 20
   m_HurtMask:
@@ -439,7 +439,7 @@ MonoBehaviour:
   m_StepDuration: 0.5
   _HP: 0
   m_WeaponRoot: {fileID: 1500692079965173499}
-  m_WeaponPhysicsCollider: {fileID: 8039216335383456825}
+  m_WeaponPhysicsCollider: {fileID: 6066024222615608826}
   m_DropForce: 2
   m_DropTorque: 6
 --- !u!1 &1514496424575826653
@@ -4204,7 +4204,7 @@ PrefabInstance:
       addedObject: {fileID: 3629667479339824029}
     - targetCorrespondingSourceObject: {fileID: 9001341634321228383, guid: 7a6c98288b1ffc342ab8b6ce201319b5, type: 3}
       insertIndex: -1
-      addedObject: {fileID: 8039216335383456825}
+      addedObject: {fileID: 6066024222615608826}
   m_SourcePrefab: {fileID: 100100000, guid: 7a6c98288b1ffc342ab8b6ce201319b5, type: 3}
 --- !u!1 &776737410668701037 stripped
 GameObject:
@@ -4238,8 +4238,8 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
---- !u!64 &8039216335383456825
-MeshCollider:
+--- !u!65 &6066024222615608826
+BoxCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -4256,10 +4256,9 @@ MeshCollider:
   m_IsTrigger: 1
   m_ProvidesContacts: 0
   m_Enabled: 1
-  serializedVersion: 5
-  m_Convex: 1
-  m_CookingOptions: 30
-  m_Mesh: {fileID: 3680027719181775668, guid: 84a25b0eeb3815541ab258aab250bcee, type: 3}
+  serializedVersion: 3
+  m_Size: {x: 0.07, y: 0.07, z: 1}
+  m_Center: {x: 0, y: 0, z: 0}
 --- !u!4 &1500692079965173499 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 7133474725549601225, guid: 7a6c98288b1ffc342ab8b6ce201319b5, type: 3}

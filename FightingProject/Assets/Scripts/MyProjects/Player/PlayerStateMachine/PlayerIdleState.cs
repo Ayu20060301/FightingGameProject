@@ -1,5 +1,5 @@
 
-using UnityEngine;
+
 
 public class PlayerIdleState : PlayerState
 {
@@ -19,13 +19,20 @@ public class PlayerIdleState : PlayerState
     {
         InputState input = m_Player.Input;
 
+
+        //ジャンプ入力バッファ
+        if (m_Player.IsJumpRequested && m_Player.IsCanJump)
+        {
+            m_Player.ChangeState(m_Player.JumpState);
+            return;
+        }
+
         //上にあるほど優先度が高い
         if (IsTryChangeState(input.Direction.IsHorizontal(), m_Player.WalkState) ||    //左右移動
             IsTryChangeState(input.Direction.IsDown(), m_Player.CrouchState) ||  //しゃがみ
             IsTryChangeState(input.IsNormalAttack,m_Player.NormalAttackState) ||
             IsTryChangeState(input.IsLowAttack,m_Player.LowAttackState) ||
-            IsTryChangeState(input.IsForwardAttack,m_Player.ForwardAttackState) ||
-            IsTryChangeState(input.IsJump, m_Player.JumpState))
+            IsTryChangeState(input.IsForwardAttack,m_Player.ForwardAttackState))
         {
             return;
         }

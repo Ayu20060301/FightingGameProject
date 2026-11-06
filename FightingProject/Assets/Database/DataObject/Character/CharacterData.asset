@@ -13,9 +13,14 @@ MonoBehaviour:
   m_Name: CharacterData
   m_EditorClassIdentifier: Assembly-CSharp::CharacterData
   characterName: Samurai
-  maxHP: 20
+  maxHP: 100
   speed: 2.5
-  jumpPower: 1.5
+  jumpPower: 2.5
+  gravity: -30
+  fallMultiplier: 1.5
+  airControl: 0.4
+  coyoteTime: 0.1
+  jumpBufferTime: 0.12
   m_NormalAttack:
     label: 
     damage: 5

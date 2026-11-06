@@ -23,6 +23,13 @@ public class PlayerWalkState : PlayerState
     {
         InputState input = m_Player.Input;
 
+        //ジャンプ入力バッファ
+        if(m_Player.IsJumpRequested && m_Player.IsCanJump)
+        {
+            m_Player.ChangeState(m_Player.JumpState);
+            return;
+        }
+
         //上にあるほど優先度が高い
         if (IsTryChangeState(!input.Direction.IsHorizontal(), m_Player.IdleState) ||  //左右入力がなくなったらIdle
             IsTryChangeState(input.IsNormalAttack,m_Player.NormalAttackState) ||

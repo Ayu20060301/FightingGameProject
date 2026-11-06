@@ -10,9 +10,6 @@ public class Player : NetworkBehaviour
     //接地中に与える押し付け速度
     private const float GroundedStickVelocity = -2.0f;
 
-    //落下時の重力倍率
-    private const float FallGravityMultiplier = 1.5f;
-
     //--- 向き ---
     //向きの判定で、同じ位置とみなすX差
     private const float FacingThreshold = 0.001f;
@@ -47,9 +44,6 @@ public class Player : NetworkBehaviour
     [SerializeField]
     private CharacterData m_CharacterData;
 
-    [Header("重力")]
-    [SerializeField]
-    private float m_Gravity = -9.8f;
 
     [Header("アニメーション")]
     [SerializeField]
@@ -192,8 +186,18 @@ public class Player : NetworkBehaviour
     public bool IsNormalAttackPressed => m_IsNormalAttackPressed;
 
     //--- ジャンプ ---
+
+
+    private float m_CoyoteTimer;
+
+    private float m_JumpBufferTimer;
+
     //1段ジャンプのみなので、接地していればジャンプ可能
-    public bool IsCanJump => m_Controller.isGrounded;
+    public bool IsCanJump => m_CoyoteTimer > 0.0f;
+
+    //ジャンプ入力が記憶されているか
+    public bool IsJumpRequested => m_JumpBufferTimer > 0.0f;
+
 
     //ステップ中か
     public bool IsStepping => CurrentState == StepState;
@@ -378,7 +382,12 @@ public class Player : NetworkBehaviour
             data = default;
         }
 
+        //入力を取得
         UpdateInput(data);
+
+        UpdateJumpTimer();
+
+        //ステップ入力
         UpdateStepInput(data.horizontal);
 
         //ステートの更新
@@ -519,22 +528,35 @@ public class Player : NetworkBehaviour
     /// </summary>
     private void UpdateMovement(NetworkManager.PlayerInputData data)
     {
+        float dt = Runner.DeltaTime;
+
         //接地中は落下速度をリセット
         if (m_Controller.isGrounded && m_Move.y < 0.0f)
         {
             m_Move.y = GroundedStickVelocity;
         }
 
+        //左右移動
         m_Move.x = CalcHorizontalVelocity(data.horizontal);
 
         //ノックバックを0へ向けて直線的に減衰
-        m_KnockbackVelocityX = Mathf.MoveTowards(m_KnockbackVelocityX, 0.0f, m_KnockbackDecay * Runner.DeltaTime);
+        m_KnockbackVelocityX = Mathf.MoveTowards(m_KnockbackVelocityX, 0.0f, m_KnockbackDecay * dt);
 
-        //重力(落下中は強める)
-        float gravity = m_Move.y > 0.0f ? m_Gravity : m_Gravity * FallGravityMultiplier;
-        m_Move.y += gravity * Runner.DeltaTime;
+        //CharacterControllerから重力を取得
+        float gravity = -Mathf.Abs(m_CharacterData.gravity);
 
-        m_Controller.Move(m_Move * Runner.DeltaTime);
+        //落下中は重力を強くする
+        if(m_Move.y < 0.0f)
+        {
+            gravity *= Mathf.Max(1.0f, m_CharacterData.fallMultiplier);
+        }
+
+        //垂直速度更新
+        m_Move.y += gravity * dt;
+
+        //移動は1回にまとめる
+        m_Controller.Move(m_Move * dt);
+
         ResolveOverlap();
     }
 
@@ -543,8 +565,11 @@ public class Player : NetworkBehaviour
     /// </summary>
     private float CalcHorizontalVelocity(float inputHorizontal)
     {
+        //空中制御倍率
+        float airMultiplier = m_Controller.isGrounded ? 1.0f : m_CharacterData.airControl;
+
         //左右移動(行動制限中は入力分を停止)
-        float inputX = IsHorizontalMoveLocked ? 0.0f : inputHorizontal * m_CharacterData.speed;
+        float inputX = IsHorizontalMoveLocked ? 0.0f : inputHorizontal * m_CharacterData.speed * airMultiplier;
 
         //攻撃中は、向いている方向へ入力した時だけ少し踏み込む
         float stepX = GetAttackStepVelocity(inputHorizontal);
@@ -616,10 +641,49 @@ public class Player : NetworkBehaviour
     {
         if (!IsCanJump) return false;
 
+        //ジャンプ初速を計算
+        float gravity = -Mathf.Abs(m_CharacterData.gravity);
+
+        //ジャンプ初速を計算
+        float jumpHeight = Mathf.Max(0.0f, m_CharacterData.jumpPower);
+
         //ジャンプ速度を設定(jumpPowerは実質ジャンプの高さ)
-        m_Move.y = Mathf.Sqrt(m_CharacterData.jumpPower * -2.0f * m_Gravity);
+        m_Move.y = Mathf.Sqrt(jumpHeight * -2.0f * gravity);
+
+        //ジャンプ猶予時間を消費
+        m_CoyoteTimer = 0.0f;
+
+        //入力バッファを消費
+        m_JumpBufferTimer = 0.0f;
+
         return true;
     }
+
+    private void UpdateJumpTimer()
+    {
+        float dt = Runner.DeltaTime;
+
+        //接地中ならジャンプ猶予時間をリセット
+        if(m_Controller.isGrounded)
+        {
+            m_CoyoteTimer = m_CharacterData.coyoteTime;
+        }
+        else
+        {
+            m_CoyoteTimer = Mathf.Max(0.0f, m_CoyoteTimer - dt);
+        }
+
+        //ジャンプ入力があれば入力バッファを保存
+        if(m_IsJumpPressed)
+        {
+            m_JumpBufferTimer = m_CharacterData.jumpBufferTime;
+        }
+        else
+        {
+            m_JumpBufferTimer = Mathf.Max(0.0f, m_JumpBufferTimer - dt);
+        }
+    }
+
 
     /// <summary>
     /// ジャンプが終了したか
