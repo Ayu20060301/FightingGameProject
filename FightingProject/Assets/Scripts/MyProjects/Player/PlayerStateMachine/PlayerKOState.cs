@@ -13,8 +13,4 @@ public class PlayerKOState : PlayerState
         m_Player.RPC_PlayAnimation(AnimationState.Death);
         m_Player.RPC_DropWeapon();
     }
-
-
-
-
 }

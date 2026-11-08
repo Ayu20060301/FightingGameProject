@@ -248,6 +248,58 @@ public class Player : NetworkBehaviour
 
     #endregion
 
+    #region ラウンド管理用
+
+    //ラウンド開始時に戻す初期位置
+    private Vector3 m_StartPosition;
+
+    [Networked]
+    public int PlayerIndex { get;  set; } = -1;
+
+    public float StartX => m_StartPosition.x;
+
+    public void ResetForNextRound()
+    {
+        if (!Object.HasStateAuthority) return;
+
+        //HP回復
+        HP = MaxHP;
+
+        //位置を初期位置へ
+        m_Controller.enabled = false;
+        this.transform.position = m_StartPosition;
+        m_Controller.enabled = true;
+        Physics.SyncTransforms();
+
+        //速度・ノックバック・入力履歴をクリア
+        m_Move = Vector3.zero;
+        m_KnockbackVelocityX = 0.0f;
+        m_StepTapDir = 0;
+        m_StepTapTimer = 0.0f;
+        m_PrevHorizontalDir = 0;
+        m_CoyoteTimer = 0.0f;
+        m_JumpBufferTimer = 0.0f;
+        m_IsPrevJumpInput = false;
+        m_IsPrevNormalAttackInput = false;
+
+        //武器を手に戻す
+        RPC_ResetWeapon();
+
+        //Idleへ
+        ChangeState(IdleState);
+
+    }
+
+    [Rpc(RpcSources.StateAuthority,RpcTargets.All)]
+    private void RPC_ResetWeapon()
+    {
+        ResetWeapon();
+    }
+
+    #endregion
+
+
+
     #region Unity / Fusion コールバック
 
     private void Awake()
@@ -275,6 +327,9 @@ public class Player : NetworkBehaviour
 
     public override void Spawned()
     {
+
+        m_StartPosition = this.transform.position;
+
         //全クライアントでカメラに登録
         RegisterToCamera(true);
 
@@ -900,7 +955,7 @@ public class Player : NetworkBehaviour
             m_WeaponPhysicsCollider.enabled = false;
         }
 
-        m_WeaponRoot.SetParent(m_WeaponRoot);
+        m_WeaponRoot.SetParent(m_WeaponParent);
         m_WeaponRoot.localPosition = m_WeaponLocalPos;
         m_WeaponRoot.localRotation = m_WeaponLocalRot;
 
