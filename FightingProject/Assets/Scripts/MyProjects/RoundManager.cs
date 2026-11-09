@@ -13,6 +13,18 @@ public class RoundManager : NetworkBehaviour
         MatchEnd,   //試合終了
     }
 
+    public enum RoundResult
+    {
+        None,
+        KO,
+        DoubleKO,
+        TimeUp,
+        TimeUpDraw,
+    }
+
+    [Networked]
+    public RoundResult LastResult { get; private set; }
+
     [Header("KOスローモーション")]
     [SerializeField]
     private float m_SlowTimeScale = 0.25f;  //減速後の速度
@@ -189,6 +201,15 @@ public class RoundManager : NetworkBehaviour
 
         FrozenTime = RoundTimer.RemainingTime(Runner) ?? 0.0f;
         LastWinnerIndex = winnerIndex;
+
+        if(isKO)
+        {
+            LastResult = winnerIndex < 0 ? RoundResult.DoubleKO : RoundResult.KO;
+        }
+        else
+        {
+            LastResult = winnerIndex < 0 ? RoundResult.TimeUpDraw : RoundResult.TimeUp;
+        }
 
         if(winnerIndex == 0)
         {
