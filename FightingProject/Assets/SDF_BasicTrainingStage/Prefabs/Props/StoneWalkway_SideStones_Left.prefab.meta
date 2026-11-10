@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: dd1d9c09b14987c46a644572de4a186d
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 100100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 158928
+  packageName: Fighting Game Level - Japanese Gate
+  packageVersion: 1.0
+  assetPath: Assets/SDF_BasicTrainingStage/Prefabs/Props/StoneWalkway_SideStones_Left.prefab
+  uploadId: 344430

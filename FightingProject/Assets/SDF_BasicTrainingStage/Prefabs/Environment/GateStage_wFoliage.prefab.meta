@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: f66214b93756dba43a26ae7dd66606da
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 100100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 158928
+  packageName: Fighting Game Level - Japanese Gate
+  packageVersion: 1.0
+  assetPath: Assets/SDF_BasicTrainingStage/Prefabs/Environment/GateStage_wFoliage.prefab
+  uploadId: 344430

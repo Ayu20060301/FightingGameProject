@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: c81a8f18171b04843be41138b0fc6ae1
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 100100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 158928
+  packageName: Fighting Game Level - Japanese Gate
+  packageVersion: 1.0
+  assetPath: Assets/SDF_BasicTrainingStage/Prefabs/Props/StoneWalkway_C.prefab
+  uploadId: 344430

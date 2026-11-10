@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: f347e15b49fc1884cac62537c024caa8
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 100100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 158928
+  packageName: Fighting Game Level - Japanese Gate
+  packageVersion: 1.0
+  assetPath: Assets/SDF_BasicTrainingStage/Prefabs/Effects/Falling_Leaves_Maple_Green.prefab
+  uploadId: 344430

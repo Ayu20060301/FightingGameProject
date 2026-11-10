@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: ea1870915f910a347a7b3734a3dc0fc6
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 100100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 158928
+  packageName: Fighting Game Level - Japanese Gate
+  packageVersion: 1.0
+  assetPath: Assets/SDF_BasicTrainingStage/Prefabs/Environment/Ground_GateWalkway.prefab
+  uploadId: 344430

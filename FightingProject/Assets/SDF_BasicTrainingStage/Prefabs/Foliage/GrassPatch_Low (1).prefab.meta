@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: b239d46a855de3a4387b212e52d0079f
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 100100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 158928
+  packageName: Fighting Game Level - Japanese Gate
+  packageVersion: 1.0
+  assetPath: Assets/SDF_BasicTrainingStage/Prefabs/Foliage/GrassPatch_Low (1).prefab
+  uploadId: 344430

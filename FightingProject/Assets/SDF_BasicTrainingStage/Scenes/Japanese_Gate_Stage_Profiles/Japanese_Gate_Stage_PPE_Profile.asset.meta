@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 17046f2d2de27084dbcc25575e653dd2
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 11400000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 158928
+  packageName: Fighting Game Level - Japanese Gate
+  packageVersion: 1.0
+  assetPath: Assets/SDF_BasicTrainingStage/Scenes/Japanese_Gate_Stage_Profiles/Japanese_Gate_Stage_PPE_Profile.asset
+  uploadId: 344430

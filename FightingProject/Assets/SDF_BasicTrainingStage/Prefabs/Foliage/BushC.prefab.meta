@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 2b276da16f7e46c46be3b9cd2cd0ddb6
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 100100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 158928
+  packageName: Fighting Game Level - Japanese Gate
+  packageVersion: 1.0
+  assetPath: Assets/SDF_BasicTrainingStage/Prefabs/Foliage/BushC.prefab
+  uploadId: 344430

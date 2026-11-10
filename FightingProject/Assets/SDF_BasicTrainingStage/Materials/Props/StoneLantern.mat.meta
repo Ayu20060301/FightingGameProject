@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: f11d88f14ce917e4ab031900c72fe1aa
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 2100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 158928
+  packageName: Fighting Game Level - Japanese Gate
+  packageVersion: 1.0
+  assetPath: Assets/SDF_BasicTrainingStage/Materials/Props/StoneLantern.mat
+  uploadId: 344430

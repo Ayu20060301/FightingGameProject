@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 20e488c11835c1b428c58b9902f2330d
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 2100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 158928
+  packageName: Fighting Game Level - Japanese Gate
+  packageVersion: 1.0
+  assetPath: Assets/SDF_BasicTrainingStage/Materials/Environments/JapaneseGate_Stage/GateWalls.mat
+  uploadId: 344430

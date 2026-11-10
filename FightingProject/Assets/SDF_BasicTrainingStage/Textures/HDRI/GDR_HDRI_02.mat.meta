@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 2d519453ae14c844db87fdea266df07d
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 2100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 158928
+  packageName: Fighting Game Level - Japanese Gate
+  packageVersion: 1.0
+  assetPath: Assets/SDF_BasicTrainingStage/Textures/HDRI/GDR_HDRI_02.mat
+  uploadId: 344430

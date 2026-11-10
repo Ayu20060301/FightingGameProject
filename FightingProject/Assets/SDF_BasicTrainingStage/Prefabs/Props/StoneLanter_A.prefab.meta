@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 4244f8ff4d8757a4b9e48a3f23973e56
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 100100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 158928
+  packageName: Fighting Game Level - Japanese Gate
+  packageVersion: 1.0
+  assetPath: Assets/SDF_BasicTrainingStage/Prefabs/Props/StoneLanter_A.prefab
+  uploadId: 344430
