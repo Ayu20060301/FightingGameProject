@@ -29,11 +29,12 @@ public class Player : NetworkBehaviour
     //攻撃中に踏み込みを許可する区間(アニメーションの正規化時間)
     private const float AttackStepEndTime = 0.3f;
 
-    //ステップ入力として扱うスティックの倒し量
-    private const float StepInputThreshold = 0.5f;
 
-    //2回目の入力を受け付ける時間
-    private const float StepInputWindow = 0.25f;
+    //スティックを離してから、再入力までの猶予時間(秒)
+    private const float DoubleTapWindow = 0.25f;
+
+    //タップとみなすスティックの倒し具合
+    private const float TapThreshold = 0.5f;
 
     #endregion
 
@@ -72,6 +73,11 @@ public class Player : NetworkBehaviour
     [SerializeField]
     private float m_StepDuration = 0.15f;    //ステップが続く時間(秒)
 
+    [Header("ジャンプ")]
+    [SerializeField]
+    private float m_JumpMoveSpeed = 4.0f;  //斜めジャンプの横移動速度
+
+
     #endregion
 
 
@@ -97,13 +103,18 @@ public class Player : NetworkBehaviour
     private Vector3 m_Move;
     private float m_KnockbackVelocityX;
 
-    //--- ステップ入力 ---
-    private int m_PrevHorizontalDir;     //前フレームのスティック方向(-1,0,1)
-    private int m_StepTapDir;            //1回目にタップした方向
-    private float m_StepTapTimer;        //2回目を受け付ける残り時間
-
     //--- 判定 ---
     private readonly Collider[] m_HitBuffer = new Collider[16];
+
+    private int m_JumpMoveSign;  //ジャンプ中の横移動方向(-1,0,1)
+
+    private int m_PrevTapSign;  //前フレームの左右入力
+    private int m_LastReleasedSign; //直前に離した方向
+    private float m_DoubleTapTimer; //離してからの猶予時間
+    private bool m_IsDodgePressed;
+    private int m_DodgeSign;  //回避した入力方向(-1,1)
+
+    private float m_DodgeTimer; //回避の移動が続く残り時間
 
     #endregion
 
@@ -122,7 +133,7 @@ public class Player : NetworkBehaviour
     public PlayerAirAttackState AirAttackState { get; private set; }
     public PlayerCrouchAttackState CrouchAttackState { get; private set; }
     public PlayerHitState HitState { get; private set; }
-    public PlayerStepState StepState { get; private set; }
+    public PlayerDodgeState DodgeState { get; private set; }
     public PlayerKOState KOState { get; private set; }
     public PlayerState CurrentState => m_StateMachine.CurrentState;
 
@@ -175,8 +186,13 @@ public class Player : NetworkBehaviour
     public float FacingDir => this.transform.forward.x >= 0.0f ? 1.0f : -1.0f;
     public bool IsFacingRight => FacingDir > 0.0f;
 
+    private int m_VerticalSign;
+
     //相手から離れる方向に入力しているか(右向きなら左入力、左向きなら右入力が後退)
-    public bool IsMovingBackward => m_HorizontalSign * FacingDir < 0.0f;
+    public bool IsMovingBackward => m_HorizontalSign * FacingDir < 0.0f && m_VerticalSign > 0;
+    public bool IsMovingForward => m_HorizontalSign * FacingDir > 0.0f && m_VerticalSign > 0;
+    public bool IsInputBackward => m_HorizontalSign * FacingDir < 0.0f;
+    public bool IsInputForward => m_HorizontalSign * FacingDir > 0.0f;
 
     //KOしているか(HPはサーバーから同期されるので全クライアントで判定できる)
     public bool IsKO => HP <= 0;
@@ -198,9 +214,13 @@ public class Player : NetworkBehaviour
     //ジャンプ入力が記憶されているか
     public bool IsJumpRequested => m_JumpBufferTimer > 0.0f;
 
+    public bool IsDodgePressed => m_IsDodgePressed;
 
-    //ステップ中か
-    public bool IsStepping => CurrentState == StepState;
+    //ダブルタップした方向が向いている方向と同じか
+    public bool IsDodgeForward => m_DodgeSign * FacingDir > 0.0f;
+
+
+
 
     #endregion
 
@@ -220,8 +240,9 @@ public class Player : NetworkBehaviour
     private bool IsHorizontalMoveLocked =>
         CurrentState == CrouchState ||
         CurrentState == HitState ||
-        CurrentState == StepState ||
+        CurrentState == DodgeState ||
         CurrentState == KOState ||
+        (CurrentState == JumpState) ||
         (IsAttackState && m_Controller.isGrounded);
 
     //攻撃中に前入力で踏み込めるか(地上攻撃のみ)
@@ -274,13 +295,18 @@ public class Player : NetworkBehaviour
         //速度・ノックバック・入力履歴をクリア
         m_Move = Vector3.zero;
         m_KnockbackVelocityX = 0.0f;
-        m_StepTapDir = 0;
-        m_StepTapTimer = 0.0f;
-        m_PrevHorizontalDir = 0;
         m_CoyoteTimer = 0.0f;
         m_JumpBufferTimer = 0.0f;
         m_IsPrevJumpInput = false;
         m_IsPrevNormalAttackInput = false;
+
+        m_PrevTapSign = 0;
+        m_LastReleasedSign = 0;
+        m_DoubleTapTimer = 0.0f;
+        m_IsDodgePressed = false;
+
+        m_JumpMoveSign = 0;
+        m_DodgeTimer = 0.0f;
 
         //武器を手に戻す
         RPC_ResetWeapon();
@@ -379,7 +405,7 @@ public class Player : NetworkBehaviour
         AirAttackState = new PlayerAirAttackState(this);
         CrouchAttackState = new PlayerCrouchAttackState(this);
         HitState = new PlayerHitState(this);
-        StepState = new PlayerStepState(this);
+        DodgeState = new PlayerDodgeState(this);
         KOState = new PlayerKOState(this);
     }
 
@@ -440,10 +466,6 @@ public class Player : NetworkBehaviour
         //入力を取得
         UpdateInput(data);
 
-        UpdateJumpTimer();
-
-        //ステップ入力
-        UpdateStepInput(data.horizontal);
 
         //ステートの更新
         m_StateMachine.Update();
@@ -478,7 +500,11 @@ public class Player : NetworkBehaviour
         m_IsNormalAttackPressed = data.isNormalAttack && !m_IsPrevNormalAttackInput;
         m_IsPrevNormalAttackInput = data.isNormalAttack;
 
+        //ダブルタップ
+        UpdateDoubleTap(data.horizontal);
+
         m_HorizontalSign = ToSign(data.horizontal);
+        m_VerticalSign = ToSign(data.vertical);
         Direction direction = ConvertDirection(m_HorizontalSign, ToSign(data.vertical));
 
 
@@ -490,59 +516,6 @@ public class Player : NetworkBehaviour
                          );
     }
 
-    /// <summary>
-    /// 同じ方向への2回入力を検出してステップを開始する
-    /// </summary>
-    private void UpdateStepInput(float horizontal)
-    {
-        int dir = ToSign(horizontal, StepInputThreshold);
-
-        //受付時間が過ぎたら1回目の入力を忘れる
-        m_StepTapTimer -= Runner.DeltaTime;
-
-        if (m_StepTapTimer <= 0.0f)
-        {
-            m_StepTapDir = 0;
-        }
-
-        //ニュートラルから倒した瞬間だけをタップとして扱う
-        bool isTap = dir != 0 && dir != m_PrevHorizontalDir;
-        
-        m_PrevHorizontalDir = dir;
-
-
-        //ステップ可能な状態以外では入力履歴を破棄
-        if(!IsCanStartStep())
-        {
-            m_StepTapDir = 0;
-            m_StepTapTimer = 0.0f;
-            return;
-        }
-
-        if (!isTap) return;
-
-      
-        //2回目の同方向入力
-        if(m_StepTapDir == dir)
-        {
-            //入力履歴をリセット
-            m_StepTapDir = 0;
-            m_StepTapTimer = 0.0f;
-
-            StepState.Setup(dir, m_StepDuration);
-            ChangeState(StepState);
-            return;
-        }
-
-        //1回目のタップとして記録
-        m_StepTapDir = dir;
-        m_StepTapTimer = StepInputWindow;
-    }
-
-    private bool IsCanStartStep()
-    {
-        return m_Controller.isGrounded && (CurrentState == IdleState || CurrentState == WalkState);
-    }
 
     /// <summary>
     /// 値を -1 / 0 / 1 に変換する(threshold以下は0)
@@ -629,9 +602,9 @@ public class Player : NetworkBehaviour
         //攻撃中は、向いている方向へ入力した時だけ少し踏み込む
         float stepX = GetAttackStepVelocity(inputHorizontal);
 
-        float dashX = CurrentState == StepState ? StepState.Dir * m_StepSpeed : 0.0f;
+        float jumpX = m_JumpMoveSign * m_JumpMoveSpeed;
 
-        return inputX + m_KnockbackVelocityX + stepX + dashX;
+        return inputX + m_KnockbackVelocityX + stepX + jumpX + GetDodgeVelocity();
     }
 
     /// <summary>
@@ -674,7 +647,7 @@ public class Player : NetworkBehaviour
         Vector3 opos = m_Opponent.transform.position;
 
         //縦に重なっていなければ何もしない
-        if (Mathf.Abs(pos.y - opos.y) >= m_Controller.height) return;
+        if (Mathf.Abs(pos.y - opos.y) >= 0.3) return;
 
         float dx = pos.x - opos.x;
         float minDist = m_Controller.radius + m_Opponent.m_Controller.radius;
@@ -689,64 +662,72 @@ public class Player : NetworkBehaviour
         m_Controller.Move(new Vector3(dir * push, 0.0f, 0.0f));
     }
 
-    /// <summary>
-    /// ジャンプ。できなければfalse
-    /// </summary>
-    public bool Jump()
-    {
-        if (!IsCanJump) return false;
-
-        //ジャンプ初速を計算
-        float gravity = -Mathf.Abs(m_CharacterData.gravity);
-
-        //ジャンプ初速を計算
-        float jumpHeight = Mathf.Max(0.0f, m_CharacterData.jumpPower);
-
-        //ジャンプ速度を設定(jumpPowerは実質ジャンプの高さ)
-        m_Move.y = Mathf.Sqrt(jumpHeight * -2.0f * gravity);
-
-        //ジャンプ猶予時間を消費
-        m_CoyoteTimer = 0.0f;
-
-        //入力バッファを消費
-        m_JumpBufferTimer = 0.0f;
-
-        return true;
-    }
-
-    private void UpdateJumpTimer()
+    
+    private void UpdateDoubleTap(float horizontal)
     {
         float dt = Runner.DeltaTime;
 
-        //接地中ならジャンプ猶予時間をリセット
-        if(m_Controller.isGrounded)
+        m_IsDodgePressed = false;
+        m_DoubleTapTimer = Mathf.Max(0.0f, m_DoubleTapTimer - dt);
+
+        int sign = ToSign(horizontal, TapThreshold);
+
+        //スティックを中立にに戻した瞬間に、猶予時間をスタート
+        if(sign == 0 && m_PrevTapSign != 0)
         {
-            m_CoyoteTimer = m_CharacterData.coyoteTime;
+            m_LastReleasedSign = m_PrevTapSign;
+            m_DoubleTapTimer = DoubleTapWindow;
         }
-        else
+        //中立から倒した瞬間
+        else if(sign != 0 && sign != m_PrevTapSign)
         {
-            m_CoyoteTimer = Mathf.Max(0.0f, m_CoyoteTimer - dt);
+            if(m_DoubleTapTimer > 0.0f && sign == m_LastReleasedSign)
+            {
+                m_IsDodgePressed = true;
+                m_DodgeSign = sign;
+            }
+
+            //成功・失敗どちらでも、猶予はリセット
+            m_DoubleTapTimer = 0.0f;
+            m_LastReleasedSign = 0;
         }
 
-        //ジャンプ入力があれば入力バッファを保存
-        if(m_IsJumpPressed)
-        {
-            m_JumpBufferTimer = m_CharacterData.jumpBufferTime;
-        }
-        else
-        {
-            m_JumpBufferTimer = Mathf.Max(0.0f, m_JumpBufferTimer - dt);
-        }
+        m_PrevTapSign = sign;
+    }
+
+  s
+
+    public void ConsumeJumpInput()
+    {
+        m_CoyoteTimer = 0.0f;
+        m_JumpBufferTimer = 0.0f;
+    }
+
+    public void StartJumpMove()
+    {
+        m_JumpMoveSign = m_HorizontalSign;
+    }
+    
+    public void EndJumpMove()
+    {
+        m_JumpMoveSign = 0;
+    }
+
+    //回避開始時に、移動時間をセットする
+    public void StartDodgeMove()
+    {
+        m_DodgeTimer = m_StepDuration;
     }
 
 
-    /// <summary>
-    /// ジャンプが終了したか
-    /// </summary>
-    public bool IsJumpFinished()
+    private float GetDodgeVelocity()
     {
-        //地面に着地し、落下が終わったらジャンプ終了
-        return m_Controller.isGrounded && m_Move.y <= 0.0f;
+        if (CurrentState != DodgeState) return 0.0f;
+        if (m_DodgeTimer <= 0) return 0.0f;
+
+        m_DodgeTimer -= Runner.DeltaTime;
+
+        return m_DodgeSign * m_StepSpeed;
     }
 
     /// <summary>
@@ -910,6 +891,12 @@ public class Player : NetworkBehaviour
         => m_PlayerAnim.GetNormalizedTime(state);
 
     //各攻撃アニメーションの終了判定
+
+    public bool IsAnimationFinished(AnimationState state)
+    {
+        return m_PlayerAnim.IsFinished(state);
+    }
+
     public bool IsNormalAttackFinished() => m_PlayerAnim.IsFinished(AnimationState.NormalAttack);
     public bool IsLowAttackFinished() => m_PlayerAnim.IsFinished(AnimationState.LowAttack);
     public bool IsForwardAttackFinished() => m_PlayerAnim.IsFinished(AnimationState.ForwardAttack);

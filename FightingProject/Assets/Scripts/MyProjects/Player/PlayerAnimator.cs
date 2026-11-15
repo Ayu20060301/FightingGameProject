@@ -6,8 +6,29 @@ public enum AnimationState
     Idle,
     Walk,       //歩行
     BackWalk,   //バック移動
-    Crouch,     //しゃがみ
-    Jump,       //ジャンプ
+
+    //===しゃがみ===
+
+    Crouch_In,     //しゃがみに入る状態
+
+    Crouch_Idle,   //しゃがみ状態
+
+    Crouch_Out,   //しゃがみを解除
+
+    //=============
+
+    //===ジャンプ===
+
+    Jump_In,       
+    Jump_Out,       
+
+    JumpForward_In,
+    JumpForward_Out,
+
+    JumpBack_In,
+    JumpBack_Out,
+
+    //==============
 
     //攻撃
 
@@ -25,9 +46,15 @@ public enum AnimationState
     Hit,            //立ち喰らい
   
 
-    //ステップ
-    Step,
-    BackStep,
+
+    
+    //=====回避=====
+
+    
+    Dodge_Forward,
+    Dodge_Back,
+
+    //==============
 
     Death, //死亡
 }
@@ -44,20 +71,27 @@ public class PlayerAnimator
 
     private static Dictionary<AnimationState, string> AnimationNames = new Dictionary<AnimationState, string>
     {
-        { AnimationState.Idle,          "Idle"},
-        { AnimationState.Walk,          "Walk"},
-        { AnimationState.BackWalk,      "BackWalk"},
-        { AnimationState.Crouch,        "Crouch"},
-        { AnimationState.Jump,          "Jump"},
-        { AnimationState.NormalAttack, "NormalAttack"},
-        { AnimationState.LowAttack,     "LowAttack"},
-        { AnimationState.ForwardAttack, "ForwardAttack"},
-        { AnimationState.AirAttack,     "AirAttack"},
-        { AnimationState.CrouchAttack,  "CrouchAttack"},
-        { AnimationState.Hit,           "Hit"},
-        { AnimationState.Step,          "Step"},
-        { AnimationState.BackStep,      "BackStep"},
-        { AnimationState.Death,         "Death"},
+        { AnimationState.Idle,           "Idle"},
+        { AnimationState.Walk,           "Walk"},
+        { AnimationState.BackWalk,       "BackWalk"},
+        { AnimationState.Crouch_In,      "Crouch_In"},
+        { AnimationState.Crouch_Idle,    "Crouch_Idle"},
+        { AnimationState.Crouch_Out,     "Crouch_Out"},
+        { AnimationState.Jump_In,        "Jump_In"},
+        { AnimationState.Jump_Out,       "Jump_Out"},
+        { AnimationState.JumpForward_In, "JumpForward_In"},
+        { AnimationState.JumpForward_Out,"JumpForward_Out"},
+        { AnimationState.JumpBack_In,    "JumpBack_In"},
+        { AnimationState.JumpBack_Out,   "JumpBack_Out"},
+        { AnimationState.NormalAttack,   "NormalAttack"},
+        { AnimationState.LowAttack,      "LowAttack"},
+        { AnimationState.ForwardAttack,  "ForwardAttack"},
+        { AnimationState.AirAttack,      "AirAttack"},
+        { AnimationState.CrouchAttack,   "CrouchAttack"},
+        { AnimationState.Hit,            "Hit"},
+        { AnimationState.Dodge_Forward,  "Dodge_Forward"},
+        { AnimationState.Dodge_Back,     "Dodge_Back"},
+        { AnimationState.Death,          "Death"},
     };
 
     private readonly Animator m_Anim;
@@ -169,7 +203,9 @@ public class PlayerAnimator
             case AnimationState.BackWalk:
                 m_Anim.SetFloat(SpeedParam, 2.0f);
                 break;
-            case AnimationState.Crouch:
+            case AnimationState.Crouch_In:
+            case AnimationState.Crouch_Idle:
+            case AnimationState.CrouchAttack:
                 m_Anim.SetBool(IsCrouchParam, true);
                 break;
         }

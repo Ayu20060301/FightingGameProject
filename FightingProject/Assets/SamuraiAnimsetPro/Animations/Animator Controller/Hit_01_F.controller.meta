@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: b9c4571608cfdd540b88b77ec3784105
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 9100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 313148
+  packageName: Two-Handed Samurai Sword Animset
+  packageVersion: 1.0
+  assetPath: Assets/SamuraiAnimsetPro/Animations/Animator Controller/Hit_01_F.controller
+  uploadId: 739141

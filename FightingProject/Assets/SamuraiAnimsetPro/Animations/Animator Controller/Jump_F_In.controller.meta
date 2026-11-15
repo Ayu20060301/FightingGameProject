@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: d3d8810b6b932bb4486cc0bd1ad0aaf6
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 9100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 313148
+  packageName: Two-Handed Samurai Sword Animset
+  packageVersion: 1.0
+  assetPath: Assets/SamuraiAnimsetPro/Animations/Animator Controller/Jump_F_In.controller
+  uploadId: 739141

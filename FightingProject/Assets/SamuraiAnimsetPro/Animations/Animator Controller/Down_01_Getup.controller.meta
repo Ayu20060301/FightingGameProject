@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 3d98e95be53885f408e3f74a5534b348
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 9100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 313148
+  packageName: Two-Handed Samurai Sword Animset
+  packageVersion: 1.0
+  assetPath: Assets/SamuraiAnimsetPro/Animations/Animator Controller/Down_01_Getup.controller
+  uploadId: 739141

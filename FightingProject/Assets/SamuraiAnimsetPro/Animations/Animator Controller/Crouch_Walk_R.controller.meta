@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: e4b330dce07aa6141a043e92338a46e0
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 9100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 313148
+  packageName: Two-Handed Samurai Sword Animset
+  packageVersion: 1.0
+  assetPath: Assets/SamuraiAnimsetPro/Animations/Animator Controller/Crouch_Walk_R.controller
+  uploadId: 739141

@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: e5fff314c7123a2498a433920715ddc9
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 9100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 313148
+  packageName: Two-Handed Samurai Sword Animset
+  packageVersion: 1.0
+  assetPath: Assets/SamuraiAnimsetPro/Animations/Animator Controller/Air_Attack_06_Loop.controller
+  uploadId: 739141

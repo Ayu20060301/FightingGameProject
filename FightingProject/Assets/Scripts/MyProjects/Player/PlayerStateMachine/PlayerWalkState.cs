@@ -30,6 +30,12 @@ public class PlayerWalkState : PlayerState
             return;
         }
 
+        if(m_Player.IsDodgePressed && m_Player.IsGrounded)
+        {
+            m_Player.ChangeState(m_Player.DodgeState);
+            return;
+        }
+
         //上にあるほど優先度が高い
         if (IsTryChangeState(!input.Direction.IsHorizontal(), m_Player.IdleState) ||  //左右入力がなくなったらIdle
             IsTryChangeState(input.IsNormalAttack,m_Player.NormalAttackState) ||

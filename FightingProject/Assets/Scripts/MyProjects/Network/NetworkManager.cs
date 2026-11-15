@@ -46,8 +46,8 @@ public class NetworkManager : MonoBehaviour, INetworkRunnerCallbacks
     //スポーン位置と向き
     private static readonly Vector3[] SpawnPositions =
     {
-        new Vector3(-2.0f, 0.0f,0.0f),
-        new Vector3(2.0f, 0.0f,0.0f),
+        new Vector3(-4.0f, 0.0f,0.0f),
+        new Vector3(4.0f, 0.0f,0.0f),
     };
 
 

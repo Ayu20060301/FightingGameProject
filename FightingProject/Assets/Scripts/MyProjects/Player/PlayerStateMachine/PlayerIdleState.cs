@@ -27,6 +27,13 @@ public class PlayerIdleState : PlayerState
             return;
         }
 
+
+        if (m_Player.IsDodgePressed && m_Player.IsGrounded)
+        {
+            m_Player.ChangeState(m_Player.DodgeState);
+            return;
+        }
+
         //上にあるほど優先度が高い
         if (IsTryChangeState(input.Direction.IsHorizontal(), m_Player.WalkState) ||    //左右移動
             IsTryChangeState(input.Direction.IsDown(), m_Player.CrouchState) ||  //しゃがみ
