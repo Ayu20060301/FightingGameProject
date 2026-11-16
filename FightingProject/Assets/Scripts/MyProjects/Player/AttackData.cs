@@ -42,6 +42,20 @@ public class AttackData
     [Tooltip("ヒット時の吹き飛ばし量")]
     [Min(0f)] public float knockback = 3.0f;
 
+    //===================================================
+    //コンボ受付
+    //===================================================
+    [Header("コンボ受付")]
+    [Tooltip("次の攻撃入力を受け付け始める(攻撃開始からの経過)")]
+    [Min(0)] public int comboStartTicks = 10;
+
+    [Tooltip("次の攻撃入力の受付が終わるTick")]
+    [Min(0)] public int comboEndTicks = 28;
+
+    public bool IsComboWIndow(int tick)
+    {
+        return tick >= comboStartTicks && tick <= comboEndTicks;
+    }
 
     // ------------------------------------------------------------
     // 派生値(Inspectorには表示されない)

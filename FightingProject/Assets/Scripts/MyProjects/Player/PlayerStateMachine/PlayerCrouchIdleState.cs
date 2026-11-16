@@ -1,7 +1,7 @@
 
 
 //しゃがみ
-public class PlayerCrouchState : PlayerState
+public class PlayerCrouchIdleState : PlayerState
 {
     private enum Phase
     {
@@ -12,7 +12,7 @@ public class PlayerCrouchState : PlayerState
 
     private Phase m_Phase;
 
-    public PlayerCrouchState(Player player) : base(player)
+    public PlayerCrouchIdleState(Player player) : base(player)
     {
 
     }
@@ -54,7 +54,7 @@ public class PlayerCrouchState : PlayerState
                 }
                 break;
             case Phase.Idle:
-                if(m_Player.IsNormalAttackPressed)
+                if(input.IsNormalAttack || input.IsLowAttack)
                 {
                     m_Player.ChangeState(m_Player.CrouchAttackState);
                     return;

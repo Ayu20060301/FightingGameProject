@@ -34,7 +34,12 @@ public enum AnimationState
 
     //攻撃
 
-    NormalAttack,  //通常攻撃
+    //=============
+    //通常攻撃(コンボ攻撃)
+    //=============
+    NormalAttack,  
+    NormalAttack2,  
+    NormalAttack3,  
 
     LowAttack,      //下攻撃
     
@@ -89,6 +94,8 @@ public class PlayerAnimator
         { AnimationState.JumpBack_In,    "JumpBack_In"},
         { AnimationState.JumpBack_Out,   "JumpBack_Out"},
         { AnimationState.NormalAttack,   "NormalAttack"},
+        { AnimationState.NormalAttack2,  "NormalAttack2"},
+        { AnimationState.NormalAttack3,  "NormalAttack3"},
         { AnimationState.LowAttack,      "LowAttack"},
         { AnimationState.ForwardAttack,  "ForwardAttack"},
         { AnimationState.AirAttack,      "AirAttack"},

@@ -36,7 +36,7 @@ public class PlayerIdleState : PlayerState
 
         //上にあるほど優先度が高い
         if (IsTryChangeState(input.Direction.IsHorizontal(), m_Player.WalkState) ||    //左右移動
-            IsTryChangeState(input.Direction.IsDown(), m_Player.CrouchState) ||  //しゃがみ
+            IsTryChangeState(input.Direction.IsDown(), m_Player.CrouchIdleState) ||  //しゃがみ
             IsTryChangeState(input.IsNormalAttack,m_Player.NormalAttackState) ||
             IsTryChangeState(input.IsLowAttack,m_Player.LowAttackState) ||
             IsTryChangeState(input.IsForwardAttack,m_Player.ForwardAttackState))

@@ -14,41 +14,49 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::CharacterData
   characterName: Samurai
   maxHP: 100
-  speed: 4
-  jumpPower: 1
+  speed: 1.5
+  jumpPower: 0.5
   gravity: -30
   fallMultiplier: 1.5
-  airControl: 0.7
+  airControl: 0.3
   coyoteTime: 0.1
   jumpBufferTime: 0.15
   m_NormalAttack:
     label: 
     damage: 5
-    hitStunTicks: 18
+    hitStunTicks: 20
     startupTicks: 6
-    activeTicks: 4
+    activeTicks: 12
     knockback: 3
+    comboStartTicks: 10
+    comboEndTicks: 28
   m_LowAttack:
     label: 
     damage: 4
     hitStunTicks: 16
     startupTicks: 5
-    activeTicks: 3
+    activeTicks: 12
     knockback: 2.5
+    comboStartTicks: 10
+    comboEndTicks: 28
   m_ForwardAttack:
     label: 
     damage: 8
     hitStunTicks: 22
     startupTicks: 12
-    activeTicks: 5
+    activeTicks: 12
     knockback: 5
+    comboStartTicks: 10
+    comboEndTicks: 28
   m_AirAttack:
     label: 
     damage: 6
     hitStunTicks: 20
     startupTicks: 7
-    activeTicks: 8
+    activeTicks: 12
     knockback: 3.5
+    comboStartTicks: 10
+    comboEndTicks: 28
   m_CrouchAttack:
     label: 
     damage: 4
@@ -56,3 +64,5 @@ MonoBehaviour:
     startupTicks: 6
     activeTicks: 3
     knockback: 3.5
+    comboStartTicks: 10
+    comboEndTicks: 28

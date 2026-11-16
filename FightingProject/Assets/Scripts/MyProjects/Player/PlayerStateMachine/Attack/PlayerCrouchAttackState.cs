@@ -1,4 +1,3 @@
-using UnityEngine;
 
 public class PlayerCrouchAttackState : PlayerAttackState
 {
@@ -14,7 +13,7 @@ public class PlayerCrouchAttackState : PlayerAttackState
     {
         if(m_Player.Input.Direction.IsDown())
         {
-            m_Player.ChangeState(m_Player.CrouchState);
+            m_Player.ChangeState(m_Player.CrouchIdleState);
         }
         else
         {
@@ -25,6 +24,5 @@ public class PlayerCrouchAttackState : PlayerAttackState
     protected override bool IsFinished()
     {
         return m_Player.IsCrouchAttackFinished(); 
-
     }
 }

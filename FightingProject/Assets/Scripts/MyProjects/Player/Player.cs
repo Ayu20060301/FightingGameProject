@@ -160,9 +160,10 @@ public class Player : NetworkBehaviour
 
     public PlayerStateMachine m_StateMachine;
 
+    public PlayerStanceState StanceIdleState { get; private set; }
     public PlayerIdleState IdleState { get; private set; }
     public PlayerWalkState WalkState { get; private set; }
-    public PlayerCrouchState CrouchState { get; private set; }
+    public PlayerCrouchIdleState CrouchIdleState { get; private set; }
     public PlayerJumpState JumpState { get; private set; }
     public PlayerNormalAttackState NormalAttackState { get; private set; }
     public PlayerLowAttackState LowAttackState { get; private set; }
@@ -172,6 +173,11 @@ public class Player : NetworkBehaviour
     public PlayerHitState HitState { get; private set; }
     public PlayerDodgeState DodgeState { get; private set; }
     public PlayerKOState KOState { get; private set; }
+    public PlayerDeathState DeathState { get; private set; }
+    public PlayerDownState DownState { get; private set; }
+    public PlayerGuardState GuardState { get; private set; }
+    public PlayerCrouchGuardState CrouchGuardState { get; private set; }
+
 
     public PlayerState CurrentState => m_StateMachine.CurrentState;
 
@@ -249,7 +255,7 @@ public class Player : NetworkBehaviour
 
     //左右移動出来ない状態か(攻撃は地上のときだけロック。空中攻撃では空中制御を残す)
     private bool IsHorizontalMoveLocked =>
-        CurrentState == CrouchState ||
+        CurrentState == CrouchIdleState ||
         CurrentState == HitState ||
         CurrentState == DodgeState ||
         CurrentState == KOState ||
@@ -321,9 +327,10 @@ public class Player : NetworkBehaviour
     /// </summary>
     private void CreateStates()
     {
+        StanceIdleState = new PlayerStanceState(this);
         IdleState = new PlayerIdleState(this);
         WalkState = new PlayerWalkState(this);
-        CrouchState = new PlayerCrouchState(this);
+        CrouchIdleState = new PlayerCrouchIdleState(this);
         JumpState = new PlayerJumpState(this);
         NormalAttackState = new PlayerNormalAttackState(this);
         LowAttackState = new PlayerLowAttackState(this);
@@ -333,6 +340,9 @@ public class Player : NetworkBehaviour
         HitState = new PlayerHitState(this);
         DodgeState = new PlayerDodgeState(this);
         KOState = new PlayerKOState(this);
+        DeathState = new PlayerDeathState(this);
+        DownState = new PlayerDownState(this);
+        //GuardState = new PlayerGuardState(this);
     }
 
     /// <summary>
