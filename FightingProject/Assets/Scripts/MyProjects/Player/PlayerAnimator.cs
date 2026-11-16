@@ -3,6 +3,8 @@ using System.Collections.Generic;
 
 public enum AnimationState
 {
+    StanceIdle,  
+
     Idle,
     Walk,       //歩行
     BackWalk,   //バック移動
@@ -56,6 +58,8 @@ public enum AnimationState
 
     //==============
 
+    Down,   //ダウン
+
     Death, //死亡
 }
 
@@ -71,6 +75,7 @@ public class PlayerAnimator
 
     private static Dictionary<AnimationState, string> AnimationNames = new Dictionary<AnimationState, string>
     {
+        { AnimationState.StanceIdle,     "StanceIdle"},
         { AnimationState.Idle,           "Idle"},
         { AnimationState.Walk,           "Walk"},
         { AnimationState.BackWalk,       "BackWalk"},
@@ -92,6 +97,7 @@ public class PlayerAnimator
         { AnimationState.Dodge_Forward,  "Dodge_Forward"},
         { AnimationState.Dodge_Back,     "Dodge_Back"},
         { AnimationState.Death,          "Death"},
+        { AnimationState.Down,           "Down"},
     };
 
     private readonly Animator m_Anim;

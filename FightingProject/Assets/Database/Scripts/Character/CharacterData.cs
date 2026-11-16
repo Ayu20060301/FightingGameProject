@@ -76,3 +76,12 @@ public class CharacterData : ScriptableObject
         }
     }
 }
+
+[System.Serializable]
+public class ComboStep
+{
+    public AnimationState animation;
+    public AttackData attack;
+    public int cancelStartTick;  //次段入力の受付開始
+    public int cancelEndTick;    //受付終了
+}

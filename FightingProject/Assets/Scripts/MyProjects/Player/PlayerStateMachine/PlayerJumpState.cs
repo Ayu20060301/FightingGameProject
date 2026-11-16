@@ -48,10 +48,10 @@ public class PlayerJumpState : PlayerState
         }
 
         //ジャンプ入力を消費し、踏み切り時の横方向を固定
+        m_HasLeftGround = false;
         m_Player.ConsumeJumpInput();
         m_Player.StartJumpMove();
-
-
+        m_Player.StartJumpVelocity();
         m_Player.RPC_PlayAnimation(m_InAnimation);
 
     }

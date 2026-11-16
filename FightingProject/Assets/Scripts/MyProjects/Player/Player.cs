@@ -19,17 +19,16 @@ public class Player : NetworkBehaviour
     private const float FaceLeftYaw = -90.0f;
 
     //--- 押し出し(相手との重なり解消) ---
+    //縦に重なっているとみなすY差
+    private const float OverlapVerticalThreshold = 0.3f;
+
     //ほぼ真上・真下に重なっているとみなすX差
     private const float OverlapCenterThreshold = 0.05f;
 
     //押し出しの最大速度
     private const float PushOutSpeed = 10.0f;
 
-    //--- 攻撃・ステップ ---
-    //攻撃中に踏み込みを許可する区間(アニメーションの正規化時間)
-    private const float AttackStepEndTime = 0.3f;
-
-
+    //--- ダブルタップ(回避) ---
     //スティックを離してから、再入力までの猶予時間(秒)
     private const float DoubleTapWindow = 0.25f;
 
@@ -44,7 +43,6 @@ public class Player : NetworkBehaviour
     [Header("キャラクター")]
     [SerializeField]
     private CharacterData m_CharacterData;
-
 
     [Header("アニメーション")]
     [SerializeField]
@@ -62,21 +60,31 @@ public class Player : NetworkBehaviour
     [SerializeField]
     private HitBox m_SwordHitBox;
 
-    [Header("攻撃中の踏み込み")]
+    [Header("ジャンプ")]
     [SerializeField]
-    private float m_AttackStepSpeed = 2.0f;  //攻撃中に前入力した際の移動速度
+    private float m_JumpHeight = 2.0f;
+    [SerializeField]
+    private float m_JumpMoveSpeed = 4.0f;    //斜めジャンプの横移動速度
+    [SerializeField]
+    private float m_CoyoteTime = 0.1f;
+    [SerializeField]
+    private float m_JumpBufferTime = 0.1f;
 
     [Header("ステップ")]
     [SerializeField]
     private float m_StepSpeed = 8.0f;        //ステップ中の移動速度
-
     [SerializeField]
     private float m_StepDuration = 0.15f;    //ステップが続く時間(秒)
 
-    [Header("ジャンプ")]
+    [Header("武器ドロップ")]
     [SerializeField]
-    private float m_JumpMoveSpeed = 4.0f;  //斜めジャンプの横移動速度
-
+    private Transform m_WeaponRoot;
+    [SerializeField]
+    private Collider m_WeaponPhysicsCollider;
+    [SerializeField]
+    private float m_DropForce = 2.0f;
+    [SerializeField]
+    private float m_DropTorque = 6.0f;
 
     #endregion
 
@@ -91,7 +99,8 @@ public class Player : NetworkBehaviour
 
     //--- 入力 ---
     private InputState m_Input;
-    private int m_HorizontalSign;        //今フレームの左右入力(-1,0,1)
+    private int m_HorizontalSign;            //今フレームの左右入力(-1,0,1)
+    private int m_VerticalSign;              //今フレームの上下入力(-1,0,1)
 
     private bool m_IsPrevJumpInput;
     private bool m_IsJumpPressed;
@@ -103,18 +112,46 @@ public class Player : NetworkBehaviour
     private Vector3 m_Move;
     private float m_KnockbackVelocityX;
 
+    //--- ジャンプ ---
+    private float m_CoyoteTimer;
+    private float m_JumpBufferTimer;
+    private int m_JumpMoveSign;              //ジャンプ中の横移動方向(-1,0,1)
+
+    //--- 回避(ダブルタップ) ---
+    private int m_PrevTapSign;               //前フレームの左右入力
+    private int m_LastReleasedSign;          //直前に離した方向
+    private float m_DoubleTapTimer;          //離してからの猶予時間
+    private bool m_IsDodgePressed;
+    private int m_DodgeSign;                 //回避した入力方向(-1,1)
+    private float m_DodgeTimer;              //回避の移動が続く残り時間
+
     //--- 判定 ---
     private readonly Collider[] m_HitBuffer = new Collider[16];
 
-    private int m_JumpMoveSign;  //ジャンプ中の横移動方向(-1,0,1)
+    //--- 武器 ---
+    private Transform m_WeaponParent;
+    private Vector3 m_WeaponLocalPos;
+    private Quaternion m_WeaponLocalRot;
+    private Rigidbody m_WeaponBody;
 
-    private int m_PrevTapSign;  //前フレームの左右入力
-    private int m_LastReleasedSign; //直前に離した方向
-    private float m_DoubleTapTimer; //離してからの猶予時間
-    private bool m_IsDodgePressed;
-    private int m_DodgeSign;  //回避した入力方向(-1,1)
+    //--- ラウンド ---
+    private Vector3 m_StartPosition;         //ラウンド開始時に戻す初期位置
 
-    private float m_DodgeTimer; //回避の移動が続く残り時間
+    #endregion
+
+
+    #region ネットワーク同期
+
+    //ネットワーク同期する向き
+    [Networked]
+    private float FacingYaw { get; set; }
+
+    //ネットワーク同期するHP
+    [Networked]
+    public int HP { get; set; }
+
+    [Networked]
+    public int PlayerIndex { get; set; } = -1;
 
     #endregion
 
@@ -135,6 +172,7 @@ public class Player : NetworkBehaviour
     public PlayerHitState HitState { get; private set; }
     public PlayerDodgeState DodgeState { get; private set; }
     public PlayerKOState KOState { get; private set; }
+
     public PlayerState CurrentState => m_StateMachine.CurrentState;
 
     /// <summary>
@@ -144,24 +182,6 @@ public class Player : NetworkBehaviour
     {
         m_StateMachine.ChangeState(state);
     }
-
-    #endregion
-
-
-    #region ネットワーク同期
-
-    /// <summary>
-    /// ネットワーク同期する向き
-    /// </summary>
-    [Networked]
-    private float FacingYaw { get; set; }
-
-    /// <summary>
-    /// ネットワーク同期するHP
-    /// </summary>
-    [Networked]
-    public int HP { get; set; }
-
 
     #endregion
 
@@ -182,51 +202,42 @@ public class Player : NetworkBehaviour
     public InputState Input => m_Input;
     public bool IsGrounded => m_Controller.isGrounded;
 
-    //向き(右= +1、左= -1)
+    //KOしているか(HPはサーバーから同期されるので全クライアントで判定できる)
+    public bool IsKO => HP <= 0;
+
+    //--- 向き(右 = +1、左 = -1) ---
     public float FacingDir => this.transform.forward.x >= 0.0f ? 1.0f : -1.0f;
     public bool IsFacingRight => FacingDir > 0.0f;
 
-    private int m_VerticalSign;
-
-    //相手から離れる方向に入力しているか(右向きなら左入力、左向きなら右入力が後退)
+    //--- 入力方向(右向きなら左入力、左向きなら右入力が後退) ---
     public bool IsMovingBackward => m_HorizontalSign * FacingDir < 0.0f && m_VerticalSign > 0;
     public bool IsMovingForward => m_HorizontalSign * FacingDir > 0.0f && m_VerticalSign > 0;
     public bool IsInputBackward => m_HorizontalSign * FacingDir < 0.0f;
     public bool IsInputForward => m_HorizontalSign * FacingDir > 0.0f;
-
-    //KOしているか(HPはサーバーから同期されるので全クライアントで判定できる)
-    public bool IsKO => HP <= 0;
 
     //--- 入力の立ち上がり ---
     public bool IsJumpPressed => m_IsJumpPressed;
     public bool IsNormalAttackPressed => m_IsNormalAttackPressed;
 
     //--- ジャンプ ---
-
-
-    private float m_CoyoteTimer;
-
-    private float m_JumpBufferTimer;
-
     //1段ジャンプのみなので、接地していればジャンプ可能
     public bool IsCanJump => m_CoyoteTimer > 0.0f;
 
     //ジャンプ入力が記憶されているか
     public bool IsJumpRequested => m_JumpBufferTimer > 0.0f;
 
+    //--- 回避 ---
     public bool IsDodgePressed => m_IsDodgePressed;
 
     //ダブルタップした方向が向いている方向と同じか
     public bool IsDodgeForward => m_DodgeSign * FacingDir > 0.0f;
 
-
-
+    public float StartX => m_StartPosition.x;
 
     #endregion
 
 
     #region State判定ヘルパー
-
 
     //踏み込み・移動ロックの対象になる攻撃State
     private bool IsAttackState =>
@@ -242,88 +253,10 @@ public class Player : NetworkBehaviour
         CurrentState == HitState ||
         CurrentState == DodgeState ||
         CurrentState == KOState ||
-        (CurrentState == JumpState) ||
+        CurrentState == JumpState ||
         (IsAttackState && m_Controller.isGrounded);
 
-    //攻撃中に前入力で踏み込めるか(地上攻撃のみ)
-    private bool IsAttackStepState => IsAttackState && m_Controller.isGrounded;
-
     #endregion
-
-    #region 武器
-
-    [Header("武器ドロップ")]
-    [SerializeField]
-    private Transform m_WeaponRoot;
-    [SerializeField]
-    private Collider m_WeaponPhysicsCollider;
-    [SerializeField]
-    private float m_DropForce = 2.0f;
-    [SerializeField]
-    private float m_DropTorque = 6.0f;
-
-    private Transform m_WeaponParent;
-    private Vector3 m_WeaponLocalPos;
-    private Quaternion m_WeaponLocalRot;
-    private Rigidbody m_WeaponBody;
-
-    #endregion
-
-    #region ラウンド管理用
-
-    //ラウンド開始時に戻す初期位置
-    private Vector3 m_StartPosition;
-
-    [Networked]
-    public int PlayerIndex { get;  set; } = -1;
-
-    public float StartX => m_StartPosition.x;
-
-    public void ResetForNextRound()
-    {
-        if (!Object.HasStateAuthority) return;
-
-        //HP回復
-        HP = MaxHP;
-
-        //位置を初期位置へ
-        m_Controller.enabled = false;
-        this.transform.position = m_StartPosition;
-        m_Controller.enabled = true;
-        Physics.SyncTransforms();
-
-        //速度・ノックバック・入力履歴をクリア
-        m_Move = Vector3.zero;
-        m_KnockbackVelocityX = 0.0f;
-        m_CoyoteTimer = 0.0f;
-        m_JumpBufferTimer = 0.0f;
-        m_IsPrevJumpInput = false;
-        m_IsPrevNormalAttackInput = false;
-
-        m_PrevTapSign = 0;
-        m_LastReleasedSign = 0;
-        m_DoubleTapTimer = 0.0f;
-        m_IsDodgePressed = false;
-
-        m_JumpMoveSign = 0;
-        m_DodgeTimer = 0.0f;
-
-        //武器を手に戻す
-        RPC_ResetWeapon();
-
-        //Idleへ
-        ChangeState(IdleState);
-
-    }
-
-    [Rpc(RpcSources.StateAuthority,RpcTargets.All)]
-    private void RPC_ResetWeapon()
-    {
-        ResetWeapon();
-    }
-
-    #endregion
-
 
 
     #region Unity / Fusion コールバック
@@ -335,13 +268,7 @@ public class Player : NetworkBehaviour
             Debug.LogError($"[Player] CharacterDataが未設定です : {name}", this);
         }
 
-        if(m_WeaponRoot != null)
-        {
-            m_WeaponParent = m_WeaponRoot.parent;
-            m_WeaponLocalPos = m_WeaponRoot.localPosition;
-            m_WeaponLocalRot = m_WeaponRoot.localRotation;
-            m_WeaponBody = m_WeaponRoot.GetComponent<Rigidbody>();
-        }
+        CacheWeapon();
 
         m_Controller = GetComponent<CharacterController>();
         m_Input = new InputState();
@@ -353,7 +280,6 @@ public class Player : NetworkBehaviour
 
     public override void Spawned()
     {
-
         m_StartPosition = this.transform.position;
 
         //全クライアントでカメラに登録
@@ -410,6 +336,19 @@ public class Player : NetworkBehaviour
     }
 
     /// <summary>
+    /// 武器の初期配置を記憶する(ラウンドリセット用)
+    /// </summary>
+    private void CacheWeapon()
+    {
+        if (m_WeaponRoot == null) return;
+
+        m_WeaponParent = m_WeaponRoot.parent;
+        m_WeaponLocalPos = m_WeaponRoot.localPosition;
+        m_WeaponLocalRot = m_WeaponRoot.localRotation;
+        m_WeaponBody = m_WeaponRoot.GetComponent<Rigidbody>();
+    }
+
+    /// <summary>
     /// FightCameraの追従対象へ登録・解除する
     /// </summary>
     private void RegisterToCamera(bool isAdd)
@@ -444,34 +383,47 @@ public class Player : NetworkBehaviour
     #endregion
 
 
-    #region 入力・更新(StateAuthority)
+    #region ラウンド管理
 
-    /// <summary>
-    /// 入力取得 → State更新 → 移動(StateAuthority側のみ)
-    /// </summary>
-    private void UpdateAuthority()
+    public void ResetForNextRound()
     {
-        //入力が取得できた場合のみゲーム処理を実行
-        if (!GetInput(out NetworkManager.PlayerInputData data))
-        {
-            data = default;
-        }
+        if (!Object.HasStateAuthority) return;
 
-        //試合中以外は入力を無効化
-        if (!IsFightPhase())
-        {
-            data = default;
-        }
+        //HP回復
+        HP = MaxHP;
 
-        //入力を取得
-        UpdateInput(data);
+        //位置を初期位置へ
+        m_Controller.enabled = false;
+        this.transform.position = m_StartPosition;
+        m_Controller.enabled = true;
+        Physics.SyncTransforms();
 
+        //速度・ノックバック・入力履歴をクリア
+        m_Move = Vector3.zero;
+        m_KnockbackVelocityX = 0.0f;
+        m_CoyoteTimer = 0.0f;
+        m_JumpBufferTimer = 0.0f;
+        m_JumpMoveSign = 0;
+        m_IsPrevJumpInput = false;
+        m_IsPrevNormalAttackInput = false;
 
-        //ステートの更新
-        m_StateMachine.Update();
+        m_PrevTapSign = 0;
+        m_LastReleasedSign = 0;
+        m_DoubleTapTimer = 0.0f;
+        m_DodgeTimer = 0.0f;
+        m_IsDodgePressed = false;
 
-        //移動の更新
-        UpdateMovement(data);
+        //武器を手に戻す
+        RPC_ResetWeapon();
+
+        //Idleへ
+        ChangeState(IdleState);
+    }
+
+    [Rpc(RpcSources.StateAuthority, RpcTargets.All)]
+    private void RPC_ResetWeapon()
+    {
+        ResetWeapon();
     }
 
     /// <summary>
@@ -487,6 +439,27 @@ public class Player : NetworkBehaviour
         return m_RoundManager != null && m_RoundManager.Phase == RoundManager.RoundPhase.Fight;
     }
 
+    #endregion
+
+
+    #region 入力・更新(StateAuthority)
+
+    /// <summary>
+    /// 入力取得 → State更新 → 移動(StateAuthority側のみ)
+    /// </summary>
+    private void UpdateAuthority()
+    {
+        //入力が取得できない場合、または試合中以外は入力を無効化
+        if (!GetInput(out NetworkManager.PlayerInputData data) || !IsFightPhase())
+        {
+            data = default;
+        }
+
+        UpdateInput(data);
+        m_StateMachine.Update();
+        UpdateMovement(data);
+    }
+
     /// <summary>
     /// 入力状態を更新する
     /// </summary>
@@ -500,22 +473,19 @@ public class Player : NetworkBehaviour
         m_IsNormalAttackPressed = data.isNormalAttack && !m_IsPrevNormalAttackInput;
         m_IsPrevNormalAttackInput = data.isNormalAttack;
 
-        //ダブルタップ
         UpdateDoubleTap(data.horizontal);
 
         m_HorizontalSign = ToSign(data.horizontal);
         m_VerticalSign = ToSign(data.vertical);
-        Direction direction = ConvertDirection(m_HorizontalSign, ToSign(data.vertical));
 
-
-        m_Input.SetInput(direction,
-                         data.isNormalAttack,
-                         data.isLowAttack,
-                         data.isForwardAttack,
-                         data.isJump
-                         );
+        m_Input.SetInput(
+            ConvertDirection(m_HorizontalSign, m_VerticalSign),
+            data.isNormalAttack,
+            data.isLowAttack,
+            data.isForwardAttack,
+            data.isJump
+        );
     }
-
 
     /// <summary>
     /// 値を -1 / 0 / 1 に変換する(threshold以下は0)
@@ -546,142 +516,26 @@ public class Player : NetworkBehaviour
         }
     }
 
-    #endregion
-
-
-    #region 移動・向き
-
     /// <summary>
-    /// 移動処理
+    /// ダブルタップ(回避入力)の検出
     /// </summary>
-    private void UpdateMovement(NetworkManager.PlayerInputData data)
-    {
-        float dt = Runner.DeltaTime;
-
-        //接地中は落下速度をリセット
-        if (m_Controller.isGrounded && m_Move.y < 0.0f)
-        {
-            m_Move.y = GroundedStickVelocity;
-        }
-
-        //左右移動
-        m_Move.x = CalcHorizontalVelocity(data.horizontal);
-
-        //ノックバックを0へ向けて直線的に減衰
-        m_KnockbackVelocityX = Mathf.MoveTowards(m_KnockbackVelocityX, 0.0f, m_KnockbackDecay * dt);
-
-        //CharacterControllerから重力を取得
-        float gravity = -Mathf.Abs(m_CharacterData.gravity);
-
-        //落下中は重力を強くする
-        if(m_Move.y < 0.0f)
-        {
-            gravity *= Mathf.Max(1.0f, m_CharacterData.fallMultiplier);
-        }
-
-        //垂直速度更新
-        m_Move.y += gravity * dt;
-
-        //移動は1回にまとめる
-        m_Controller.Move(m_Move * dt);
-
-        ResolveOverlap();
-    }
-
-    /// <summary>
-    /// 入力 + ノックバック + 踏み込み + ステップを合成した左右速度を返す
-    /// </summary>
-    private float CalcHorizontalVelocity(float inputHorizontal)
-    {
-        //空中制御倍率
-        float airMultiplier = m_Controller.isGrounded ? 1.0f : m_CharacterData.airControl;
-
-        //左右移動(行動制限中は入力分を停止)
-        float inputX = IsHorizontalMoveLocked ? 0.0f : inputHorizontal * m_CharacterData.speed * airMultiplier;
-
-        //攻撃中は、向いている方向へ入力した時だけ少し踏み込む
-        float stepX = GetAttackStepVelocity(inputHorizontal);
-
-        float jumpX = m_JumpMoveSign * m_JumpMoveSpeed;
-
-        return inputX + m_KnockbackVelocityX + stepX + jumpX + GetDodgeVelocity();
-    }
-
-    /// <summary>
-    /// 攻撃中の踏み込み速度を返す
-    /// </summary>
-    private float GetAttackStepVelocity(float inputHorizontal)
-    {
-        if (!IsAttackStepState) return 0.0f;
-
-        //向いている方向へ入力していない場合は踏み込まない
-        if (inputHorizontal * FacingDir <= 0.0f) return 0.0f;
-
-        //出始めの区間を過ぎたら止める
-        float t = GetAnimationNormalizedTime(GetCurrentAttackAnimation());
-        if (t >= AttackStepEndTime) return 0.0f;
-
-        return FacingDir * m_AttackStepSpeed;
-    }
-
-    /// <summary>
-    /// 今の攻撃Stateに対応するAnimationStateを返す
-    /// </summary>
-    private AnimationState GetCurrentAttackAnimation()
-    {
-        if (CurrentState == LowAttackState) return AnimationState.LowAttack;
-        if (CurrentState == ForwardAttackState) return AnimationState.ForwardAttack;
-        if (CurrentState == AirAttackState) return AnimationState.AirAttack;
-        if (CurrentState == CrouchAttackState) return AnimationState.CrouchAttack;
-        return AnimationState.NormalAttack;
-    }
-
-    /// <summary>
-    /// 相手と重なっていたら、横方向に押し出す
-    /// </summary>
-    private void ResolveOverlap()
-    {
-        if (m_Opponent == null) return;
-
-        Vector3 pos = this.transform.position;
-        Vector3 opos = m_Opponent.transform.position;
-
-        //縦に重なっていなければ何もしない
-        if (Mathf.Abs(pos.y - opos.y) >= 0.3) return;
-
-        float dx = pos.x - opos.x;
-        float minDist = m_Controller.radius + m_Opponent.m_Controller.radius;
-        float overlap = minDist - Mathf.Abs(dx);
-        if (overlap <= 0.0f) return;
-
-        //ほぼ真上・真下で重なった時は、来た側へ逃がす
-        float dir = Mathf.Abs(dx) > OverlapCenterThreshold ? Mathf.Sign(dx) : -FacingDir;
-
-        //一気にワープさせないよう、速度を制限して押し出す
-        float push = Mathf.Min(overlap, PushOutSpeed * Runner.DeltaTime);
-        m_Controller.Move(new Vector3(dir * push, 0.0f, 0.0f));
-    }
-
-    
     private void UpdateDoubleTap(float horizontal)
     {
-        float dt = Runner.DeltaTime;
-
         m_IsDodgePressed = false;
-        m_DoubleTapTimer = Mathf.Max(0.0f, m_DoubleTapTimer - dt);
+        m_DoubleTapTimer = Mathf.Max(0.0f, m_DoubleTapTimer - Runner.DeltaTime);
 
         int sign = ToSign(horizontal, TapThreshold);
 
-        //スティックを中立にに戻した瞬間に、猶予時間をスタート
-        if(sign == 0 && m_PrevTapSign != 0)
+        if (sign == 0 && m_PrevTapSign != 0)
         {
+            //スティックを中立に戻した瞬間に、猶予時間をスタート
             m_LastReleasedSign = m_PrevTapSign;
             m_DoubleTapTimer = DoubleTapWindow;
         }
-        //中立から倒した瞬間
-        else if(sign != 0 && sign != m_PrevTapSign)
+        else if (sign != 0 && sign != m_PrevTapSign)
         {
-            if(m_DoubleTapTimer > 0.0f && sign == m_LastReleasedSign)
+            //中立から倒した瞬間
+            if (m_DoubleTapTimer > 0.0f && sign == m_LastReleasedSign)
             {
                 m_IsDodgePressed = true;
                 m_DodgeSign = sign;
@@ -695,39 +549,97 @@ public class Player : NetworkBehaviour
         m_PrevTapSign = sign;
     }
 
-  s
+    #endregion
 
-    public void ConsumeJumpInput()
+
+    #region 移動・向き
+
+    /// <summary>
+    /// 移動処理
+    /// </summary>
+    private void UpdateMovement(NetworkManager.PlayerInputData data)
     {
-        m_CoyoteTimer = 0.0f;
-        m_JumpBufferTimer = 0.0f;
+        float dt = Runner.DeltaTime;
+        bool isGrounded = m_Controller.isGrounded;
+
+        //コヨーテタイム
+        m_CoyoteTimer = isGrounded
+            ? m_CoyoteTime
+            : Mathf.Max(0.0f, m_CoyoteTimer - dt);
+
+        //ジャンプ先行入力
+        m_JumpBufferTimer = m_IsJumpPressed
+            ? m_JumpBufferTime
+            : Mathf.Max(0.0f, m_JumpBufferTimer - dt);
+
+        //接地中は落下速度をリセット
+        if (isGrounded && m_Move.y < 0.0f)
+        {
+            m_Move.y = GroundedStickVelocity;
+        }
+
+        //左右移動
+        m_Move.x = CalcHorizontalVelocity(data.horizontal);
+
+        //ノックバックを0へ向けて直線的に減衰
+        m_KnockbackVelocityX = Mathf.MoveTowards(m_KnockbackVelocityX, 0.0f, m_KnockbackDecay * dt);
+
+        //垂直速度更新(落下中は重力を強くする)
+        float gravity = -Mathf.Abs(m_CharacterData.gravity);
+        if (m_Move.y < 0.0f)
+        {
+            gravity *= Mathf.Max(1.0f, m_CharacterData.fallMultiplier);
+        }
+        m_Move.y += gravity * dt;
+
+        //移動は1回にまとめる
+        m_Controller.Move(m_Move * dt);
+
+        ResolveOverlap();
     }
 
-    public void StartJumpMove()
+    /// <summary>
+    /// 入力 + ノックバック + ジャンプ移動 + ステップを合成した左右速度を返す
+    /// </summary>
+    private float CalcHorizontalVelocity(float inputHorizontal)
     {
-        m_JumpMoveSign = m_HorizontalSign;
+        //空中制御倍率
+        float airMultiplier = m_Controller.isGrounded ? 1.0f : m_CharacterData.airControl;
+
+        //左右移動(行動制限中は入力分を停止)
+        float inputX = IsHorizontalMoveLocked
+            ? 0.0f
+            : inputHorizontal * m_CharacterData.speed * airMultiplier;
+
+        float jumpX = m_JumpMoveSign * m_JumpMoveSpeed;
+
+        return inputX + m_KnockbackVelocityX + jumpX + GetDodgeVelocity();
     }
-    
-    public void EndJumpMove()
+
+    /// <summary>
+    /// 相手と重なっていたら、横方向に押し出す
+    /// </summary>
+    private void ResolveOverlap()
     {
-        m_JumpMoveSign = 0;
-    }
+        if (m_Opponent == null) return;
 
-    //回避開始時に、移動時間をセットする
-    public void StartDodgeMove()
-    {
-        m_DodgeTimer = m_StepDuration;
-    }
+        Vector3 pos = this.transform.position;
+        Vector3 opos = m_Opponent.transform.position;
 
+        //縦に重なっていなければ何もしない
+        if (Mathf.Abs(pos.y - opos.y) >= OverlapVerticalThreshold) return;
 
-    private float GetDodgeVelocity()
-    {
-        if (CurrentState != DodgeState) return 0.0f;
-        if (m_DodgeTimer <= 0) return 0.0f;
+        float dx = pos.x - opos.x;
+        float minDist = m_Controller.radius + m_Opponent.m_Controller.radius;
+        float overlap = minDist - Mathf.Abs(dx);
+        if (overlap <= 0.0f) return;
 
-        m_DodgeTimer -= Runner.DeltaTime;
+        //ほぼ真上・真下で重なった時は、来た側へ逃がす
+        float dir = Mathf.Abs(dx) > OverlapCenterThreshold ? Mathf.Sign(dx) : -FacingDir;
 
-        return m_DodgeSign * m_StepSpeed;
+        //一気にワープさせないよう、速度を制限して押し出す
+        float push = Mathf.Min(overlap, PushOutSpeed * Runner.DeltaTime);
+        m_Controller.Move(new Vector3(dir * push, 0.0f, 0.0f));
     }
 
     /// <summary>
@@ -755,6 +667,60 @@ public class Player : NetworkBehaviour
     #endregion
 
 
+    #region ジャンプ・回避(Stateから呼ぶ)
+
+    /// <summary>
+    /// ジャンプ開始時に上向き速度を与える
+    /// </summary>
+    public void StartJumpVelocity()
+    {
+        float g = Mathf.Abs(m_CharacterData.gravity);
+        m_Move.y = Mathf.Sqrt(2.0f * g * m_JumpHeight);
+    }
+
+    /// <summary>
+    /// ジャンプ入力を消費する
+    /// </summary>
+    public void ConsumeJumpInput()
+    {
+        m_CoyoteTimer = 0.0f;
+        m_JumpBufferTimer = 0.0f;
+    }
+
+    public void StartJumpMove()
+    {
+        m_JumpMoveSign = m_HorizontalSign;
+    }
+
+    public void EndJumpMove()
+    {
+        m_JumpMoveSign = 0;
+    }
+
+    /// <summary>
+    /// 回避開始時に、移動時間をセットする
+    /// </summary>
+    public void StartDodgeMove()
+    {
+        m_DodgeTimer = m_StepDuration;
+    }
+
+    /// <summary>
+    /// 回避中の左右速度を返す(呼ぶたびに残り時間を消費する)
+    /// </summary>
+    private float GetDodgeVelocity()
+    {
+        if (CurrentState != DodgeState) return 0.0f;
+        if (m_DodgeTimer <= 0.0f) return 0.0f;
+
+        m_DodgeTimer -= Runner.DeltaTime;
+
+        return m_DodgeSign * m_StepSpeed;
+    }
+
+    #endregion
+
+
     #region ダメージ
 
     /// <summary>
@@ -767,7 +733,8 @@ public class Player : NetworkBehaviour
     /// </summary>
     /// <param name="damage">ダメージ量</param>
     /// <param name="hitStunTicks">喰らい硬直(Tick数)</param>
-    /// <param name="guardStunTicks">ガード硬直(Tick数)</param>
+    /// <param name="attackerX">攻撃者のX座標(ノックバック方向の算出用)</param>
+    /// <param name="knockback">ノックバックの強さ</param>
     public void TakeDamage(int damage, int hitStunTicks, float attackerX, float knockback)
     {
         if (!CanTakeHit) return;
@@ -776,16 +743,14 @@ public class Player : NetworkBehaviour
         ApplyKnockback(attackerX, knockback);
 
         //HPが0になったらKO
-        if(IsKO)
+        if (IsKO)
         {
             ChangeState(KOState);
             return;
         }
 
         EnterHitState(hitStunTicks);
-
     }
-
 
     /// <summary>
     /// 喰らい状態へ遷移する(喰らい中なら硬直とアニメーションをやり直す)
@@ -873,7 +838,6 @@ public class Player : NetworkBehaviour
     #endregion
 
 
-
     #region アニメーション
 
     /// <summary>
@@ -890,40 +854,38 @@ public class Player : NetworkBehaviour
     public float GetAnimationNormalizedTime(AnimationState state)
         => m_PlayerAnim.GetNormalizedTime(state);
 
-    //各攻撃アニメーションの終了判定
-
     public bool IsAnimationFinished(AnimationState state)
-    {
-        return m_PlayerAnim.IsFinished(state);
-    }
+        => m_PlayerAnim.IsFinished(state);
 
-    public bool IsNormalAttackFinished() => m_PlayerAnim.IsFinished(AnimationState.NormalAttack);
-    public bool IsLowAttackFinished() => m_PlayerAnim.IsFinished(AnimationState.LowAttack);
-    public bool IsForwardAttackFinished() => m_PlayerAnim.IsFinished(AnimationState.ForwardAttack);
-    public bool IsAirAttackFinished() => m_PlayerAnim.IsFinished(AnimationState.AirAttack);
-    public bool IsCrouchAttackFinished() => m_PlayerAnim.IsFinished(AnimationState.CrouchAttack);
+    //各攻撃アニメーションの終了判定
+    public bool IsNormalAttackFinished() => IsAnimationFinished(AnimationState.NormalAttack);
+    public bool IsLowAttackFinished() => IsAnimationFinished(AnimationState.LowAttack);
+    public bool IsForwardAttackFinished() => IsAnimationFinished(AnimationState.ForwardAttack);
+    public bool IsAirAttackFinished() => IsAnimationFinished(AnimationState.AirAttack);
+    public bool IsCrouchAttackFinished() => IsAnimationFinished(AnimationState.CrouchAttack);
+
     #endregion
 
-    #region 武器を外す処理
+
+    #region 武器
 
     /// <summary>
     /// 武器を手から外して落とす
     /// </summary>
-    [Rpc(RpcSources.StateAuthority,RpcTargets.All)]
+    [Rpc(RpcSources.StateAuthority, RpcTargets.All)]
     public void RPC_DropWeapon()
     {
         if (m_WeaponRoot == null || m_WeaponBody == null) return;
 
         m_WeaponRoot.SetParent(null);
 
-        if(m_WeaponPhysicsCollider != null)
+        if (m_WeaponPhysicsCollider != null)
         {
             m_WeaponPhysicsCollider.enabled = true;
             m_WeaponPhysicsCollider.isTrigger = false;
         }
 
         m_WeaponBody.isKinematic = false;
-        
 
         //やられた方向へ少し跳ねさせて回転を加える
         Vector3 force = new Vector3(-FacingDir * m_DropForce, m_DropForce, 0.0f);
@@ -931,6 +893,9 @@ public class Player : NetworkBehaviour
         m_WeaponBody.AddTorque(Random.insideUnitSphere * m_DropTorque, ForceMode.Impulse);
     }
 
+    /// <summary>
+    /// 武器を手に戻す
+    /// </summary>
     public void ResetWeapon()
     {
         if (m_WeaponRoot == null || m_WeaponBody == null) return;
@@ -945,7 +910,6 @@ public class Player : NetworkBehaviour
         m_WeaponRoot.SetParent(m_WeaponParent);
         m_WeaponRoot.localPosition = m_WeaponLocalPos;
         m_WeaponRoot.localRotation = m_WeaponLocalRot;
-
     }
 
     #endregion
