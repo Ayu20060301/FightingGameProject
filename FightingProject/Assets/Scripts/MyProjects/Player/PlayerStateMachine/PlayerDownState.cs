@@ -11,6 +11,6 @@ public class PlayerDownState : PlayerState
     public override void Enter()
     {
         //ダウンアニメーションを再生
-        m_Player.RPC_PlayAnimation(AnimationState.Down);
+        m_Player.RPC_PlayAnimation(AnimationState.Down_In);
     }
 }

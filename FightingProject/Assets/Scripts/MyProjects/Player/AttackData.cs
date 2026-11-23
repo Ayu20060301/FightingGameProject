@@ -1,3 +1,4 @@
+using Unity.VisualScripting;
 using UnityEngine;
 
 /// <summary>
@@ -50,9 +51,9 @@ public class AttackData
     [Min(0)] public int comboStartTicks = 10;
 
     [Tooltip("次の攻撃入力の受付が終わるTick")]
-    [Min(0)] public int comboEndTicks = 28;
+    [Min(0)] public int comboEndTicks = 40;
 
-    public bool IsComboWIndow(int tick)
+    public bool IsComboWindow(int tick)
     {
         return tick >= comboStartTicks && tick <= comboEndTicks;
     }

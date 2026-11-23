@@ -40,6 +40,7 @@ public enum AnimationState
     NormalAttack,  
     NormalAttack2,  
     NormalAttack3,  
+    NormalAttack4,    
 
     LowAttack,      //下攻撃
     
@@ -63,7 +64,10 @@ public enum AnimationState
 
     //==============
 
-    Down,   //ダウン
+
+    //ダウン
+    Down_In,   
+    Down_Loop,
 
     Death, //死亡
 }
@@ -96,6 +100,7 @@ public class PlayerAnimator
         { AnimationState.NormalAttack,   "NormalAttack"},
         { AnimationState.NormalAttack2,  "NormalAttack2"},
         { AnimationState.NormalAttack3,  "NormalAttack3"},
+        { AnimationState.NormalAttack4,  "NormalAttack4"},
         { AnimationState.LowAttack,      "LowAttack"},
         { AnimationState.ForwardAttack,  "ForwardAttack"},
         { AnimationState.AirAttack,      "AirAttack"},
@@ -104,7 +109,8 @@ public class PlayerAnimator
         { AnimationState.Dodge_Forward,  "Dodge_Forward"},
         { AnimationState.Dodge_Back,     "Dodge_Back"},
         { AnimationState.Death,          "Death"},
-        { AnimationState.Down,           "Down"},
+        { AnimationState.Down_In,           "Down_In"},
+        { AnimationState.Down_Loop,           "Down_In"},
     };
 
     private readonly Animator m_Anim;

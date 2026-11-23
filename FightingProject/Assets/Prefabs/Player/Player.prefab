@@ -302,6 +302,7 @@ GameObject:
   - component: {fileID: -8790460540236081828}
   - component: {fileID: -2583217724775206455}
   - component: {fileID: -3436661010995726091}
+  - component: {fileID: -427984585944470165}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -433,9 +434,8 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 8
   m_SwordHitBox: {fileID: 7330631417924569282}
-  m_JumpHeight: 2
-  m_JumpMoveSpeed: 4
-  m_CoyoteTime: 0.1
+  m_JumpHeight: 1.5
+  m_JumpMoveSpeed: 3
   m_JumpBufferTime: 0.1
   m_StepSpeed: 7
   m_StepDuration: 0.5
@@ -445,6 +445,18 @@ MonoBehaviour:
   m_DropTorque: 6
   _HP: 0
   _PlayerIndex: -1
+--- !u!114 &-427984585944470165
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1492660497916863503}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 516efc547f225b54fa65ebec394829d5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::RootMotionRelay
 --- !u!1 &1514496424575826653
 GameObject:
   m_ObjectHideFlags: 0

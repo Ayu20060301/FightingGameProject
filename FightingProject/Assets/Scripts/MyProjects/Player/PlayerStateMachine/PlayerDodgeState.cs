@@ -15,8 +15,6 @@ public class PlayerDodgeState : PlayerState
         m_DodgeAnimation = m_Player.IsDodgeForward ? AnimationState.Dodge_Forward
                                                    : AnimationState.Dodge_Back;
 
-        m_Player.StartDodgeMove();
-
         //回避アニメーションを再生
         m_Player.RPC_PlayAnimation(m_DodgeAnimation);
     }

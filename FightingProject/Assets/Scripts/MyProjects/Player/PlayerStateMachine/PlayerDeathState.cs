@@ -12,6 +12,5 @@ public class PlayerDeathState : PlayerState
     {
         //死亡アニメーションを再生
         m_Player.RPC_PlayAnimation(AnimationState.Death);
-        m_Player.RPC_DropWeapon();
     }
 }

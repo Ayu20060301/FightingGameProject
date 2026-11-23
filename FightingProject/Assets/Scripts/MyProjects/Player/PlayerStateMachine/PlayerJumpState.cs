@@ -34,12 +34,12 @@ public class PlayerJumpState : PlayerState
         if(m_Player.IsMovingForward)
         {
             m_InAnimation = AnimationState.JumpForward_In;
-            m_OutAnimation = AnimationState.JumpForward_Out;
+            m_OutAnimation = AnimationState.Jump_Out;
         }
         else if(m_Player.IsMovingBackward)
         {
             m_InAnimation = AnimationState.JumpBack_In;
-            m_OutAnimation = AnimationState.JumpBack_Out;
+            m_OutAnimation = AnimationState.Jump_Out;
         }
         else
         {
@@ -49,9 +49,8 @@ public class PlayerJumpState : PlayerState
 
         //ジャンプ入力を消費し、踏み切り時の横方向を固定
         m_HasLeftGround = false;
-        m_Player.ConsumeJumpInput();
-        m_Player.StartJumpMove();
-        m_Player.StartJumpVelocity();
+
+        m_Player.StartJump();
         m_Player.RPC_PlayAnimation(m_InAnimation);
 
     }
@@ -78,7 +77,6 @@ public class PlayerJumpState : PlayerState
                 else if(m_Player.IsAnimationFinished(m_InAnimation))
                 {
                     m_Phase = Phase.Land;
-                    m_Player.EndJumpMove();
                     m_Player.RPC_PlayAnimation(m_OutAnimation);
                 }
                 break;
@@ -92,8 +90,4 @@ public class PlayerJumpState : PlayerState
         }
     }
 
-    public override void Exit()
-    {
-        m_Player.EndJumpMove();
-    }
 }
