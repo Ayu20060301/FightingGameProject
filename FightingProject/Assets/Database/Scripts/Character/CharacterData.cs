@@ -63,8 +63,6 @@ public class CharacterData : ScriptableObject
     private AttackData m_NormalAttack3;
     [SerializeField]
     private AttackData m_NormalAttack4;
-    [SerializeField]
-    private AttackData m_NormalAttack5;
 
     [SerializeField]
     private AttackData m_LowAttack;
@@ -86,7 +84,6 @@ public class CharacterData : ScriptableObject
             case AttackSlot.NormalAttack2: return m_NormalAttack2;
             case AttackSlot.NormalAttack3: return m_NormalAttack3;
             case AttackSlot.NormalAttack4: return m_NormalAttack4;
-            case AttackSlot.NormalAttack5: return m_NormalAttack5;
             case AttackSlot.LowAttack: return m_LowAttack;
             case AttackSlot.ForwardAttack: return m_ForwardAttack;
             case AttackSlot.AirAttack:  return m_AirAttack;

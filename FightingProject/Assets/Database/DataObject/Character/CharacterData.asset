@@ -15,7 +15,7 @@ MonoBehaviour:
   characterName: Samurai
   maxHP: 100
   speed: 2
-  jumpHeight: 1.5
+  jumpHeight: 1
   jumpMoveSpeed: 3
   gravity: -20
   fallMultiplier: 1.4
@@ -24,44 +24,35 @@ MonoBehaviour:
   m_NormalAttack:
     label: 
     damage: 5
-    hitStunTicks: 20
+    hitStunTicks: 30
     startupTicks: 6
     activeTicks: 12
-    knockback: 3
+    knockback: 1.5
     comboStartTicks: 20
     comboEndTicks: 40
   m_NormalAttack2:
     label: 
     damage: 5
-    hitStunTicks: 20
+    hitStunTicks: 30
     startupTicks: 6
     activeTicks: 12
-    knockback: 3
+    knockback: 1.5
     comboStartTicks: 20
     comboEndTicks: 40
   m_NormalAttack3:
     label: 
     damage: 5
-    hitStunTicks: 40
+    hitStunTicks: 30
     startupTicks: 6
     activeTicks: 12
-    knockback: 3
+    knockback: 1.5
     comboStartTicks: 20
     comboEndTicks: 40
   m_NormalAttack4:
     label: 
     damage: 5
-    hitStunTicks: 20
-    startupTicks: 6
-    activeTicks: 12
-    knockback: 3
-    comboStartTicks: 20
-    comboEndTicks: 40
-  m_NormalAttack5:
-    label: 
-    damage: 5
-    hitStunTicks: 20
-    startupTicks: 6
+    hitStunTicks: 30
+    startupTicks: 8
     activeTicks: 12
     knockback: 3
     comboStartTicks: 20
