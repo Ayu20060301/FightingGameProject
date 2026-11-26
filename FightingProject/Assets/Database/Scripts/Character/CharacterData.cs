@@ -10,8 +10,6 @@ public enum AttackSlot
    NormalAttack2,  
    NormalAttack3,  
    NormalAttack4,  
-   NormalAttack5
-        ,  
    LowAttack,　　 //下攻撃(Aボタン)
    ForwardAttack, //前攻撃(Bボタン)
 

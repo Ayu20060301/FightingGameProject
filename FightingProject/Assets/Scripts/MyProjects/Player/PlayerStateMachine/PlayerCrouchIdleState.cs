@@ -1,46 +1,51 @@
-
-
-//しゃがみ
 public class PlayerCrouchIdleState : PlayerState
 {
     private enum Phase
     {
         In,     //しゃがみ動作中
-        Idle,    //しゃがみ維持
+        Idle,   //しゃがみ維持
         Out,    //立ち上がり動作中
     }
 
     private Phase m_Phase;
+    private bool m_SkipIn;   
 
     public PlayerCrouchIdleState(Player player) : base(player)
     {
-
     }
+
+    public void SetSkipIn() => m_SkipIn = true;
 
     public override void Enter()
     {
+        if (m_SkipIn)
+        {
+            m_SkipIn = false;
+            m_Phase = Phase.Idle;
+            m_Player.RPC_PlayAnimation(AnimationState.Crouch_Idle);
+            return;
+        }
+
         m_Phase = Phase.In;
         m_Player.RPC_PlayAnimation(AnimationState.Crouch_In);
     }
-
 
     public override void Update()
     {
         InputState input = m_Player.Input;
         bool isCrouchHeld = input.Direction.IsDown();
 
-        switch(m_Phase)
+        switch (m_Phase)
         {
             case Phase.In:
-                //しゃがみ攻撃
-                if(m_Player.IsNormalAttackPressed)
+                if (m_Player.IsNormalAttackPressed)
                 {
                     m_Player.ChangeState(m_Player.CrouchAttackState);
                     return;
                 }
 
-                //入り途中で入力を話した → 解除へ
-                if(!isCrouchHeld)
+                //入り途中で入力を離した → 解除へ
+                if (!isCrouchHeld)
                 {
                     StartOut();
                     return;
@@ -53,22 +58,25 @@ public class PlayerCrouchIdleState : PlayerState
                     m_Player.RPC_PlayAnimation(AnimationState.Crouch_Idle);
                 }
                 break;
+
             case Phase.Idle:
-                if(input.IsNormalAttack || input.IsLowAttack)
+                //押しっぱなしで連続攻撃にならないよう、押した瞬間だけ判定
+                if (m_Player.IsNormalAttackPressed)
                 {
                     m_Player.ChangeState(m_Player.CrouchAttackState);
                     return;
                 }
 
                 //しゃがみ入力がなくなった
-                if(!isCrouchHeld)
+                if (!isCrouchHeld)
                 {
                     StartOut();
                 }
                 break;
+
             case Phase.Out:
                 //立ち上がり中に再入力 → もう一度しゃがむ
-                if(isCrouchHeld)
+                if (isCrouchHeld)
                 {
                     m_Phase = Phase.In;
                     m_Player.RPC_PlayAnimation(AnimationState.Crouch_In);
@@ -82,15 +90,11 @@ public class PlayerCrouchIdleState : PlayerState
                 }
                 break;
         }
-
-
     }
 
     private void StartOut()
     {
-
         m_Phase = Phase.Out;
         m_Player.RPC_PlayAnimation(AnimationState.Crouch_Out);
     }
-
 }

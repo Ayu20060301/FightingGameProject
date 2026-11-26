@@ -34,12 +34,12 @@ public class PlayerJumpState : PlayerState
         if(m_Player.IsMovingForward)
         {
             m_InAnimation = AnimationState.JumpForward_In;
-            m_OutAnimation = AnimationState.Jump_Out;
+            m_OutAnimation = AnimationState.JumpForward_Out;
         }
         else if(m_Player.IsMovingBackward)
         {
             m_InAnimation = AnimationState.JumpBack_In;
-            m_OutAnimation = AnimationState.Jump_Out;
+            m_OutAnimation = AnimationState.JumpBack_Out;
         }
         else
         {
